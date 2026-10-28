@@ -1,7 +1,4 @@
-#!/usr/bin/env bash
-# ==============================================================================
-# NicaLogistics - Script Automatizado de Respaldo Cifrado de Base de Datos (Política 3)
-# ==============================================================================
+#!/bin/sh
 set -e
 
 BACKUP_DIR="${BACKUP_DIR:-/backups}"
@@ -14,19 +11,16 @@ mkdir -p "${BACKUP_DIR}"
 
 echo "[$(date)] Iniciando respaldo de la base de datos nicalogistics_db..."
 
-# 1. Generación de Dump y Compresión GZIP
 export PGPASSWORD="${POSTGRES_PASSWORD:-NicaLogisticsSecure2026!}"
 pg_dump -h "${DB_HOST:-db-server}" -p 5432 -U "${POSTGRES_USER:-nicalogistics_user}" -d "${POSTGRES_DB:-nicalogistics_db}" --clean --if-exists | gzip > "${BACKUP_FILE}"
 
 echo "[$(date)] Dump completado: ${BACKUP_FILE} ($(du -h "${BACKUP_FILE}" | cut -f1))"
 
-# 2. Cifrado AES-256-CBC (Política 3: Almacenamiento Cifrado y Seguro)
 openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 -in "${BACKUP_FILE}" -out "${ENC_BACKUP_FILE}" -k "${ENCRYPTION_KEY}"
 rm -f "${BACKUP_FILE}"
 
 echo "[$(date)] Respaldo cifrado exitosamente: ${ENC_BACKUP_FILE}"
 
-# 3. Política de Retención: Eliminar respaldos mayores a 7 días
-find "${BACKUP_DIR}" -name "nicalogistics_db_*.enc" -mtime +7 -delete
+find "${BACKUP_DIR}" -name "nicalogistics_db_*.enc" -mtime +7 -exec rm -f {} + 2>/dev/null || true
 
 echo "[$(date)] Proceso de respaldo finalizado con éxito."

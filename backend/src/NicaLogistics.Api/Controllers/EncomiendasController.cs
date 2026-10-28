@@ -116,4 +116,7 @@ public class EncomiendasController : ControllerBase
     }
 }
 
-public record DeliverRequestDto(string? Notas);
+public class DeliverRequestDto
+{
+    public string? Notas { get; set; }
+}
