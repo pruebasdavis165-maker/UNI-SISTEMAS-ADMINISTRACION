@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, ShoppingCart, User, Menu, X, MapPin, Search, LogOut } from 'lucide-react';
+import { Package, ShoppingCart, User, Menu, X, MapPin, Search, LogOut, ShoppingBag } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,7 +74,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8 font-inter font-medium text-sm text-slate-600">
+          <div className="hidden md:flex items-center space-x-7 font-inter font-medium text-sm text-slate-600">
             <Link href="/" className="hover:text-primary-blue transition-colors">
               Inicio
             </Link>
@@ -87,8 +87,14 @@ export default function Navbar() {
             </Link>
             <Link href="/sedes" className="hover:text-primary-blue transition-colors flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-accent-magenta" />
-              Sedes de Retiro
+              Sedes
             </Link>
+            {user && (
+              <Link href="/mis-pedidos" className="hover:text-primary-blue transition-colors flex items-center gap-1">
+                <ShoppingBag className="w-4 h-4 text-primary-blue" />
+                Mis Pedidos
+              </Link>
+            )}
             {user && (user.rol === 'Admin' || user.rol === 'Vendedor' || user.rol === 'Logística') && (
               <Link href="/panel" className="text-primary-blue font-semibold hover:underline">
                 Panel Interno
@@ -201,6 +207,16 @@ export default function Navbar() {
           >
             Sedes de Retiro en Ventanilla
           </Link>
+
+          {user && (
+            <Link 
+              href="/mis-pedidos" 
+              onClick={() => setIsOpen(false)}
+              className="block py-2 text-primary-blue font-semibold"
+            >
+              Mis Pedidos y Encomiendas
+            </Link>
+          )}
 
           {user && (user.rol === 'Admin' || user.rol === 'Vendedor' || user.rol === 'Logística') && (
             <Link 
