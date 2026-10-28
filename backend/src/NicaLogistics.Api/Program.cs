@@ -54,15 +54,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 5. Documentación Swagger / OpenAPI
+// 5. Documentación Swagger / OpenAPI (Issue 6.5)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "NicaLogistics API",
+        Title = "NicaLogistics API — Plataforma Enterprise Sede a Sede",
         Version = "v1",
-        Description = "API de Comercio Electrónico y Gestión Logística Sede a Sede"
+        Description = "Documentación interactiva de la API NicaLogistics. Plataforma E-commerce y logística de ventanilla (Miami Hub ⇄ Nicaragua)."
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -88,20 +88,24 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
 });
 
 var app = builder.Build();
 
-// Pipeline HTTP
-if (app.Environment.IsDevelopment() || true)
+// Pipeline HTTP: Swagger activo tanto en desarrollo como en producción para verificación
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "NicaLogistics API v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "NicaLogistics API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseCors("AllowAll");
 app.UseStaticFiles();
@@ -133,6 +137,7 @@ app.MapGet("/", () => Results.Ok(new
     Status = "Healthy",
     Architecture = "Hexagonal .NET 9",
     Mode = "Sede a Sede (Pickup en Ventanilla)",
+    Documentation = "/swagger",
     Timestamp = DateTime.UtcNow
 }));
 
