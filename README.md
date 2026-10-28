@@ -1,114 +1,187 @@
-# NicaLogistics — Sistema Enterprise de Logística y E-Commerce "Sede a Sede"
+# NicaLogistics Enterprise — Sistema Web Integral de Gestión Comercial y Logística
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
-[![Backend](https://img.shields.io/badge/Backend-.NET%209%20Hexagonal-blue.svg)]()
-[![Frontend](https://img.shields.io/badge/Frontend-Next.js%2014%20App%20Router-black.svg)]()
-[![Database](https://img.shields.io/badge/Database-PostgreSQL%2016-blue.svg)]()
-[![Security](https://img.shields.io/badge/Security-SSL%20%7C%20JWT%20%7C%20BCrypt-magenta.svg)]()
+[![Docker](https://img.shields.io/badge/Docker%20Compose-Orchestrated-blue?logo=docker)](https://www.docker.com/)
+[![Backend](https://img.shields.io/badge/.NET%209-Hexagonal%20Architecture-purple?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Frontend](https://img.shields.io/badge/Next.js%2014-App%20Router-black?logo=next.js)](https://nextjs.org/)
+[![Database](https://img.shields.io/badge/PostgreSQL%2016-ACID%20Compliant-336791?logo=postgresql)](https://www.postgresql.org/)
+[![Security](https://img.shields.io/badge/Security-SSL%20%7C%20HTTPS%20%7C%20JWT-success)](https://nginx.org/)
+[![UI/UX](https://img.shields.io/badge/Designed%20with-Stitch%20UI-D946EF)](https://stitch.googleapis.com)
 
-Plataforma corporativa de comercio electrónico y gestión logística internacional y local con modalidad **exclusiva** de entrega **"Sede a Sede"** (Pickup oficial en ventanilla).
-
----
-
-## 📌 Regla de Negocio Crítica
-
-> **EL SISTEMA NO REALIZA ENVÍOS A DOMICILIO.**  
-> Todos los pedidos de compra (Checkout) y traslados de encomiendas operan de forma estricta entre sedes oficiales autorizadas (**Miami Hub ⇄ Managua, León y Estelí**). No existen campos de dirección domiciliaria en ningún módulo de la plataforma. La entrega se realiza presentando identificación oficial en ventanilla.
+**NicaLogistics Enterprise** es una plataforma corporativa robusta diseñada para centralizar las operaciones de comercio electrónico y la cadena de suministro logístico entre Estados Unidos y Nicaragua. El sistema integra catálogo de productos en tiempo real, inventario con Kardex automatizado, pasarela de pago atómica, emisión y seguimiento de encomiendas y un panel logístico Kanban para operadores de ventanilla.
 
 ---
 
-## 🚀 Despliegue Rápido en Producción (Docker Compose)
+## ⚠️ Regla de Negocio Crítica: Modelo Estrictamente "Sede a Sede"
 
-Levanta todos los servicios (Base de datos, Backend API, Frontend Next.js, NGINX SSL Proxy y Cron de Backups) con un solo comando:
+> ### **EL SISTEMA NO REALIZA ENVÍOS A DOMICILIO.**
+> 
+> Todos los flujos logísticos, de compra (Checkout) y de transporte de carga se basan **exclusivamente en entregas "Sede a Sede" (Pickup en ventanilla oficial)**. 
+> * **Cero campos de dirección domiciliaria:** No existen campos de calle, número residencial ni código postal en ningún formulario ni tabla de la base de datos.
+> * **Retiro protegido:** La entrega de paquetes se realiza únicamente en las ventanillas de las sucursales oficiales autorizadas (**Miami Hub ⇄ Managua, León y Estelí**), previa verificación de documento de identidad oficial (Cédula o Pasaporte) del titular o destinatario.
+
+---
+
+## 📋 Prerrequisitos
+
+Para ejecutar el sistema en cualquier entorno local de desarrollo o producción, únicamente se requiere:
+
+1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (Windows / macOS) o **Docker Engine 24.0+** con el plugin `docker compose` (Linux).
+2. Asegurarse de que el motor de Docker esté en ejecución (*Docker Daemon running*).
+3. Tener libres los puertos **80**, **443**, **3000** y **5000** en el equipo anfitrión.
+
+---
+
+## 🚀 Instrucciones de Ejecución (Paso a Paso)
+
+### 1. Clonación y Navegación al Repositorio
+Abre una terminal o PowerShell y colócate en la raíz del proyecto:
+
+```bash
+git clone https://github.com/pruebasdavis165-maker/UNI-SISTEMAS-ADMINISTRACION.git
+cd UNI-SISTEMAS-ADMINISTRACION
+```
+
+### 2. Despliegue del Ecosistema Completo (Comando Raíz)
+Ejecuta el siguiente comando para orquestar, compilar y levantar automáticamente los 5 contenedores en segundo plano (`-d`) forzando la construcción de imágenes (`--build`):
 
 ```bash
 docker compose up -d --build
 ```
 
-### URLs de Acceso Local y Producción:
-* **Aplicación Web (Frontend):** [https://localhost](https://localhost) o [http://localhost:3000](http://localhost:3000)
-* **Documentación Interactiva Swagger / OpenAPI:** [https://localhost/swagger](https://localhost/swagger) o [http://localhost:5000/swagger](http://localhost:5000/swagger)
-* **Portal de Rastreo Público:** [https://localhost/rastreo](https://localhost/rastreo)
-* **Catálogo Oficial:** [https://localhost/catalogo](https://localhost/catalogo)
-* **Panel Administrativo:** [https://localhost/panel](https://localhost/panel)
+Este comando único realiza de manera desatendida:
+1. **Base de Datos (`db-server`):** Inicializa PostgreSQL 16 en red interna aislada, ejecuta scripts de esquema relacional (`init.sql`) y carga de datos semilla con roles y catálogo inicial (`seed.sql`).
+2. **Servicio de Respaldos (`db-backup`):** Configura un cron job diario con cifrado AES-256 y compresión GZIP hacia el volumen persistente `db_backups`.
+3. **Backend API (`backend-api`):** Compila la API en .NET 9 C# bajo Arquitectura Hexagonal y expone los servicios en red interna.
+4. **Frontend Web (`frontend-web`):** Compila e inicia la aplicación Next.js 14 en modo optimizado de producción.
+5. **Proxy Inverso SSL (`reverse-proxy`):** Inicia NGINX con certificados TLS, redirigiendo automáticamente todo el tráfico HTTP (puerto 80) hacia HTTPS (puerto 443).
+
+### 3. Reinicio Limpio y Solución de Conflictos
+Si en algún momento requieres reiniciar el entorno desde cero, limpiar volúmenes o restablecer los datos de prueba de la base de datos:
+
+```bash
+# 1. Detener contenedores y eliminar volúmenes persistentes
+docker compose down -v
+
+# 2. Reconstruir y levantar el sistema limpiamente
+docker compose up -d --build
+```
 
 ---
 
-## 🔐 Cuentas de Acceso Predeterminadas (Demo Seed)
+## 🌐 Guía de Acceso y URLs Oficiales
 
-Todas las contraseñas están hasheadas con **BCrypt** de acuerdo a la Política 6:
+El sistema cuenta con un **Proxy Inverso (NGINX)** que actúa como gateway perimetral de seguridad estricta, aplicando certificados SSL y redirección 301 forzada a HTTPS (Cumplimiento de Seguridad RNF-01):
 
-| Rol | Correo Electrónico | Contraseña | Perfil y Acceso |
+| Módulo del Sistema | URL Primaria (Segura HTTPS) | URL Directa de Contenedor | Descripción |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@nicalogistics.com` | `Admin123*` | Control total, usuarios, roles, suspensión, auditoría |
-| **Vendedor** | `vendedor@nicalogistics.com` | `Vendedor123*` | CRM de clientes, catálogo, precios, inventario |
-| **Logística** | `logistica@nicalogistics.com` | `Logistica123*` | Tablero Kanban, actualización de tracking, entregas |
-| **Cliente** | `cliente@gmail.com` | `Cliente123*` | Catálogo público, compras, mis pedidos, rastreo |
+| **Frontend Web** (Landing & Tienda) | **[https://localhost](https://localhost)** | `http://localhost:3000` | Página de inicio institucional, catálogo público, carrito y checkout Sede a Sede. |
+| **Documentación API** (Swagger OpenAPI) | **[https://localhost/swagger](https://localhost/swagger)** | `http://localhost:5000/swagger` | Especificación interactiva OpenAPI con autenticación JWT Bearer y esquema XML. |
+| **Portal de Rastreo del Cliente** | **[https://localhost/rastreo](https://localhost/rastreo)** | `http://localhost:3000/rastreo` | Buscador público de encomiendas con timeline visual interactivo corporativo. |
+| **Panel de Control Administrativo** | **[https://localhost/panel](https://localhost/panel)** | `http://localhost:3000/panel` | Gestión de usuarios, inventario, categorías, productos y CRM de clientes. |
+| **Tablero Kanban Logístico** | **[https://localhost/panel/logistica](https://localhost/panel/logistica)** | `http://localhost:3000/panel/logistica` | Despacho y recepción de paquetes en sedes, avance de estados y entrega en ventanilla. |
+
+> 🔒 **Nota sobre Certificados SSL en Desarrollo Local:**  
+> Al acceder por primera vez mediante `https://localhost`, tu navegador web (Chrome, Edge, Firefox) podría mostrar una advertencia de seguridad indicando que el certificado es autofirmado por la entidad corporativa interna de NicaLogistics.  
+> **Para continuar:** Haz clic en **"Configuración avanzada"** (o *"More details"*) y luego selecciona **"Continuar a localhost (no seguro)"**. El candado HTTPS quedará activo y cifrará todas las transmisiones de datos.
 
 ---
 
-## 🎨 Sistema de Diseño Global (Stitch & Tailwind CSS)
+## 🔑 Credenciales y Cuentas de Acceso Predeterminadas
 
-* **Tipografías:** `font-montserrat` para títulos (H1-H6) y `font-inter` para cuerpo de texto y tablas.
-* **Colores UI con Significado Visual:**
-  * `primary-blue` (`#1A56DB`): Confianza, tecnología, botones principales y headers.
-  * `accent-magenta` (`#D946EF`): Innovación, acentos interactivos y hover.
-  * `alert-amber` (`#F59E0B`): Precaución, alertas de stock mínimo crítico y estado "En Tránsito".
-  * `success-green` (`#10B981`): Éxito, estado "Listo para retiro" o "Entregada en ventanilla".
-* **Estilo Visual:** Esquinas redondeadas (`rounded-xl`, `rounded-2xl`) y sombras suaves (`shadow-sm`, `shadow-md`, `shadow-xl`) simulando elevación moderna y limpia.
+La base de datos se inicializa automáticamente con usuarios de prueba para cada uno de los 4 roles del sistema. Todas las contraseñas están protegidas con algoritmo **BCrypt Work Factor 12** (Política 6):
 
----
-
-## 🗺️ Cobertura de Milestones e Issues Desarrollados
-
-### 🚀 Milestone 1: Infraestructura Docker, Base de Datos y Arquitectura Base (100%)
-* [x] **Issue 1.1 (#1):** Orquestación con `docker-compose.yml` (db-server, backend-api, frontend-web en redes aisladas).
-* [x] **Issue 1.2 (#2):** Volúmenes persistentes y verificación de datos (`nicalogistics_db_data`, `nicalogistics_uploads`).
-* [x] **Issue 1.3 (#3):** Modelado relacional SQL en `database/init.sql` (Sedes, Encomiendas, Pedidos sin domicilios).
-* [x] **Issue 1.4 (#4):** Datos iniciales en `database/seed.sql` (4 roles, 4 sedes, contraseñas bcrypt).
-* [x] **Issue 1.5 (#5):** Arquitectura Hexagonal en C# .NET 9 (Domain, Application, Infrastructure, Api).
-* [x] **Issue 1.6 (#6):** Setup base Frontend Next.js 14 con Tailwind CSS y fuentes Google Fonts.
-* [x] **Issue 1.7 (#7):** Biblioteca de componentes UI reutilizables (Button, Input, Card, Modal, Badge, Alert).
-
-### 🔐 Milestone 2: Seguridad, Roles y Landing Page Corporativa (100%)
-* [x] **Issue 2.1 (#8):** API de autenticación JWT y autorización basada en 4 roles.
-* [x] **Issue 2.2 (#9):** Middleware de rutas protegidas en Next.js (`/admin`, `/panel`, `/checkout`) con página `/403`.
-* [x] **Issue 2.3 (#10):** Landing Page responsiva en Stitch con diagrama interactivo Sede a Sede y calculadora de flete.
-* [x] **Issue 2.4 (#11):** Módulo de trazabilidad y auditoría de eventos de usuario en BD (`logs_auditoria`).
-* [x] **Issue 2.5 (#12):** CRUD de usuarios y roles en backend con Soft Delete (`toggle-status`).
-* [x] **Issue 2.6 (#13):** Dashboard de gestión de usuarios en frontend con modales de alta y suspensión.
-
-### 📦 Milestone 3: Core E-commerce (Catálogo, Inventario y Clientes) (100%)
-* [x] **Issue 3.1 (#14):** CRUD de categorías y productos en backend y frontend.
-* [x] **Issue 3.2 (#15):** Subida de imágenes de productos almacenadas en volumen Docker persistente.
-* [x] **Issue 3.3 (#16):** Lógica de inventario, Kardex de movimientos y alertas de stock bajo (`/api/inventario/alertas`).
-* [x] **Issue 3.4 (#17):** Panel de inventario con banners de alerta en color `alert-amber`.
-* [x] **Issue 3.5 (#18):** Cartera de clientes y CRM 360 con historial de compras y envíos (RF-04).
-* [x] **Issue 3.6 (#19):** Vista pública del catálogo en frontend con filtros rápidos y tiempo de respuesta < 2s (RNF-02).
-
-### 🛒 Milestone 4: Ventas, Pagos y Flujo "Sede a Sede" (100%)
-* [x] **Issue 4.1 (#20):** Carrito de compras con persistencia en LocalStorage y restricción estricta de stock (RF-05).
-* [x] **Issue 4.2 (#21):** Checkout Sede a Sede con selectores obligatorios de Sede Origen y Destino (0 direcciones domiciliarias).
-* [x] **Issue 4.3 (#22):** Procesamiento atómico de pedidos, deducción de stock en BD (RF-07) y registro de pago (RF-11).
-* [x] **Issue 4.4 (#23):** Trigger automático de encomienda logística al confirmar pago, generando código de tracking `NL-2026-XXXXX` (RF-08).
-* [x] **Issue 4.5 (#24):** Cancelaciones y reembolsos con reingreso automático de existencias vía Kardex (RF-14).
-
-### ✈️ Milestone 5: Logística, Rastreo y Entregas en Ventanilla (100%)
-* [x] **Issue 5.1 (#25):** API de estados de tracking con bitácora inmutable en `historial_tracking`.
-* [x] **Issue 5.2 (#26):** Tablero Kanban para empleados logísticos con filtros por sede y avance de estados.
-* [x] **Issue 5.3 (#27):** Servicio de notificaciones por correo/consola al activarse el estado "Lista para retiro" (RF-09).
-* [x] **Issue 5.4 (#28):** Portal público interactivo de rastreo de cliente con timeline visual corporativo (RF-10).
-* [x] **Issue 5.5 (#29):** Protocolo de entrega en ventanilla con registro de operador, fecha UTC y bloqueo de inmutabilidad.
-
-### 🛡️ Milestone 6: Compliance TI, QA y Despliegue Producción (100%)
-* [x] **Issue 6.1 (#30):** Proxy inverso NGINX con certificados SSL y redirección 301 forzada a HTTPS (RNF-01).
-* [x] **Issue 6.2 (#31):** Script automatizado de copias de seguridad cifradas con AES-256 en volumen `db_backups` (Política 3).
-* [x] **Issue 6.3 (#32):** Optimización mediante índices B-Tree SQL y pruebas de rendimiento con tiempos < 2000 ms (RNF-02).
-* [x] **Issue 6.4 (#33):** Auditoría final de seguridad validando rechazo HTTP 403 para usuarios con rol Cliente (Política 2).
-* [x] **Issue 6.5 (#34):** Documentación interactiva de APIs en Swagger/OpenAPI (`/swagger`) con especificación XML.
-* [x] **Issue 6.6 (#35):** Despliegue final automatizado y Manual de Operaciones y Soporte (`MANUAL_SOPORTE.md`).
+| Rol | Correo Electrónico | Contraseña | Alcance Operativo |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `admin@nicalogistics.com` | `Admin123*` | Control total del sistema, gestión de usuarios, roles, suspensión de cuentas y bitácora de auditoría. |
+| **Vendedor** | `vendedor@nicalogistics.com` | `Vendedor123*` | Gestión del catálogo, precios, creación de productos/categorías y CRM 360 de clientes. |
+| **Logística** | `logistica@nicalogistics.com` | `Logistica123*` | Operador de ventanilla: Tablero Kanban, actualización de estados de encomienda y entrega física. |
+| **Cliente** | `cliente@gmail.com` | `Cliente123*` | Exploración de catálogo, carrito de compras, órdenes Sede a Sede y seguimiento de paquetes. |
 
 ---
 
-## 📄 Documentación Adicional
-* Para directrices completas de mantenimiento, protocolos de contingencia y diagramas de arquitectura, consulta el [Manual de Soporte Técnico](MANUAL_SOPORTE.md).
+## 🏗️ Stack Tecnológico y Arquitectura de Software
+
+El sistema fue diseñado bajo estándares de ingeniería de software empresarial, alta cohesión y bajo acoplamiento:
+
+```
+                            [ Cliente Web / Móvil ]
+                                       │ (HTTPS / TLS 1.3)
+                                       ▼
+                       ┌───────────────────────────────┐
+                       │   NGINX Reverse Proxy (SSL)   │
+                       └──────┬─────────────────┬──────┘
+                              │                 │
+                (Frontend /)  ▼                 ▼  (API /api/*)
+               ┌─────────────────────┐   ┌─────────────────────────────┐
+               │    Next.js 14 Web   │   │  Backend .NET 9 (Hexagonal) │
+               │   Tailwind + Stitch │   │   DDD / Clean Architecture  │
+               └─────────────────────┘   └──────────────┬──────────────┘
+                                                        │
+                                                        │ (Red interna segura)
+                                                        ▼
+                                         ┌─────────────────────────────┐
+                                         │  PostgreSQL 16 Database     │
+                                         │  + Backup Cifrado AES-256   │
+                                         └─────────────────────────────┘
+```
+
+### 1. Backend: C# .NET 9 (Clean Hexagonal Architecture & DDD)
+Estructurado en 4 capas estrictamente desacopladas:
+* **`NicaLogistics.Domain`**: Entidades ricas de negocio (`Sede`, `User`, `Product`, `Order`, `Shipment`, `TrackingHistory`), enumeraciones y reglas invariantes (Domain-Driven Design).
+* **`NicaLogistics.Application`**: Casos de uso, DTOs inmutables (`records`), contratos de servicios (`IOrderService`, `IShipmentService`, `IInventoryService`, etc.) y lógica de orquestación.
+* **`NicaLogistics.Infrastructure`**: Implementación de persistencia con Entity Framework Core 9 sobre PostgreSQL, hashing con BCrypt, generación de tokens JWT, servicio de notificaciones y jobs de mantenimiento.
+* **`NicaLogistics.Api`**: Controladores RESTful, middleware de auditoría de seguridad (`AuditLoggingMiddleware`), validación de claims/roles y documentación Swagger/OpenAPI enriquecida con XML.
+
+### 2. Frontend: Next.js 14 App Router + Stitch UI/UX
+* **Renderizado Híbrido:** Arquitectura React Server Components y Client Components con optimización estática previa (< 2s de tiempo de respuesta RNF-02).
+* **Sistema de Diseño Stitch:** Diseñado en la plataforma **Stitch**, garantizando interfaces modernas, limpias, accesibles e intuitivas con elevación suave (`shadow-md`, `shadow-xl`) y esquinas redondeadas (`rounded-xl`, `rounded-2xl`).
+* **Tipografías Corporativas:** `Montserrat` para encabezados y llamadas a la acción; `Inter` para cuerpos de texto, tablas operativas y reportes.
+* **Paleta de Colores con Propósito Visual:**
+  * `primary-blue` (`#1A56DB`): Confianza, tecnología y botones de acción principal.
+  * `accent-magenta` (`#D946EF`): Innovación, acentos visuales y estados interactivos hover.
+  * `alert-amber` (`#F59E0B`): Precaución, alertas de stock mínimo crítico y estado *"En Tránsito"*.
+  * `success-green` (`#10B981`): Éxito, confirmación de retiros y estado *"Listo para Retiro"* / *"Entregada"*.
+
+### 3. Base de Datos & DevOps
+* **PostgreSQL 16:** Esquema relacional normalizado con soporte UUID v4 nativo (`pgcrypto`).
+* **Aislamiento de Red:** La base de datos no expone ningún puerto al exterior del host, siendo accesible únicamente por la red interna Docker `internal-net`.
+* **Respaldos Automatizados (Política 3):** Contenedor secundario con ejecución programada diaria que comprime los volcados (`pg_dump`) y los cifra con **OpenSSL AES-256-CBC**, aplicando política de retención de 7 días.
+
+---
+
+## 📍 Directorio de Sedes Oficiales Autorizadas
+
+| Código Sede | Nombre de la Sucursal | Ubicación | Dirección de Ventanilla Oficial | Horario de Atención |
+| :--- | :--- | :--- | :--- | :--- |
+| **`MIA-HUB-01`** | **Miami International Hub** | Miami, Florida (USA) | 8205 NW 68th St, Miami, FL 33166 | Lun - Vie 8:00 AM - 5:00 PM |
+| **`MGA-CEN-02`** | **Sede Central Managua** | Managua, Nicaragua | Pista Jean Paul Genie, Edificio NicaLogistics | Lun - Sáb 8:00 AM - 6:00 PM |
+| **`LEO-OCC-03`** | **Sede Regional Occidente** | León, Nicaragua | Costado Sur de la Catedral, Calle Real | Lun - Sáb 8:00 AM - 5:00 PM |
+| **`EST-NOR-04`** | **Sede Regional Norte** | Estelí, Nicaragua | Avenida Central, Frente a Parque Infantil | Lun - Sáb 8:00 AM - 5:00 PM |
+
+---
+
+## 🧪 Pruebas Automatizadas y Scripts de Verificación
+
+En la carpeta [`scripts/`](scripts/) se incluyen utilidades listas para ejecución:
+
+* **Pruebas de Rendimiento QA (< 2s, RNF-02):**
+  ```powershell
+  .\scripts\benchmark-performance.ps1
+  ```
+* **Auditoría de Seguridad de Accesos (Rechazo 403 a Clientes, Política 2):**
+  ```powershell
+  .\scripts\audit-access-security.ps1
+  ```
+* **Verificación de Persistencia de Volúmenes (Política 3):**
+  ```powershell
+  .\scripts\verify-persistence.ps1
+  ```
+* **Generación Manual de Respaldo Cifrado de Base de Datos:**
+  ```powershell
+  .\scripts\backup-database.ps1
+  ```
+
+---
+
+## 📖 Documentación Complementaria
+Para consultar protocolos de contingencia, diagramas de base de datos detallados y procedimientos de soporte nivel 1, 2 y 3, revisa el archivo [MANUAL_SOPORTE.md](MANUAL_SOPORTE.md).
