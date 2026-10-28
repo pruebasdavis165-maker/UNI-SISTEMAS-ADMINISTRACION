@@ -145,59 +145,51 @@ export default function ClientesCRMPage() {
 
         {/* KPI Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-primary-blue shadow-sm">
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-inter">Total Clientes</p>
-                <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{customers.length}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Usuarios registrados</p>
-              </div>
-              <div className="p-3 bg-blue-50 text-primary-blue rounded-xl">
-                <Users className="w-6 h-6" />
-              </div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Total Clientes</p>
+              <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{customers.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Usuarios registrados</p>
             </div>
-          </Card>
+            <div className="p-3 bg-blue-50 text-primary-blue rounded-xl border border-blue-100">
+              <Users className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="border-l-4 border-l-success-green shadow-sm">
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-inter">Facturación Clientes</p>
-                <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">
-                  ${totalSpentAll.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-[11px] text-emerald-600 mt-0.5 font-medium">Compras confirmadas</p>
-              </div>
-              <div className="p-3 bg-emerald-50 text-success-green rounded-xl">
-                <DollarSign className="w-6 h-6" />
-              </div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Facturación Clientes</p>
+              <p className="text-2xl font-montserrat font-extrabold text-emerald-600 mt-1">
+                ${totalSpentAll.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Compras confirmadas USD</p>
             </div>
-          </Card>
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
+              <DollarSign className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="border-l-4 border-l-accent-magenta shadow-sm">
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-inter">Total Compras</p>
-                <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{totalOrdersAll}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Órdenes procesadas</p>
-              </div>
-              <div className="p-3 bg-fuchsia-50 text-accent-magenta rounded-xl">
-                <ShoppingBag className="w-6 h-6" />
-              </div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Total Compras</p>
+              <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{totalOrdersAll}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Órdenes procesadas</p>
             </div>
-          </Card>
+            <div className="p-3 bg-fuchsia-50 text-accent-magenta rounded-xl border border-fuchsia-100">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="border-l-4 border-l-alert-amber shadow-sm">
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-inter">Encomiendas</p>
-                <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{totalShipmentsAll}</p>
-                <p className="text-[11px] text-amber-600 mt-0.5 font-medium">Retiro en ventanilla</p>
-              </div>
-              <div className="p-3 bg-amber-50 text-alert-amber rounded-xl">
-                <Truck className="w-6 h-6" />
-              </div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Encomiendas</p>
+              <p className="text-2xl font-montserrat font-extrabold text-amber-600 mt-1">{totalShipmentsAll}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Retiro en ventanilla</p>
             </div>
-          </Card>
+            <div className="p-3 bg-amber-50 text-alert-amber rounded-xl border border-amber-100">
+              <Truck className="w-6 h-6" />
+            </div>
+          </div>
         </div>
 
         {/* Filter / Search Card */}

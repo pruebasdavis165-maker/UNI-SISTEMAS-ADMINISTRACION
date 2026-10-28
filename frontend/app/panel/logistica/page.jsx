@@ -8,7 +8,7 @@ import {
   AlertTriangle, ShieldCheck, UserCheck, Eye, 
   Send, CheckSquare
 } from 'lucide-react';
-import { Button, Input, Card, Badge, Modal, Alert } from '../../../components/ui';
+import { Button, Input, Select, Card, Badge, Modal, Alert } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function PanelLogisticaPage() {
@@ -76,7 +76,7 @@ export default function PanelLogisticaPage() {
       let res;
 
       if (transitionStatus === 'ENTREGADA') {
-        // Endpoint específico de entrega en ventanilla (Issue 5.5)
+        // Confirmación de entrega en ventanilla física contra cédula/pasaporte
         res = await fetch(`${API_BASE_URL}/api/encomiendas/${selectedShipment.id}/entregar`, {
           method: 'POST',
           headers: {
@@ -86,7 +86,7 @@ export default function PanelLogisticaPage() {
           body: JSON.stringify({ notas: transitionNote })
         });
       } else {
-        // Actualización estándar de estado (Issue 5.1)
+        // Actualización manual de estado por operador
         res = await fetch(`${API_BASE_URL}/api/encomiendas/${selectedShipment.id}/estado`, {
           method: 'PUT',
           headers: {
@@ -100,12 +100,13 @@ export default function PanelLogisticaPage() {
         });
       }
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Error al cambiar estado.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Error al actualizar el estado de la encomienda.');
+      }
 
       setSuccessMsg(`Encomienda ${selectedShipment.codigoTracking} actualizada a: ${transitionStatus}`);
       setIsModalOpen(false);
-      setSelectedShipment(null);
       fetchLogisticsData();
     } catch (err) {
       setError(err.message);
@@ -114,24 +115,20 @@ export default function PanelLogisticaPage() {
     }
   };
 
-  // Filter logic
-  const filteredShipments = shipments.filter(s => {
-    const term = search.toLowerCase().trim();
+  // Filter Shipments
+  const filteredShipments = shipments.filter((item) => {
     const matchesSearch = 
-      !term ||
-      s.codigoTracking.toLowerCase().includes(term) ||
-      s.numeroPedido.toLowerCase().includes(term) ||
-      s.clienteNombre.toLowerCase().includes(term);
+      item.codigoTracking.toLowerCase().includes(search.toLowerCase()) ||
+      item.numeroPedido.toLowerCase().includes(search.toLowerCase()) ||
+      item.clienteNombre.toLowerCase().includes(search.toLowerCase());
 
-    const matchesSede = 
-      !selectedSedeFilter ||
-      s.sedeOrigenId === selectedSedeFilter ||
-      s.sedeDestinoId === selectedSedeFilter;
+    const matchesSede = selectedSedeFilter
+      ? item.sedeOrigenId === selectedSedeFilter || item.sedeDestinoId === selectedSedeFilter
+      : true;
 
     return matchesSearch && matchesSede;
   });
 
-  // Kanban groups
   const colRegistrada = filteredShipments.filter(s => s.estado === 'REGISTRADA');
   const colTransito = filteredShipments.filter(s => s.estado === 'EN_TRANSITO');
   const colRetiro = filteredShipments.filter(s => s.estado === 'LISTA_PARA_RETIRO');
@@ -225,14 +222,14 @@ export default function PanelLogisticaPage() {
           <div>
             <div className="flex items-center gap-2">
               <Badge variant="amber" size="sm">Operaciones Logísticas</Badge>
-              <span className="text-xs text-slate-400 font-inter">Control de Ventanilla y Despacho Sede a Sede</span>
+              <span className="text-xs text-slate-500 font-inter">Control de Ventanilla y Despacho Sede a Sede</span>
             </div>
             <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1 flex items-center gap-2.5">
               <Truck className="w-8 h-8 text-alert-amber" />
               Tablero Logístico de Encomiendas
             </h1>
             <p className="font-inter text-xs sm:text-sm text-slate-500">
-              Monitorea el ciclo de vida de los paquetes desde su registro en Miami Hub hasta su entrega en ventanilla oficial.
+              Gestión operativa entre Sede Central Managua y Sede Miami Hub. Retiro exclusivo en ventanilla física oficial.
             </p>
           </div>
 
@@ -247,35 +244,55 @@ export default function PanelLogisticaPage() {
         {error && <Alert type="error" title="Error en Operaciones">{error}</Alert>}
         {successMsg && <Alert type="success" title="Completado">{successMsg}</Alert>}
 
-        {/* KPIs */}
+        {/* Top Metric Cards (Corporate accents #1A56DB, #D946EF, #F59E0B, emerald) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4 border-l-4 border-l-primary-blue bg-white shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase font-inter">Registradas</p>
-            <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{colRegistrada.length}</p>
-            <p className="text-[11px] text-slate-500">En preparación en origen</p>
-          </Card>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Registradas</p>
+              <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{colRegistrada.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">En preparación en sede origen</p>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-50 text-primary-blue border border-blue-100">
+              <Package className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="p-4 border-l-4 border-l-alert-amber bg-white shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase font-inter">En Tránsito</p>
-            <p className="text-2xl font-montserrat font-extrabold text-amber-600 mt-1">{colTransito.length}</p>
-            <p className="text-[11px] text-slate-500">Traslado inter-sucursales</p>
-          </Card>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">En Tránsito</p>
+              <p className="text-2xl font-montserrat font-extrabold text-amber-600 mt-1">{colTransito.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Ruta Managua ⇄ Miami Hub</p>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-50 text-alert-amber border border-amber-100">
+              <Truck className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="p-4 border-l-4 border-l-emerald-500 bg-white shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase font-inter">Listas para Retiro</p>
-            <p className="text-2xl font-montserrat font-extrabold text-emerald-600 mt-1">{colRetiro.length}</p>
-            <p className="text-[11px] text-slate-500">En ventanilla de destino</p>
-          </Card>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Listas para Retiro</p>
+              <p className="text-2xl font-montserrat font-extrabold text-emerald-600 mt-1">{colRetiro.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Disponibles en ventanilla física</p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <Clock className="w-6 h-6" />
+            </div>
+          </div>
 
-          <Card className="p-4 border-l-4 border-l-slate-400 bg-white shadow-sm">
-            <p className="text-xs font-semibold text-slate-400 uppercase font-inter">Entregadas</p>
-            <p className="text-2xl font-montserrat font-extrabold text-slate-700 mt-1">{colEntregada.length}</p>
-            <p className="text-[11px] text-slate-500">Ciclo completado con éxito</p>
-          </Card>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Entregadas</p>
+              <p className="text-2xl font-montserrat font-extrabold text-slate-700 mt-1">{colEntregada.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Entrega física confirmada</p>
+            </div>
+            <div className="p-3 rounded-xl bg-purple-50 text-accent-magenta border border-purple-100">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+          </div>
         </div>
 
-        {/* Filters */}
-        <Card className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        {/* Filters with Modern Select Combobox */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="w-full md:w-96">
               <Input
@@ -287,26 +304,22 @@ export default function PanelLogisticaPage() {
             </div>
 
             {/* Sede Filter */}
-            <div className="w-full md:w-auto flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-600 font-inter flex items-center gap-1.5 shrink-0">
-                <MapPin className="w-4 h-4 text-accent-magenta" />
-                Filtrar por Sede:
-              </span>
-              <select
+            <div className="w-full md:w-72">
+              <Select
+                icon={MapPin}
                 value={selectedSedeFilter}
                 onChange={(e) => setSelectedSedeFilter(e.target.value)}
-                className="text-xs font-inter font-medium py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue"
               >
-                <option value="">Todas las Sedes</option>
+                <option value="">Todas las Sedes Oficiales</option>
                 {sedes.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.nombre} ({s.ciudad})
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Kanban Board (4 Columns) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -393,7 +406,7 @@ export default function PanelLogisticaPage() {
 
         </div>
 
-        {/* Transition Action Modal */}
+        {/* Transition Action Modal (Sin Issue 5.3 ni notificaciones automáticas) */}
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -411,13 +424,17 @@ export default function PanelLogisticaPage() {
                 <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-inter space-y-1">
                   <p className="font-bold flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    Protocolo de Entrega en Ventanilla (Issue 5.5)
+                    Protocolo de Entrega en Ventanilla
                   </p>
-                  <p>Verifica que el titular presente su cédula o pasaporte original y firme el comprobante físico de entrega.</p>
+                  <p>Verifica que el titular presente su cédula o pasaporte original y firme el comprobante físico de entrega en ventanilla.</p>
                 </div>
               ) : transitionStatus === 'LISTA_PARA_RETIRO' ? (
-                <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs text-primary-blue font-inter">
-                  <strong>Notificación Automática (Issue 5.3):</strong> Se emitirá una notificación al correo del cliente ({selectedShipment.clienteEmail}) avisándole que su paquete ya puede ser retirado.
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-inter space-y-1">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <CheckSquare className="w-4 h-4 text-emerald-600" />
+                    Recepción Física en Ventanilla
+                  </p>
+                  <p>El paquete queda registrado como disponible para retiro presencial inmediato en la ventanilla oficial de destino.</p>
                 </div>
               ) : null}
 

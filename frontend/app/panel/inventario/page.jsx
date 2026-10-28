@@ -8,7 +8,7 @@ import {
   CheckCircle2, AlertOctagon, TrendingDown 
 } from 'lucide-react';
 import { 
-  Button, Input, Card, CardHeader, CardTitle, CardContent, 
+  Button, Input, Select, Card, CardHeader, CardTitle, CardContent, 
   Badge, Modal, Alert 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
@@ -36,22 +36,29 @@ export default function InventarioPage() {
     setError('');
     try {
       const token = getToken();
+      const headers = { 'Authorization': `Bearer ${token}` };
 
-      const [resProd, resMov, resAlt] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/productos`),
-        fetch(`${API_BASE_URL}/api/inventario/movimientos`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${API_BASE_URL}/api/inventario/alertas`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+      const [resProd, resMovs, resAlerts] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/inventario`, { headers }),
+        fetch(`${API_BASE_URL}/api/inventario/movimientos`, { headers }),
+        fetch(`${API_BASE_URL}/api/inventario/alertas`, { headers })
       ]);
 
-      if (resProd.ok) setProducts(await resProd.json());
-      if (resMov.ok) setMovements(await resMov.json());
-      if (resAlt.ok) setAlerts(await resAlt.json());
+      if (!resProd.ok) throw new Error('Error al cargar inventario general.');
+      const dataProd = await resProd.json();
+      setProducts(dataProd);
+
+      if (resMovs.ok) {
+        const dataMovs = await resMovs.json();
+        setMovements(dataMovs);
+      }
+
+      if (resAlerts.ok) {
+        const dataAlerts = await resAlerts.json();
+        setAlerts(dataAlerts);
+      }
     } catch (err) {
-      setError(err.message || 'Error de conexión.');
+      setError(err.message || 'Error de conexión con el servicio de inventario.');
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +128,7 @@ export default function InventarioPage() {
           <div>
             <div className="flex items-center gap-2">
               <Badge variant="amber" size="sm">Control Operativo</Badge>
-              <span className="text-xs text-slate-400 font-inter">Kardex y Umbrales Críticos</span>
+              <span className="text-xs text-slate-500 font-inter">Kardex y Umbrales Críticos Sede a Sede</span>
             </div>
             <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
               Inventario y Alertas de Stock
@@ -136,7 +143,56 @@ export default function InventarioPage() {
           </Button>
         </div>
 
-        {/* ALERTA VISUAL DESTACADA EN ALERT-AMBER (Issue 3.4) */}
+        {/* 4 Cards de Métricas con Colores Corporativos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Total Artículos</p>
+              <p className="text-2xl font-montserrat font-extrabold text-slate-900 mt-1">{products.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">En catálogo oficial</p>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-50 text-primary-blue border border-blue-100">
+              <Package className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Existencias Globales</p>
+              <p className="text-2xl font-montserrat font-extrabold text-emerald-600 mt-1">
+                {products.reduce((acc, p) => acc + (p.stockActual || 0), 0)}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Unidades disponibles</p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Alertas de Stock</p>
+              <p className="text-2xl font-montserrat font-extrabold text-amber-600 mt-1">{alerts.length}</p>
+              <p className="text-[11px] text-alert-amber font-semibold mt-0.5">Umbral mínimo o agotado</p>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-50 text-alert-amber border border-amber-100">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider font-inter">Kardex Histórico</p>
+              <p className="text-2xl font-montserrat font-extrabold text-accent-magenta mt-1">{movements.length}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Transacciones registradas</p>
+            </div>
+            <div className="p-3 rounded-xl bg-fuchsia-50 text-accent-magenta border border-fuchsia-100">
+              <History className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* ALERTA VISUAL DESTACADA EN ALERT-AMBER */}
         {alerts.length > 0 && (
           <div className="bg-amber-500/10 border-2 border-alert-amber rounded-2xl p-5 shadow-soft-sm">
             <div className="flex items-start gap-3.5">
@@ -204,7 +260,7 @@ export default function InventarioPage() {
         {/* TAB 1: STOCK & ALERTS */}
         {activeTab === 'stock' && (
           <div className="space-y-4">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-soft-sm flex items-center justify-between">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div className="relative w-full sm:w-96">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -212,12 +268,12 @@ export default function InventarioPage() {
                   placeholder="Buscar en inventario por nombre o SKU..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm font-inter focus:outline-none focus:border-primary-blue"
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm font-inter focus:outline-none focus:border-primary-blue"
                 />
               </div>
             </div>
 
-            <Card hover={false} className="border border-slate-200 overflow-hidden">
+            <Card hover={false} className="border border-slate-200 overflow-hidden rounded-xl shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left font-inter text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase font-bold text-slate-600 tracking-wider">
@@ -293,7 +349,7 @@ export default function InventarioPage() {
 
         {/* TAB 2: KARDEX MOVEMENTS */}
         {activeTab === 'kardex' && (
-          <Card hover={false} className="border border-slate-200 overflow-hidden">
+          <Card hover={false} className="border border-slate-200 overflow-hidden rounded-xl shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left font-inter text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase font-bold text-slate-600 tracking-wider">
@@ -361,7 +417,7 @@ export default function InventarioPage() {
           </Card>
         )}
 
-        {/* Modal: Registrar Movimiento */}
+        {/* Modal: Registrar Movimiento con Select Estilizado */}
         <Modal
           isOpen={isMoveModalOpen}
           onClose={() => setIsMoveModalOpen(false)}
@@ -374,20 +430,15 @@ export default function InventarioPage() {
               <div>Stock Mínimo de Alerta: <strong className="text-alert-amber">{selectedProduct?.stockMinimo} unidades</strong></div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
-                Tipo de Movimiento
-              </label>
-              <select
-                value={moveType}
-                onChange={(e) => setMoveType(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm font-inter focus:outline-none focus:border-primary-blue"
-              >
-                <option value="ENTRADA">ENTRADA (Reabastecimiento o recepción desde Miami)</option>
-                <option value="SALIDA">SALIDA (Merma, daño o ajuste negativo)</option>
-                <option value="AJUSTE">AJUSTE (Conteo físico directo)</option>
-              </select>
-            </div>
+            <Select
+              label="Tipo de Movimiento"
+              value={moveType}
+              onChange={(e) => setMoveType(e.target.value)}
+            >
+              <option value="ENTRADA">ENTRADA (Reabastecimiento o recepción desde Miami Hub)</option>
+              <option value="SALIDA">SALIDA (Merma, daño o ajuste negativo)</option>
+              <option value="AJUSTE">AJUSTE (Conteo físico directo)</option>
+            </Select>
 
             <Input
               label={moveType === 'AJUSTE' ? 'Nuevo Conteo Físico Total' : 'Cantidad a Mover'}
@@ -408,7 +459,7 @@ export default function InventarioPage() {
                 value={moveReason}
                 onChange={(e) => setMoveReason(e.target.value)}
                 required
-                className="w-full rounded-xl border border-slate-300 p-3 text-sm font-inter focus:outline-none focus:border-primary-blue"
+                className="w-full rounded-lg border border-slate-200 p-3 text-sm font-inter focus:outline-none focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue"
               />
             </div>
 

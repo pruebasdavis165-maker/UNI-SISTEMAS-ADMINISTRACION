@@ -155,7 +155,7 @@ export default function HomePage() {
                       Listo para Retiro en Ventanilla
                     </strong>
                   </div>
-                  <p className="text-[11px] text-slate-400">Notificación automática por correo al arribar a sede.</p>
+                  <p className="text-[11px] text-slate-400">Disponible para retiro físico inmediato en ventanilla oficial.</p>
                 </div>
               </div>
             </div>

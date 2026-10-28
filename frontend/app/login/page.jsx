@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
 import { Button, Input, Card, CardContent, Alert } from '../../components/ui';
-import { setSession, API_BASE_URL } from '../../lib/auth';
+import { setSession, API_BASE_URL, normalizeRole } from '../../lib/auth';
 
 function LoginForm() {
   const router = useRouter();
@@ -39,14 +39,16 @@ function LoginForm() {
       window.dispatchEvent(new Event('authChanged'));
       window.dispatchEvent(new Event('cartUpdated'));
 
+      const userRole = normalizeRole(data.user?.rol);
+
       if (redirectPath && redirectPath !== '/') {
         router.push(redirectPath);
-      } else if (data.user.rol === 'Admin') {
-        router.push('/panel/usuarios');
-      } else if (data.user.rol === 'Logística') {
+      } else if (userRole === 'Admin') {
+        router.push('/panel');
+      } else if (userRole === 'Logística') {
         router.push('/panel/logistica');
-      } else if (data.user.rol === 'Vendedor') {
-        router.push('/panel/inventario');
+      } else if (userRole === 'Vendedor') {
+        router.push('/panel/vendedor');
       } else {
         router.push('/catalogo');
       }

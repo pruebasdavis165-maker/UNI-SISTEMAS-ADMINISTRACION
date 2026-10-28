@@ -7,7 +7,7 @@ import {
   Edit3, UserX, UserCheck, RefreshCw, Mail, Phone, Lock, Eye, AlertTriangle, Truck
 } from 'lucide-react';
 import { 
-  Button, Input, Card, CardHeader, CardTitle, CardContent, 
+  Button, Input, Select, Card, CardHeader, CardTitle, CardContent, 
   Badge, Modal, Alert 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
@@ -342,20 +342,18 @@ export default function UserManagementPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-primary-blue shrink-0" />
-            <span className="text-xs font-semibold text-slate-600 font-inter hidden sm:inline">Filtrar por:</span>
-            <select
+          <div className="w-full sm:w-72">
+            <Select
+              icon={Filter}
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-inter font-medium text-slate-800 bg-white hover:border-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue shadow-sm transition-all cursor-pointer"
             >
               <option value="">Todos los Roles del Sistema</option>
               <option value="Admin">Admin (Control Total)</option>
               <option value="Vendedor">Vendedor (Comercial)</option>
               <option value="Logística">Logística (Ventanilla)</option>
               <option value="Cliente">Cliente (Comprador)</option>
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -496,22 +494,17 @@ export default function UserManagementPage() {
               value={formPhone}
               onChange={(e) => setFormPhone(e.target.value)}
             />
-            <div>
-              <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
-                Rol en el Sistema
-              </label>
-              <select
-                value={formRole}
-                onChange={(e) => setFormRole(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white py-3 px-3.5 text-sm font-inter text-slate-800 shadow-sm hover:border-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue transition-all cursor-pointer"
-              >
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.nombre} ({r.descripcion})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Rol en el Sistema"
+              value={formRole}
+              onChange={(e) => setFormRole(e.target.value)}
+            >
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nombre} ({r.descripcion})
+                </option>
+              ))}
+            </Select>
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -544,22 +537,17 @@ export default function UserManagementPage() {
               value={formPhone}
               onChange={(e) => setFormPhone(e.target.value)}
             />
-            <div>
-              <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
-                Rol Asignado
-              </label>
-              <select
-                value={formRole}
-                onChange={(e) => setFormRole(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white py-3 px-3.5 text-sm font-inter text-slate-800 shadow-sm hover:border-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue transition-all cursor-pointer"
-              >
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Rol Asignado"
+              value={formRole}
+              onChange={(e) => setFormRole(e.target.value)}
+            >
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nombre}
+                </option>
+              ))}
+            </Select>
 
             <Input
               label="Nueva Contraseña (Opcional)"
