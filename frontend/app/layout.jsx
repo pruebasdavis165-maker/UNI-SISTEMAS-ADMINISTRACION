@@ -1,0 +1,25 @@
+import './globals.css';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+
+export const metadata = {
+  title: 'NicaLogistics - Plataforma Logística y E-Commerce Sede a Sede',
+  description: 'Sistema empresarial de comercio electrónico y gestión logística de envíos Sede a Sede Miami ⇄ Nicaragua. Retiro seguro en ventanilla.',
+  icons: {
+    icon: '/logo.png',
+  },
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="es">
+      <body className="min-h-screen flex flex-col font-inter bg-slate-50 text-slate-900 antialiased selection:bg-primary-blue selection:text-white">
+        <Navbar />
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
