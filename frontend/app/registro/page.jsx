@@ -61,6 +61,7 @@ export default function RegisterPage() {
       }
 
       setSession(data.token, data.user);
+      window.dispatchEvent(new Event('authChanged'));
       window.dispatchEvent(new Event('cartUpdated'));
       router.push('/catalogo');
     } catch (err) {

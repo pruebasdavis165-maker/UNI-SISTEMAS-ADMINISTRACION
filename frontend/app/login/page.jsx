@@ -36,6 +36,7 @@ function LoginForm() {
       }
 
       setSession(data.token, data.user);
+      window.dispatchEvent(new Event('authChanged'));
       window.dispatchEvent(new Event('cartUpdated'));
 
       if (redirectPath && redirectPath !== '/') {
