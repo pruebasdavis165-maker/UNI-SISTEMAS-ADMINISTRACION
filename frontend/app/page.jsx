@@ -40,7 +40,7 @@ export default function HomePage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-primary-blue text-xs font-bold font-inter tracking-wide shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-accent-magenta" />
-                <span>EXCLUSIVO SEDE A SEDE • CERO EXTRAVÍOS EN DOMICILIO</span>
+                <span>COMERCIO BILATERAL & LOGÍSTICA MIAMI ⇄ MANAGUA</span>
               </div>
 
               <h1 className="font-montserrat font-extrabold text-4xl sm:text-5xl lg:text-6xl text-slate-900 tracking-tight leading-[1.15]">
@@ -168,7 +168,7 @@ export default function HomePage() {
       {/* 2. CÓMO FUNCIONA EL MODELO SEDE A SEDE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <Badge variant="magenta" size="md">Operación Transparente</Badge>
+          
           <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-900 mt-2 mb-3">
             ¿Cómo Funciona el Envío Sede a Sede?
           </h2>
@@ -245,38 +245,45 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. CALCULADORA DE FLETE EN LÍNEA */}
+      {/* 3. CALCULADORA DE FLETE INTERNACIONAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-slate-900 to-blue-950 rounded-3xl p-8 sm:p-12 text-white shadow-soft-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 rounded-3xl p-8 sm:p-12 text-white shadow-soft-xl border border-slate-800 relative overflow-hidden">
+          {/* Subtle Ambient Glows */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/15 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             
             <div className="lg:col-span-7 space-y-4">
-              <Badge variant="green" size="md">Transparencia Total</Badge>
-              <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-white">
-                Calculadora de Flete Miami ⇄ Sedes Nicaragua
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-semibold tracking-wide">
+                <Plane className="w-3.5 h-3.5 text-accent-magenta" />
+                Tarifas Oficiales Sin Cargos Ocultos
+              </span>
+              <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
+                Calculadora de Flete Miami ⇄ Managua
               </h2>
-              <p className="font-inter text-sm text-slate-300 leading-relaxed">
-                Sin cargos ocultos ni tarifas sorpresa. El precio por libra incluye recepción, transporte 
-                internacional y resguardo en bóveda de ventanilla hasta por 15 días calendario.
+              <p className="font-inter text-sm text-slate-300 leading-relaxed max-w-xl">
+                Cotiza el transporte de tus paquetes entre Florida y Nicaragua. El costo incluye recepción, 
+                tránsito internacional seguro y resguardo en ventanilla oficial hasta por 15 días.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                    Modalidad
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
+                    Modalidad de Envío
                   </label>
                   <select 
                     value={calcService}
                     onChange={(e) => setCalcService(e.target.value)}
-                    className="w-full bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-sm focus:outline-none focus:border-primary-blue"
+                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
                   >
                     <option value="aereo">Aéreo Exprés ($4.50/lb)</option>
-                    <option value="maritimo">Marítimo ($1.85/lb)</option>
+                    <option value="maritimo">Marítimo Carga ($1.85/lb)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
                     Peso Estimado (Libras)
                   </label>
                   <input
@@ -285,41 +292,44 @@ export default function HomePage() {
                     max="500"
                     value={calcWeight}
                     onChange={(e) => setCalcWeight(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-sm focus:outline-none focus:border-primary-blue"
+                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
                     Sede de Retiro
                   </label>
                   <select 
                     value={calcSede}
                     onChange={(e) => setCalcSede(e.target.value)}
-                    className="w-full bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-sm focus:outline-none focus:border-primary-blue"
+                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
                   >
-                    <option value="Managua">Managua Central</option>
-                    <option value="León">León Regional</option>
-                    <option value="Estelí">Estelí Regional</option>
+                    <option value="Managua">Sede Central Managua (Nicaragua)</option>
+                    <option value="Miami">Sede Miami Hub (Estados Unidos)</option>
                   </select>
                 </div>
               </div>
             </div>
 
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center space-y-3">
-                <span className="text-xs uppercase font-bold tracking-wider text-slate-300">
-                  Costo Estimado de Retiro en {calcSede}
-                </span>
-                <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta">
-                  ${calculateEstimate()} <span className="text-lg text-white font-normal">USD</span>
+              <div className="w-full max-w-sm bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center space-y-3.5 shadow-soft-lg">
+                <div className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-wider text-slate-300 font-inter">
+                  <Building2 className="w-3.5 h-3.5 text-success-green" />
+                  Costo de Retiro en {calcSede}
                 </div>
-                <p className="text-xs text-slate-300">
-                  {calcService === 'aereo' ? 'Tiempo estimado: 3 a 5 días hábiles' : 'Tiempo estimado: 12 a 15 días'}
-                </p>
-                <Link href="/catalogo" className="block pt-2">
-                  <Button variant="accent" className="w-full">
-                    Explorar Catálogo con Flete
+                <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta tracking-tight">
+                  ${calculateEstimate()} <span className="text-base text-white/80 font-normal">USD</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 space-y-1">
+                  <p className="font-medium text-white">
+                    {calcService === 'aereo' ? 'Tiempo estimado: 3 a 5 días hábiles' : 'Tiempo marítimo: 12 a 15 días'}
+                  </p>
+                  <p className="text-[11px] text-slate-400">Entrega en ventanilla con Cédula o Pasaporte</p>
+                </div>
+                <Link href="/catalogo" className="block pt-1">
+                  <Button variant="accent" className="w-full font-bold shadow-soft-md">
+                    Ver Catálogo Disponible
                   </Button>
                 </Link>
               </div>
@@ -333,12 +343,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
           <div>
-            <Badge variant="blue" size="md">E-Commerce Sede a Sede</Badge>
             <h2 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-2">
-              Productos Disponibles para Retiro
+              Productos Destacados Miami ⇄ Nicaragua
             </h2>
             <p className="font-inter text-sm text-slate-500">
-              Compra directamente tecnología e insumos originales con retiro asegurado en ventanilla.
+              Gastronomía típica, rosquillas y café de altura nicaragüense para envío a EE.UU., y tecnología selecta para retiro en Managua.
             </p>
           </div>
           <Link href="/catalogo">
@@ -349,21 +358,144 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Item 1 */}
-          <Card className="flex flex-col justify-between">
-            <div className="p-4 bg-slate-100/60 flex items-center justify-center h-48 border-b border-slate-100">
-              <Package className="w-20 h-20 text-slate-400 stroke-1" />
+          {/* Item 1: Café Especial de Nicaragua */}
+          <Card className="flex flex-col justify-between overflow-hidden group hover:border-primary-blue/40 hover:shadow-soft-md transition-all">
+            <div className="relative h-48 bg-slate-100 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80" 
+                alt="Café Especial Dipilto"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2.5 left-2.5 bg-primary-blue text-white text-[10px] font-bold px-2 py-0.5 rounded-md font-montserrat shadow-xs">
+                Nicaragua ➔ USA
+              </span>
+              <span className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md font-inter shadow-xs">
+                50 en stock
+              </span>
             </div>
-            <CardContent className="p-5 space-y-2 flex-grow">
-              <div className="flex justify-between items-center text-xs">
-                <Badge variant="blue" size="sm">Electrónica</Badge>
-                <span className="text-emerald-700 font-semibold">12 en stock</span>
-              </div>
-              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
-                MacBook Air 15" M3 - 16GB / 512GB SSD
+            <CardContent className="p-4 space-y-1.5 flex-grow">
+              <span className="text-[11px] font-semibold text-primary-blue uppercase font-inter tracking-wider">
+                Café de Especialidad
+              </span>
+              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-primary-blue transition-colors">
+                Café de Altura Dipilto (Grano 1 lb)
               </h4>
               <p className="text-xs text-slate-500 line-clamp-2">
-                Portátil ultraligero con chip Apple M3, Liquid Retina y carga MagSafe.
+                Café arábica de estricta altura (SHG) con notas achocolatadas de Nueva Segovia.
+              </p>
+              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
+                $14.50 <span className="text-xs font-normal text-slate-500">USD</span>
+              </div>
+            </CardContent>
+            <div className="p-4 pt-0">
+              <Link href="/catalogo" className="w-full">
+                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
+                  Ordenar en Ventanilla
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Item 2: Rosquillas Somoteñas */}
+          <Card className="flex flex-col justify-between overflow-hidden group hover:border-primary-blue/40 hover:shadow-soft-md transition-all">
+            <div className="relative h-48 bg-slate-100 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80" 
+                alt="Rosquillas Somoteñas"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2.5 left-2.5 bg-primary-blue text-white text-[10px] font-bold px-2 py-0.5 rounded-md font-montserrat shadow-xs">
+                Nicaragua ➔ USA
+              </span>
+              <span className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md font-inter shadow-xs">
+                40 en stock
+              </span>
+            </div>
+            <CardContent className="p-4 space-y-1.5 flex-grow">
+              <span className="text-[11px] font-semibold text-accent-magenta uppercase font-inter tracking-wider">
+                Gastronomía Típica
+              </span>
+              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-primary-blue transition-colors">
+                Rosquillas Somoteñas (Bolsa 500g)
+              </h4>
+              <p className="text-xs text-slate-500 line-clamp-2">
+                Auténticas rosquillas de maíz tostado y queso artesanal crujiente de Somoto.
+              </p>
+              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
+                $12.00 <span className="text-xs font-normal text-slate-500">USD</span>
+              </div>
+            </CardContent>
+            <div className="p-4 pt-0">
+              <Link href="/catalogo" className="w-full">
+                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
+                  Ordenar en Ventanilla
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Item 3: Hamaca de Masaya */}
+          <Card className="flex flex-col justify-between overflow-hidden group hover:border-primary-blue/40 hover:shadow-soft-md transition-all">
+            <div className="relative h-48 bg-slate-100 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80" 
+                alt="Hamaca de Masaya"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2.5 left-2.5 bg-primary-blue text-white text-[10px] font-bold px-2 py-0.5 rounded-md font-montserrat shadow-xs">
+                Nicaragua ➔ USA
+              </span>
+              <span className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md font-inter shadow-xs">
+                10 en stock
+              </span>
+            </div>
+            <CardContent className="p-4 space-y-1.5 flex-grow">
+              <span className="text-[11px] font-semibold text-alert-amber uppercase font-inter tracking-wider">
+                Artesanías Masaya
+              </span>
+              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-primary-blue transition-colors">
+                Hamaca Matrimonial de Cedro
+              </h4>
+              <p className="text-xs text-slate-500 line-clamp-2">
+                Tejida a mano en algodón de alta resistencia con travesaños de madera fina.
+              </p>
+              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
+                $65.00 <span className="text-xs font-normal text-slate-500">USD</span>
+              </div>
+            </CardContent>
+            <div className="p-4 pt-0">
+              <Link href="/catalogo" className="w-full">
+                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
+                  Ordenar en Ventanilla
+                </Button>
+              </Link>
+            </div>
+          </Card>
+
+          {/* Item 4: MacBook Air USA */}
+          <Card className="flex flex-col justify-between overflow-hidden group hover:border-primary-blue/40 hover:shadow-soft-md transition-all">
+            <div className="relative h-48 bg-slate-100 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80" 
+                alt="MacBook Air M3"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="absolute top-2.5 left-2.5 bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md font-montserrat shadow-xs">
+                USA ➔ Nicaragua
+              </span>
+              <span className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md font-inter shadow-xs">
+                8 en stock
+              </span>
+            </div>
+            <CardContent className="p-4 space-y-1.5 flex-grow">
+              <span className="text-[11px] font-semibold text-primary-blue uppercase font-inter tracking-wider">
+                Tecnología Importada
+              </span>
+              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-primary-blue transition-colors">
+                MacBook Air 15" M3 - 16GB RAM
+              </h4>
+              <p className="text-xs text-slate-500 line-clamp-2">
+                Chip Apple M3, Liquid Retina y hasta 18h de batería. Despacho desde Miami Hub.
               </p>
               <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
                 $1,299.00 <span className="text-xs font-normal text-slate-500">USD</span>
@@ -372,94 +504,7 @@ export default function HomePage() {
             <div className="p-4 pt-0">
               <Link href="/catalogo" className="w-full">
                 <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
-                  Comprar en Ventanilla
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Item 2 */}
-          <Card className="flex flex-col justify-between">
-            <div className="p-4 bg-slate-100/60 flex items-center justify-center h-48 border-b border-slate-100">
-              <Package className="w-20 h-20 text-slate-400 stroke-1" />
-            </div>
-            <CardContent className="p-5 space-y-2 flex-grow">
-              <div className="flex justify-between items-center text-xs">
-                <Badge variant="amber" size="sm">Stock Bajo</Badge>
-                <span className="text-alert-amber font-semibold">4 en stock</span>
-              </div>
-              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
-                Lenovo ThinkPad X1 Carbon Gen 11
-              </h4>
-              <p className="text-xs text-slate-500 line-clamp-2">
-                Intel Core i7 empresarial, 32GB RAM, 1TB NVMe, chasis de fibra de carbono.
-              </p>
-              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
-                $1,450.00 <span className="text-xs font-normal text-slate-500">USD</span>
-              </div>
-            </CardContent>
-            <div className="p-4 pt-0">
-              <Link href="/catalogo" className="w-full">
-                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
-                  Comprar en Ventanilla
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Item 3 */}
-          <Card className="flex flex-col justify-between">
-            <div className="p-4 bg-slate-100/60 flex items-center justify-center h-48 border-b border-slate-100">
-              <Package className="w-20 h-20 text-slate-400 stroke-1" />
-            </div>
-            <CardContent className="p-5 space-y-2 flex-grow">
-              <div className="flex justify-between items-center text-xs">
-                <Badge variant="blue" size="sm">Smartphones</Badge>
-                <span className="text-emerald-700 font-semibold">8 en stock</span>
-              </div>
-              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
-                iPhone 15 Pro Max 256GB Titanio Natural
-              </h4>
-              <p className="text-xs text-slate-500 line-clamp-2">
-                Chip A17 Pro, cámara 48MP teleobjetivo 5x y puerto USB-C de alta velocidad.
-              </p>
-              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
-                $1,199.00 <span className="text-xs font-normal text-slate-500">USD</span>
-              </div>
-            </CardContent>
-            <div className="p-4 pt-0">
-              <Link href="/catalogo" className="w-full">
-                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
-                  Comprar en Ventanilla
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Item 4 */}
-          <Card className="flex flex-col justify-between">
-            <div className="p-4 bg-slate-100/60 flex items-center justify-center h-48 border-b border-slate-100">
-              <Package className="w-20 h-20 text-slate-400 stroke-1" />
-            </div>
-            <CardContent className="p-5 space-y-2 flex-grow">
-              <div className="flex justify-between items-center text-xs">
-                <Badge variant="blue" size="sm">Repuestos</Badge>
-                <span className="text-emerald-700 font-semibold">25 en stock</span>
-              </div>
-              <h4 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
-                Kit Scanner Automotriz OBD2 Bluetooth
-              </h4>
-              <p className="text-xs text-slate-500 line-clamp-2">
-                Herramienta profesional de diagnóstico para lectura de códigos y sensores.
-              </p>
-              <div className="pt-2 font-montserrat font-extrabold text-xl text-primary-blue">
-                $85.00 <span className="text-xs font-normal text-slate-500">USD</span>
-              </div>
-            </CardContent>
-            <div className="p-4 pt-0">
-              <Link href="/catalogo" className="w-full">
-                <Button variant="primary" size="sm" icon={ShoppingCart} className="w-full">
-                  Comprar en Ventanilla
+                  Ordenar en Ventanilla
                 </Button>
               </Link>
             </div>
@@ -470,7 +515,7 @@ export default function HomePage() {
       {/* 5. DIRECTORIO OFICIAL DE SEDES (SEDE A SEDE) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <Badge variant="green" size="md">Ventanillas Físicas</Badge>
+          
           <h2 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-2">
             Red de Sedes Oficiales de Retiro
           </h2>

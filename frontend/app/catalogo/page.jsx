@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Search, ShoppingCart, Filter, ArrowUpDown, Package, 
+  Search, ShoppingCart, Filter, ArrowUpDown, Package, ChevronDown, 
   MapPin, CheckCircle2, AlertTriangle, Sparkles, RefreshCw, 
   Check, ArrowRight, ShieldCheck 
 } from 'lucide-react';
@@ -17,6 +17,26 @@ export default function PublicCatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('featured');
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = React.useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sortRef.current && !sortRef.current.contains(event.target)) {
+        setIsSortOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const sortOptions = [
+    { value: 'featured', label: 'Destacados', icon: Sparkles },
+    { value: 'price-asc', label: 'Precio: Menor a Mayor', icon: ArrowUpDown },
+    { value: 'price-desc', label: 'Precio: Mayor a Menor', icon: ArrowUpDown },
+    { value: 'name-asc', label: 'Nombre: A - Z', icon: ArrowUpDown },
+  ];
+  const currentSortOption = sortOptions.find((o) => o.value === sortBy) || sortOptions[0];
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [addedToast, setAddedToast] = useState(null);
@@ -128,7 +148,7 @@ export default function PublicCatalogPage() {
             Catálogo Oficial NicaLogistics
           </h1>
           <p className="font-inter text-blue-100/80 text-sm sm:text-base max-w-2xl leading-relaxed">
-            Explora equipos tecnológicos, componentes y accesorios garantizados. Compra en línea y retira en nuestras dos sedes oficiales (Sede Miami Hub o Sede Central Managua) sin costo adicional.
+            Explora productos tradicionales nicaragüenses (rosquillas, cajetas, quesillo, café de altura y artesanías) y tecnología de alta gama importada desde EE.UU. Retiro en ventanilla oficial en Managua o Miami Hub.
           </p>
 
           {/* Quick Notice Badge */}
@@ -155,22 +175,67 @@ export default function PublicCatalogPage() {
               />
             </div>
 
-            {/* Sort Select */}
-            <div className="w-full md:w-auto flex items-center gap-3 self-end md:self-center">
-              <span className="text-xs font-semibold text-slate-500 font-inter flex items-center gap-1.5 shrink-0">
-                <ArrowUpDown className="w-3.5 h-3.5 text-primary-blue" />
-                Ordenar por:
-              </span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full sm:w-auto text-xs font-inter font-medium py-2 px-3 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              >
-                <option value="featured">Destacados</option>
-                <option value="price-asc">Precio: Menor a Mayor</option>
-                <option value="price-desc">Precio: Mayor a Menor</option>
-                <option value="name-asc">Nombre: A - Z</option>
-              </select>
+            {/* Modern Combobox (Destacados y Criterios) */}
+            <div className="relative w-full md:w-auto self-end md:self-center" ref={sortRef}>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 font-inter hidden sm:inline-block">
+                  Ordenar por:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="w-full sm:w-56 h-10 px-3.5 py-2 bg-white rounded-lg border border-slate-200 shadow-md hover:border-primary-blue/50 flex items-center justify-between text-xs font-inter font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue/20 transition-all duration-200 group"
+                  aria-haspopup="listbox"
+                  aria-expanded={isSortOpen}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <currentSortOption.icon className="w-3.5 h-3.5 text-primary-blue shrink-0 group-hover:text-accent-magenta transition-colors" />
+                    <span className="truncate">{currentSortOption.label}</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-primary-blue transition-transform duration-200 shrink-0 ${isSortOpen ? 'rotate-180 text-primary-blue' : ''}`} />
+                </button>
+              </div>
+
+              {/* Dropdown Menu */}
+              {isSortOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-full sm:w-56 bg-white rounded-lg shadow-md border border-slate-100 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150"
+                  role="listbox"
+                >
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter border-b border-slate-100 mb-1">
+                    Criterio de Orden
+                  </div>
+                  {sortOptions.map((option) => {
+                    const isSelected = sortBy === option.value;
+                    const OptionIcon = option.icon;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setSortBy(option.value);
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-xs font-inter flex items-center justify-between transition-all duration-150 rounded-md my-0.5 text-left ${
+                          isSelected
+                            ? 'bg-blue-50/90 text-primary-blue font-bold'
+                            : 'text-slate-700 hover:bg-slate-50 hover:text-primary-blue'
+                        }`}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <div className="flex items-center gap-2">
+                          <OptionIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-primary-blue' : 'text-slate-400'}`} />
+                          <span>{option.label}</span>
+                        </div>
+                        {isSelected && (
+                          <Check className="w-4 h-4 text-primary-blue shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

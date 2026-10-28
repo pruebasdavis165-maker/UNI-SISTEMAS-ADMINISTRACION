@@ -45,24 +45,36 @@ ON CONFLICT (email) DO UPDATE SET
 
 -- 4. Categorías Iniciales
 INSERT INTO categorias (id, nombre, descripcion, activo) VALUES
-('c1111111-1111-1111-1111-111111111111', 'Electrónica y Laptops', 'Equipos de cómputo, componentes y accesorios de alta gama', TRUE),
-('c2222222-2222-2222-2222-222222222222', 'Smartphones y Gadgets', 'Teléfonos inteligentes, relojes y dispositivos portátiles', TRUE),
-('c3333333-3333-3333-3333-333333333333', 'Repuestos y Herramientas', 'Piezas automotrices, industriales y herramientas de precisión', TRUE),
-('c4444444-4444-4444-4444-444444444444', 'Moda y Accesorios', 'Ropa deportiva, calzado importado y accesorios de viaje', TRUE)
-ON CONFLICT (nombre) DO UPDATE SET descripcion = EXCLUDED.descripcion;
+('c1111111-1111-1111-1111-111111111111', 'Gastronomía y Dulces Tradicionales', 'Rosquillas, cajetas, quesillos y alimentos autóctonos nicaragüenses listos para despacho', TRUE),
+('c2222222-2222-2222-2222-222222222222', 'Café Especial y Exportación', 'Café gourmet de estricta altura origen Dipilto, Matagalpa y Jinotega', TRUE),
+('c3333333-3333-3333-3333-333333333333', 'Artesanías y Cuero de Masaya', 'Hamacas de cedro tejidas a mano, calzado y manufactura en cuero genuino nicaragüense', TRUE),
+('c4444444-4444-4444-4444-444444444444', 'Tecnología e Informática USA', 'Laptops, smartphones y componentes de última generación despachados desde Miami Hub', TRUE)
+ON CONFLICT (id) DO UPDATE SET 
+    nombre = EXCLUDED.nombre,
+    descripcion = EXCLUDED.descripcion,
+    activo = EXCLUDED.activo;
 
--- 5. Productos Iniciales en Inventario
+-- 5. Productos Iniciales en Inventario (Gastronomía, Café y Artesanías de Nicaragua + Tecnología USA)
 INSERT INTO productos (id, codigo_sku, nombre, descripcion, precio, stock_actual, stock_minimo, imagen_url, categoria_id, activo) VALUES
-('p1111111-1111-1111-1111-111111111111', 'SKU-LAP-001', 'MacBook Air 15" M3 - 16GB / 512GB SSD', 'Portátil ultraligero con chip Apple M3, pantalla Liquid Retina y hasta 18h de batería.', 1299.00, 12, 3, '/images/products/macbook-air.jpg', 'c1111111-1111-1111-1111-111111111111', TRUE),
-('p2222222-2222-2222-2222-222222222222', 'SKU-LAP-002', 'Lenovo ThinkPad X1 Carbon Gen 11', 'Portátil empresarial Intel Core i7, 32GB RAM, 1TB NVMe, chasis de fibra de carbono.', 1450.00, 4, 5, '/images/products/thinkpad-x1.jpg', 'c1111111-1111-1111-1111-111111111111', TRUE),
-('p3333333-3333-3333-3333-333333333333', 'SKU-PHN-001', 'iPhone 15 Pro Max 256GB Titanio Natural', 'Dispositivo iOS con chip A17 Pro, cámara 48MP con teleobjetivo 5x y puerto USB-C.', 1199.00, 8, 4, '/images/products/iphone-15-pro.jpg', 'c2222222-2222-2222-2222-222222222222', TRUE),
-('p4444444-4444-4444-4444-444444444444', 'SKU-PHN-002', 'Samsung Galaxy S24 Ultra 512GB', 'Smartphone Android con Galaxy AI integrada, S-Pen incluido y pantalla Dynamic AMOLED 2X.', 1249.00, 3, 5, '/images/products/s24-ultra.jpg', 'c2222222-2222-2222-2222-222222222222', TRUE),
-('p5555555-5555-5555-5555-555555555555', 'SKU-REP-001', 'Kit Scanner Diagnóstico Automotriz OBD2 Bluetooth', 'Herramienta profesional de diagnóstico para lectura de códigos y sensores en tiempo real.', 85.00, 25, 6, '/images/products/obd2-scanner.jpg', 'c3333333-3333-3333-3333-333333333333', TRUE),
-('p6666666-6666-6666-6666-666666666666', 'SKU-MOD-001', 'Mochila Antirrobo Resistente al Agua para Laptop 17"', 'Mochila de viaje ergonómica con puerto USB de carga rápida y candado TSA integrado.', 49.99, 30, 8, '/images/products/backpack-pro.jpg', 'c4444444-4444-4444-4444-444444444444', TRUE)
-ON CONFLICT (codigo_sku) DO UPDATE SET 
+('00000001-0000-0000-0000-000000000001', 'SKU-NIC-ROSQ01', 'Rosquillas Somoteñas Tradicionales (Bolsa Familiar 500g)', 'Auténticas rosquillas somoteñas de maíz tostado y queso con sabor crujiente tradicional nicaragüense.', 12.00, 40, 10, 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80', 'c1111111-1111-1111-1111-111111111111', TRUE),
+('00000001-0000-0000-0000-000000000002', 'SKU-NIC-CAJ01', 'Cajetas de Leche y Manjar Típico (Caja Surtida 12 uds)', 'Dulces tradicionales artesanales elaborados con leche entera, canela y azúcar morena de caña.', 9.50, 35, 8, 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=800&q=80', 'c1111111-1111-1111-1111-111111111111', TRUE),
+('00000001-0000-0000-0000-000000000003', 'SKU-NIC-QUES01', 'Quesillo Artesanal de Santo Tomás (Sellado al Vacío 2 lbs)', 'Quesillo fresco de leche pasteurizada nicaragüense, textura elástica insuperable con conservación en frío.', 18.00, 20, 5, 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=800&q=80', 'c1111111-1111-1111-1111-111111111111', TRUE),
+('00000001-0000-0000-0000-000000000004', 'SKU-NIC-NAC01', 'Nacatamales Criollos de Cerdo (Pack 4 uds Congelados al Vacío)', 'Nacatamales tradicionales envueltos en hoja de plátano con masa de maíz condimentada, lomo de cerdo y yerbabuena.', 22.00, 15, 5, 'https://images.unsplash.com/photo-1628294895950-9805252327bc?auto=format&fit=crop&w=800&q=80', 'c1111111-1111-1111-1111-111111111111', TRUE),
+('00000001-0000-0000-0000-000000000005', 'SKU-NIC-CAF01', 'Café Especial de Altura Dipilto Nueva Segovia (Grano 1 lb)', 'Café arábica de estricta altura (SHG) con notas a chocolate amargo, caramelo y acidez cítrica balanceada.', 14.50, 50, 10, 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80', 'c2222222-2222-2222-2222-222222222222', TRUE),
+('00000001-0000-0000-0000-000000000006', 'SKU-NIC-HAM01', 'Hamaca Matrimonial de Masaya (Tejida a Mano con Barras de Cedro)', 'Hamaca artesanal de hilo de algodón de alta resistencia con flecos decorativos y travesaños de madera fina.', 65.00, 10, 3, 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80', 'c3333333-3333-3333-3333-333333333333', TRUE),
+('00000001-0000-0000-0000-000000000007', 'SKU-NIC-BOT01', 'Botas de Cuero Genuino Masaya (Hechas a Mano)', 'Calzado artesanal en cuero vacuno auténtico con costura reforzada y suela antideslizante para alta durabilidad.', 58.00, 14, 4, 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80', 'c3333333-3333-3333-3333-333333333333', TRUE),
+('00000001-0000-0000-0000-000000000008', 'SKU-USA-LAP01', 'MacBook Air 15" M3 - 16GB / 512GB SSD (Despacho Miami Hub)', 'Portátil ultraligero con chip Apple M3, pantalla Liquid Retina y hasta 18h de batería. Importación directa.', 1299.00, 8, 2, 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80', 'c4444444-4444-4444-4444-444444444444', TRUE),
+('00000001-0000-0000-0000-000000000009', 'SKU-USA-PHN01', 'iPhone 15 Pro Max 256GB Titanio Natural (Despacho Miami Hub)', 'Dispositivo iOS con chip A17 Pro, cámara 48MP con teleobjetivo 5x y chasis de titanio de grado aeroespacial.', 1199.00, 6, 2, 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80', 'c4444444-4444-4444-4444-444444444444', TRUE)
+ON CONFLICT (id) DO UPDATE SET 
+    codigo_sku = EXCLUDED.codigo_sku,
+    nombre = EXCLUDED.nombre,
+    descripcion = EXCLUDED.descripcion,
     precio = EXCLUDED.precio,
     stock_actual = EXCLUDED.stock_actual,
-    stock_minimo = EXCLUDED.stock_minimo;
+    stock_minimo = EXCLUDED.stock_minimo,
+    imagen_url = EXCLUDED.imagen_url,
+    categoria_id = EXCLUDED.categoria_id,
+    activo = EXCLUDED.activo;
 
 -- Registrar Kardex inicial de los productos
 INSERT INTO movimientos_inventario (producto_id, tipo_movimiento, cantidad, stock_anterior, stock_nuevo, motivo, usuario_id)

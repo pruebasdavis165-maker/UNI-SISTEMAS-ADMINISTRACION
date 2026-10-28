@@ -13,7 +13,7 @@ export default function Footer() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-montserrat font-bold text-white text-base">Cero Extravíos Garantizado</h4>
+              <h4 className="font-montserrat font-bold text-white text-base">Retiro Seguro en Ventanilla</h4>
               <p className="text-xs text-slate-400">Retiro seguro en ventanilla física oficial</p>
             </div>
           </div>

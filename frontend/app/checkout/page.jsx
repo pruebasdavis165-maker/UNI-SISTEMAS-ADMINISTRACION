@@ -246,7 +246,7 @@ export default function CheckoutPage() {
           <div>
             <div className="flex items-center gap-2">
               <Badge variant="blue" size="sm">Checkout Seguro</Badge>
-              <span className="text-xs text-slate-400 font-inter">Modelo Operativo Sede a Sede</span>
+              <span className="text-xs text-slate-400 font-inter">Comercio Bilateral Miami ⇄ Managua</span>
             </div>
             <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
               Confirmación de Pedido y Retiro
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <h2 className="font-montserrat font-bold text-lg text-slate-900">
-                      Ruta Logística "Sede a Sede"
+                      Ruta Logística Oficial (Miami Hub ⇄ Sede Central Managua)
                     </h2>
                     <p className="text-xs text-slate-500 font-inter">
                       Selecciona las sucursales oficiales de origen y retiro en ventanilla.
