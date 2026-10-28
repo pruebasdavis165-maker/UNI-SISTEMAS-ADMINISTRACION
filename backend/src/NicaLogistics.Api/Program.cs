@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NicaLogistics.Api.Middlewares;
 using NicaLogistics.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,7 +92,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Pipeline HTTP
-if (app.Environment.IsDevelopment() || true) // Permitir Swagger
+if (app.Environment.IsDevelopment() || true)
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -106,6 +107,9 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Middleware de Auditoría (RF-12, Política 6, Issue 2.4)
+app.UseMiddleware<AuditLoggingMiddleware>();
 
 app.MapControllers();
 
