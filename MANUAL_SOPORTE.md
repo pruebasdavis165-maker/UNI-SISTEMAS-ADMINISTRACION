@@ -15,10 +15,11 @@
 ### Regla de Negocio Fundamental: "Sede a Sede" (Pickup en Ventanilla)
 * **El sistema NO realiza entregas a domicilio particulares.**
 * Todos los pedidos de compra (Checkout) y traslados de encomiendas operan de forma estricta entre sedes oficiales autorizadas:
-  1. **Miami International Hub (USA)** - Recepción y consolidación de mercancía exterior.
-  2. **Sede Central Managua (Nicaragua)** - Centro de distribución nacional y ventanilla central.
-  3. **Sede Regional Occidente León (Nicaragua)** - Ventanilla de retiro en León.
-  4. **Sede Regional Norte Estelí (Nicaragua)** - Ventanilla de retiro en Estelí.
+  1. **Sede Central Managua (Nicaragua)** - Ventanilla oficial de despacho y retiro nacional.
+  2. **Sede Miami Hub (Estados Unidos)** - Ventanilla oficial de despacho y retiro internacional (Flujo comercial bidireccional Managua ⇄ Miami).
+
+
+
 * **Prohibición de campos de dirección física:** Ningún formulario del sistema solicita calle, número, apartamento o código postal domiciliario. Toda entrega se realiza presentando identificación oficial física (Cédula o Pasaporte) en la ventanilla de la sede de destino seleccionada.
 
 ---

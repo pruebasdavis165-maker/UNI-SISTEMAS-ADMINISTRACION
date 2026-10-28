@@ -17,7 +17,7 @@
 > 
 > Todos los flujos logísticos, de compra (Checkout) y de transporte de carga se basan **exclusivamente en entregas "Sede a Sede" (Pickup en ventanilla oficial)**. 
 > * **Cero campos de dirección domiciliaria:** No existen campos de calle, número residencial ni código postal en ningún formulario ni tabla de la base de datos.
-> * **Retiro protegido:** La entrega de paquetes se realiza únicamente en las ventanillas de las sucursales oficiales autorizadas (**Miami Hub ⇄ Managua, León y Estelí**), previa verificación de documento de identidad oficial (Cédula o Pasaporte) del titular o destinatario.
+> * **Retiro protegido:** La entrega de paquetes se realiza únicamente en las ventanillas de las dos sucursales oficiales autorizadas (**Sede Miami Hub ⇄ Sede Central Managua**), previa verificación de documento de identidad oficial (Cédula o Pasaporte) del titular o destinatario. Flujo comercial bidireccional continuo (Nicaragua ➔ EE.UU. y EE.UU. ➔ Nicaragua).
 
 ---
 
@@ -153,10 +153,8 @@ Estructurado en 4 capas estrictamente desacopladas:
 
 | Código Sede | Nombre de la Sucursal | Ubicación | Dirección de Ventanilla Oficial | Horario de Atención |
 | :--- | :--- | :--- | :--- | :--- |
-| **`MIA-HUB-01`** | **Miami International Hub** | Miami, Florida (USA) | 8205 NW 68th St, Miami, FL 33166 | Lun - Vie 8:00 AM - 5:00 PM |
-| **`MGA-CEN-02`** | **Sede Central Managua** | Managua, Nicaragua | Pista Jean Paul Genie, Edificio NicaLogistics | Lun - Sáb 8:00 AM - 6:00 PM |
-| **`LEO-OCC-03`** | **Sede Regional Occidente** | León, Nicaragua | Costado Sur de la Catedral, Calle Real | Lun - Sáb 8:00 AM - 5:00 PM |
-| **`EST-NOR-04`** | **Sede Regional Norte** | Estelí, Nicaragua | Avenida Central, Frente a Parque Infantil | Lun - Sáb 8:00 AM - 5:00 PM |
+| **`MIA-01`** | **Sede Miami Hub** | Miami, Florida (USA) | 8400 NW 25th St, Doral, FL 33198 (Carga y Recepción) | Lun - Vie 8:00 AM - 5:00 PM |
+| **`MGA-01`** | **Sede Central Managua** | Managua, Nicaragua | Km 4.5 Carretera Norte, Frente a Enabas (Ventanilla Principal) | Lun - Sáb 8:00 AM - 6:00 PM |
 
 ---
 

@@ -49,7 +49,7 @@ export default function HomePage() {
 
               <p className="font-inter text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
                 El sistema logístico más confiable de la región. Sin entregas a domicilio fallidas ni riesgos en la calle. 
-                Tus compras de USA llegan a nuestras <strong>bóvedas de seguridad en Managua, León y Estelí</strong> para retiro personal.
+                Tus compras y encomiendas viajan protegidas entre nuestras <strong>bóvedas de seguridad en Managua y Miami Hub</strong> para retiro personal en ventanilla oficial.
               </p>
 
               {/* Interactive Tracking Widget */}
@@ -142,7 +142,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider">Sede Destino (Pickup)</span>
-                    <h4 className="font-montserrat font-bold text-sm text-slate-900">Managua, León o Estelí</h4>
+                    <h4 className="font-montserrat font-bold text-sm text-slate-900">Sede Central Managua (Nicaragua)</h4>
                     <p className="text-xs text-slate-500">Retiro seguro en ventanilla física</p>
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
               Distribución a Sede
             </h3>
             <p className="font-inter text-xs text-slate-500 leading-relaxed">
-              El paquete se transfiere de inmediato a la ventanilla oficial seleccionada (Managua, León, Estelí).
+              El paquete se transfiere de inmediato a la ventanilla oficial seleccionada (Sede Central Managua o Miami Hub).
             </p>
           </div>
 
@@ -479,64 +479,36 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Miami */}
           <div className="bg-white rounded-2xl p-6 border-2 border-primary-blue/30 shadow-soft-sm hover:shadow-soft-md transition-all">
             <span className="text-xs font-bold font-montserrat text-primary-blue uppercase tracking-wider block mb-1">
-              Sede Recepción USA
+              Sede Oficial EE.UU. (Ventanilla & Hub)
             </span>
-            <h3 className="font-montserrat font-bold text-lg text-slate-900">Miami Hub Doral</h3>
+            <h3 className="font-montserrat font-bold text-xl text-slate-900">Sede Miami Hub (Estados Unidos)</h3>
             <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              8400 NW 25th St, Doral, FL 33198
+              8400 NW 25th St, Doral, FL 33198 (Ventanilla de Carga y Recepción)
             </p>
             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
               <p><strong>Tel:</strong> +1 (305) 555-0199</p>
               <p><strong>Horario:</strong> Lun - Vie: 8:00 AM - 5:00 PM</p>
+              <p className="text-primary-blue font-semibold mt-1">Flujo: Recepción / Despacho USA ⇄ Nicaragua</p>
             </div>
           </div>
 
           {/* Managua */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm hover:shadow-soft-md transition-all">
+          <div className="bg-white rounded-2xl p-6 border-2 border-accent-magenta/30 shadow-soft-sm hover:shadow-soft-md transition-all">
             <span className="text-xs font-bold font-montserrat text-accent-magenta uppercase tracking-wider block mb-1">
-              Sede Principal Nicaragua
+              Sede Oficial Nicaragua (Ventanilla Principal)
             </span>
-            <h3 className="font-montserrat font-bold text-lg text-slate-900">Managua Central</h3>
+            <h3 className="font-montserrat font-bold text-xl text-slate-900">Sede Central Managua (Nicaragua)</h3>
             <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              Km 4.5 Carretera Norte, Frente Enabas (Ventanilla Principal)
+              Km 4.5 Carretera Norte, Frente a Enabas (Ventanilla Principal)
             </p>
             <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
               <p><strong>Tel:</strong> +505 2249-0100</p>
               <p><strong>Horario:</strong> Lun - Sáb: 8:00 AM - 6:00 PM</p>
-            </div>
-          </div>
-
-          {/* León */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm hover:shadow-soft-md transition-all">
-            <span className="text-xs font-bold font-montserrat text-alert-amber uppercase tracking-wider block mb-1">
-              Sede Regional Occidente
-            </span>
-            <h3 className="font-montserrat font-bold text-lg text-slate-900">León Regional</h3>
-            <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              Costado Sur Iglesia La Recolección, Módulo 3
-            </p>
-            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-              <p><strong>Tel:</strong> +505 2311-4560</p>
-              <p><strong>Horario:</strong> Lun - Sáb: 8:30 AM - 5:30 PM</p>
-            </div>
-          </div>
-
-          {/* Estelí */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm hover:shadow-soft-md transition-all">
-            <span className="text-xs font-bold font-montserrat text-success-green uppercase tracking-wider block mb-1">
-              Sede Regional Norte
-            </span>
-            <h3 className="font-montserrat font-bold text-lg text-slate-900">Estelí Regional</h3>
-            <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              De la Catedral 2c al Norte, 1/2c al Este, Ventanilla 1
-            </p>
-            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-              <p><strong>Tel:</strong> +505 2713-8890</p>
-              <p><strong>Horario:</strong> Lun - Sáb: 8:30 AM - 5:30 PM</p>
+              <p className="text-accent-magenta font-semibold mt-1">Flujo: Retiro en Ventanilla / Envíos a Miami</p>
             </div>
           </div>
         </div>

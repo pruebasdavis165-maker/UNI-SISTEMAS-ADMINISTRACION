@@ -136,7 +136,7 @@ export default function RegisterPage() {
               />
 
               <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
-                <strong>Modelo Sede a Sede:</strong> Al registrarte aceptas retirar tus compras y encomiendas en cualquiera de nuestras sedes oficiales (Miami Hub, Managua, León, Estelí).
+                <strong>Modelo Sede a Sede:</strong> Al registrarte aceptas retirar tus compras y encomiendas en nuestras sedes oficiales autorizadas (Sede Central Managua y Sede Miami Hub).
               </div>
 
               <Button

@@ -14,7 +14,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // 2. Controladores
 builder.Services.AddControllers();
 
-// 3. CORS para permitir frontend Next.js
+// 3. CORS para permitir frontend Next.js y reverse proxy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -62,8 +62,17 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "NicaLogistics API — Plataforma Enterprise Sede a Sede",
         Version = "v1",
-        Description = "Documentación interactiva de la API NicaLogistics. Plataforma E-commerce y logística de ventanilla (Miami Hub ⇄ Nicaragua)."
+        Description = "Documentación interactiva de la API NicaLogistics. Modelo comercial y logístico exclusivo Sede a Sede (Miami Hub ⇄ Managua)."
     });
+
+    // Soporte binario para subida de archivos FormFile
+    c.MapType<IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+
+    c.CustomSchemaIds(type => type.FullName ?? type.Name);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -99,12 +108,17 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Pipeline HTTP: Swagger activo tanto en desarrollo como en producción para verificación
-app.UseSwagger();
+// Pipeline HTTP: Swagger activo incondicionalmente en desarrollo y producción
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
+
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "NicaLogistics API v1");
     c.RoutePrefix = "swagger";
+    c.DocumentTitle = "NicaLogistics API Documentation";
 });
 
 app.UseCors("AllowAll");
@@ -136,7 +150,7 @@ app.MapGet("/", () => Results.Ok(new
     Version = "1.0.0",
     Status = "Healthy",
     Architecture = "Hexagonal .NET 9",
-    Mode = "Sede a Sede (Pickup en Ventanilla)",
+    Mode = "Sede a Sede (Miami Hub ⇄ Managua)",
     Documentation = "/swagger",
     Timestamp = DateTime.UtcNow
 }));

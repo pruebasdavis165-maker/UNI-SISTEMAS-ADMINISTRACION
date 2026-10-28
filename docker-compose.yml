@@ -52,7 +52,7 @@ services:
       db-server:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Host=db-server;Port=5432;Database=nicalogistics_db;Username=nicalogistics_user;Password=NicaLogisticsSecure2026!
       - Jwt__Key=NicaLogisticsUltraSecureJwtSecretKey2026!EnterpriseGrade

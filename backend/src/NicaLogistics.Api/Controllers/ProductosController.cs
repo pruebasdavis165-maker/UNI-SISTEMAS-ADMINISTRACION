@@ -49,8 +49,8 @@ public class ProductosController : ControllerBase
     {
         try
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid? userId = Guid.TryParse(userIdStr, out var parsedId) ? parsedId : null;
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Guid.TryParse(userIdStr, out var userId);
 
             var created = await _productService.CreateAsync(dto, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
@@ -81,13 +81,28 @@ public class ProductosController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin,Vendedor")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try
         {
-            await _productService.DeleteAsync(id);
-            return Ok(new { message = "Producto desactivado con éxito." });
+            var result = await _productService.DeleteAsync(id);
+            return Ok(new { message = "Producto eliminado exitosamente", success = result });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id:guid}/toggle-status")]
+    [Authorize(Roles = "Admin,Vendedor")]
+    public async Task<IActionResult> ToggleStatus(Guid id)
+    {
+        try
+        {
+            var updated = await _productService.ToggleStatusAsync(id);
+            return Ok(updated);
         }
         catch (KeyNotFoundException ex)
         {
@@ -97,8 +112,10 @@ public class ProductosController : ControllerBase
 
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin,Vendedor")]
-    public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadImage([FromForm] ImageUploadDto form)
     {
+        var file = form?.File;
         if (file == null || file.Length == 0)
         {
             return BadRequest(new { message = "No se ha proporcionado un archivo válido." });
@@ -129,4 +146,9 @@ public class ProductosController : ControllerBase
         var imageUrl = $"/uploads/{fileName}";
         return Ok(new { imageUrl, fileName });
     }
+}
+
+public class ImageUploadDto
+{
+    public IFormFile? File { get; set; }
 }

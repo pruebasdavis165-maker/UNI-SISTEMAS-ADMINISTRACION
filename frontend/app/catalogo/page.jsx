@@ -128,7 +128,7 @@ export default function PublicCatalogPage() {
             Catálogo Oficial NicaLogistics
           </h1>
           <p className="font-inter text-blue-100/80 text-sm sm:text-base max-w-2xl leading-relaxed">
-            Explora equipos tecnológicos, componentes y accesorios garantizados. Compra en línea y retira en nuestras sedes de Miami Hub, Managua, León o Estelí sin costo adicional.
+            Explora equipos tecnológicos, componentes y accesorios garantizados. Compra en línea y retira en nuestras dos sedes oficiales (Sede Miami Hub o Sede Central Managua) sin costo adicional.
           </p>
 
           {/* Quick Notice Badge */}

@@ -96,7 +96,7 @@ export default function PanelDashboardPage() {
               Operaciones Centralizadas en Sucursales
             </h2>
             <p className="text-white/80 text-xs sm:text-sm font-inter leading-relaxed">
-              Todos los pedidos facturados y encomiendas se reciben y retiran en las sedes oficiales (Miami Hub, Managua, León, Estelí). La plataforma no procesa entregas a domicilio.
+              Todos los pedidos facturados y encomiendas se reciben y retiran en las sedes oficiales (Sede Central Managua y Sede Miami Hub). La plataforma opera bajo el modelo Sede a Sede sin entregas a domicilio.
             </p>
           </div>
           <div className="absolute right-6 -bottom-6 opacity-10 pointer-events-none">

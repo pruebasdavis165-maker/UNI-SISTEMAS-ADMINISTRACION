@@ -34,7 +34,7 @@ export default function Footer() {
             </div>
             <div>
               <h4 className="font-montserrat font-bold text-white text-base">Red de Sedes Físicas</h4>
-              <p className="text-xs text-slate-400">Miami Hub, Managua, León y Estelí</p>
+              <p className="text-xs text-slate-400">Sede Miami Hub (USA) y Sede Central Managua (Nicaragua)</p>
             </div>
           </div>
         </div>
@@ -93,20 +93,12 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3 text-xs text-slate-400">
               <li className="border-l-2 border-primary-blue pl-3">
-                <strong className="text-white block font-montserrat">Miami Hub (EE.UU.)</strong>
+                <strong className="text-white block font-montserrat">Sede Miami Hub (EE.UU.)</strong>
                 8400 NW 25th St, Doral, FL 33198
               </li>
               <li className="border-l-2 border-accent-magenta pl-3">
-                <strong className="text-white block font-montserrat">Managua Central</strong>
+                <strong className="text-white block font-montserrat">Sede Central Managua (Nicaragua)</strong>
                 Km 4.5 Carretera Norte, Frente Enabas
-              </li>
-              <li className="border-l-2 border-alert-amber pl-3">
-                <strong className="text-white block font-montserrat">León Regional</strong>
-                Costado Sur Iglesia La Recolección
-              </li>
-              <li className="border-l-2 border-success-green pl-3">
-                <strong className="text-white block font-montserrat">Estelí Regional</strong>
-                De la Catedral 2c al Norte, 1/2c al Este
               </li>
             </ul>
           </div>

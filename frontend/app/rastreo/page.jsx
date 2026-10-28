@@ -332,7 +332,7 @@ export default function RastreoPage() {
             Seguimiento de Encomiendas en Tiempo Real
           </h1>
           <p className="font-inter text-slate-500 text-xs sm:text-sm max-w-xl mx-auto">
-            Consulta el estado de tu paquete entre las sedes de Miami Hub, Managua, León y Estelí. Retiro seguro en ventanilla oficial.
+            Consulta el estado de tu paquete entre las sedes oficiales de Miami Hub y Managua Central. Retiro seguro en ventanilla oficial.
           </p>
         </div>
 

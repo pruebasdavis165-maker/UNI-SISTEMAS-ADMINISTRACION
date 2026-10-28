@@ -9,4 +9,5 @@ public interface IProductService
     Task<ProductDto> CreateAsync(CreateProductDto dto, Guid? userId = null);
     Task<ProductDto> UpdateAsync(Guid id, UpdateProductDto dto);
     Task<bool> DeleteAsync(Guid id);
+    Task<ProductDto> ToggleStatusAsync(Guid id);
 }

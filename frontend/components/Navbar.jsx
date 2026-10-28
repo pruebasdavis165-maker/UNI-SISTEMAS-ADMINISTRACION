@@ -49,7 +49,7 @@ export default function Navbar() {
       {/* Top Banner Informativo Sede a Sede */}
       <div className="bg-primary-blue text-white text-xs py-1.5 px-4 text-center font-medium tracking-wide flex justify-center items-center gap-2">
         <span className="inline-block w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
-        <span>Envíos Seguros <strong>Sede a Sede</strong> Miami ⇄ Nicaragua (Managua, León, Estelí) • Retiro en Ventanilla Oficial</span>
+        <span>Envíos Seguros <strong>Sede a Sede</strong> Miami Hub ⇄ Sede Central Managua • Retiro en Ventanilla Oficial</span>
       </div>
 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

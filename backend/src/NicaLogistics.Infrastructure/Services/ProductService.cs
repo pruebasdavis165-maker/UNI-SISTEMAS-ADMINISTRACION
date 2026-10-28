@@ -34,7 +34,7 @@ public class ProductService : IProductService
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchLower = search.Trim().ToLower();
-            query = query.Where(p => p.Nombre.ToLower().Contains(searchLower) || 
+            query = query.Where(p => p.Nombre.ToLower().Contains(searchLower) ||
                                      p.CodigoSku.ToLower().Contains(searchLower) ||
                                      (p.Descripcion != null && p.Descripcion.ToLower().Contains(searchLower)));
         }
@@ -63,8 +63,9 @@ public class ProductService : IProductService
     public async Task<ProductDto> GetByIdAsync(Guid id)
     {
         var p = await _context.Productos
-            .Include(p => p.Categoria)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .Include(prod => prod.Categoria)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(prod => prod.Id == id);
 
         if (p == null)
             throw new KeyNotFoundException("Producto no encontrado.");
@@ -99,7 +100,6 @@ public class ProductService : IProductService
 
         var product = new Product
         {
-            Id = Guid.NewGuid(),
             CodigoSku = normalizedSku,
             Nombre = dto.Nombre.Trim(),
             Descripcion = dto.Descripcion?.Trim(),
@@ -114,23 +114,23 @@ public class ProductService : IProductService
             ActualizadoEn = DateTime.UtcNow
         };
 
-        _context.Productos.Add(product);
+        await _context.Productos.AddAsync(product);
 
-        // Registro automático de movimiento de inventario inicial (RF-07)
-        if (product.StockActual > 0)
+        // Registro de Kardex Inicial si hay stock inicial
+        if (dto.StockActual > 0)
         {
-            _context.MovimientosInventario.Add(new InventoryMovement
+            var movement = new InventoryMovement
             {
-                Id = Guid.NewGuid(),
                 ProductoId = product.Id,
                 TipoMovimiento = "ENTRADA",
-                Cantidad = product.StockActual,
+                Cantidad = dto.StockActual,
                 StockAnterior = 0,
-                StockNuevo = product.StockActual,
+                StockNuevo = dto.StockActual,
                 Motivo = "Inventario inicial al crear producto",
                 UsuarioId = userId,
                 Fecha = DateTime.UtcNow
-            });
+            };
+            await _context.MovimientosInventario.AddAsync(movement);
         }
 
         await _context.SaveChangesAsync();
@@ -202,5 +202,34 @@ public class ProductService : IProductService
         product.ActualizadoEn = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<ProductDto> ToggleStatusAsync(Guid id)
+    {
+        var product = await _context.Productos
+            .Include(p => p.Categoria)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+            throw new KeyNotFoundException("Producto no encontrado.");
+
+        product.Activo = !product.Activo;
+        product.ActualizadoEn = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return new ProductDto(
+            product.Id,
+            product.CodigoSku,
+            product.Nombre,
+            product.Descripcion,
+            product.Precio,
+            product.StockActual,
+            product.StockMinimo,
+            product.ImagenUrl,
+            product.CategoriaId,
+            product.Categoria?.Nombre ?? "",
+            product.Activo,
+            product.CreadoEn
+        );
     }
 }

@@ -14,15 +14,19 @@ ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre, descripcion = EXCLUDED.
 -- Sincronizar secuencia de roles si existe
 SELECT setval('roles_id_seq', (SELECT MAX(id) FROM roles));
 
--- 2. Sedes Principales (Sede a Sede exclusiva)
+-- 2. Sedes Oficiales (Sede a Sede exclusiva: Managua y Miami)
 INSERT INTO sedes (id, codigo, nombre, pais, ciudad, direccion_ventanilla, telefono_contacto, horario_atencion, activo) VALUES
 ('11111111-1111-1111-1111-111111111111', 'MIA-01', 'Sede Central Miami Hub', 'Estados Unidos', 'Miami', '8400 NW 25th St, Doral, FL 33198 (Ventanilla de Carga y Recepción)', '+1 (305) 555-0199', 'Lun - Vie: 8:00 AM - 5:00 PM', TRUE),
-('22222222-2222-2222-2222-222222222222', 'MGA-01', 'Sede Central Managua', 'Nicaragua', 'Managua', 'Km 4.5 Carretera Norte, Frente a Enabas (Ventanilla Principal)', '+505 2249-0100', 'Lun - Sáb: 8:00 AM - 6:00 PM', TRUE),
-('33333333-3333-3333-3333-333333333333', 'LEO-01', 'Sede Regional León', 'Nicaragua', 'León', 'Costado Sur Iglesia La Recolección, Módulo 3', '+505 2311-4560', 'Lun - Sáb: 8:30 AM - 5:30 PM', TRUE),
-('44444444-4444-4444-4444-444444444444', 'EST-01', 'Sede Regional Estelí', 'Nicaragua', 'Estelí', 'De la Catedral 2c al Norte, 1/2c al Este, Ventanilla 1', '+505 2713-8890', 'Lun - Sáb: 8:30 AM - 5:30 PM', TRUE)
+('22222222-2222-2222-2222-222222222222', 'MGA-01', 'Sede Central Managua', 'Nicaragua', 'Managua', 'Km 4.5 Carretera Norte, Frente a Enabas (Ventanilla Principal)', '+505 2249-0100', 'Lun - Sáb: 8:00 AM - 6:00 PM', TRUE)
+
+
 ON CONFLICT (codigo) DO UPDATE SET 
     nombre = EXCLUDED.nombre,
-    direccion_ventanilla = EXCLUDED.direccion_ventanilla;
+    direccion_ventanilla = EXCLUDED.direccion_ventanilla,
+    activo = EXCLUDED.activo;
+
+-- Garantizar que únicamente las 2 sedes oficiales estén activas
+UPDATE sedes SET activo = FALSE WHERE codigo NOT IN ('MIA-01', 'MGA-01');
 
 -- 3. Usuarios Iniciales por Defecto con Password Bcrypt
 -- Passwords en texto plano para testing:
