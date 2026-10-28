@@ -9,10 +9,12 @@ namespace NicaLogistics.Infrastructure.Services;
 public class ShipmentService : IShipmentService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public ShipmentService(AppDbContext context)
+    public ShipmentService(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<ShipmentResponseDto> GetByTrackingCodeAsync(string trackingCode)
@@ -145,16 +147,25 @@ public class ShipmentService : IShipmentService
         await _context.SaveChangesAsync();
 
         // Notificación al cliente si está lista para retiro (RF-09, Issue 5.3)
-        if (normalizedState == "LISTA_PARA_RETIRO")
+        if (normalizedState == "LISTA_PARA_RETIRO" && shipment.Cliente != null)
         {
+            await _notificationService.SendReadyForPickupNotificationAsync(
+                shipment.Cliente.Email,
+                shipment.Cliente.NombreCompleto,
+                shipment.CodigoTracking,
+                shipment.SedeDestino?.Nombre ?? "Sede Autorizada",
+                shipment.SedeDestino?.DireccionVentanilla ?? "Ventanilla de Sede",
+                shipment.SedeDestino?.HorarioAtencion
+            );
+
             // Registrar auditoría/evento de notificación
             await _context.LogsAuditoria.AddAsync(new AuditLog
             {
                 UsuarioId = empleadoId,
-                UsuarioEmail = shipment.Cliente?.Email,
+                UsuarioEmail = shipment.Cliente.Email,
                 Accion = "NOTIFICACION_ENVIO",
                 Modulo = "LOGISTICA",
-                Detalles = $"Notificación enviada a {shipment.Cliente?.Email}: El paquete {shipment.CodigoTracking} está listo para retiro en ventanilla de sede {shipment.SedeDestino?.Nombre}.",
+                Detalles = $"Notificación enviada a {shipment.Cliente.Email}: El paquete {shipment.CodigoTracking} está listo para retiro en ventanilla de sede {shipment.SedeDestino?.Nombre}.",
                 Fecha = DateTime.UtcNow
             });
             await _context.SaveChangesAsync();
