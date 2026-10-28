@@ -128,7 +128,7 @@ export default function HomePage() {
 
                 {/* En Tránsito Indicator */}
                 <div className="flex justify-center -my-3">
-                  <div className="bg-slate-900 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 shadow-md">
+                  <div className="bg-primary-blue text-white px-3.5 py-1 rounded-full text-xs font-semibold flex items-center gap-2 shadow-soft-sm">
                     <Plane className="w-3.5 h-3.5 text-accent-magenta animate-pulse" />
                     <span>Tránsito Internacional Consolidado</span>
                   </div>
@@ -246,35 +246,35 @@ export default function HomePage() {
 
       {/* 3. CALCULADORA DE FLETE INTERNACIONAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#0F172A] rounded-3xl p-8 sm:p-12 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
+        <div className="bg-white rounded-3xl p-8 sm:p-12 text-slate-800 shadow-xl border border-slate-200 relative overflow-hidden">
           {/* Subtle Corporate Ambient Glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/15 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/5 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             
             <div className="lg:col-span-7 space-y-4">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-blue/10 border border-primary-blue/20 text-blue-300 text-xs font-semibold tracking-wide">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-primary-blue text-xs font-semibold tracking-wide">
                 <Plane className="w-3.5 h-3.5 text-accent-magenta" />
                 Tarifas Oficiales Sin Cargos Ocultos
               </span>
-              <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
+              <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
                 Calculadora de Flete Miami ⇄ Managua
               </h2>
-              <p className="font-inter text-sm text-slate-300 leading-relaxed max-w-xl">
+              <p className="font-inter text-sm text-slate-600 leading-relaxed max-w-xl">
                 Cotiza el transporte de tus paquetes entre Florida y Nicaragua. El costo incluye recepción, 
                 tránsito internacional seguro y resguardo en ventanilla oficial hasta por 15 días.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
                     Modalidad de Envío
                   </label>
                   <select 
                     value={calcService}
                     onChange={(e) => setCalcService(e.target.value)}
-                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
+                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   >
                     <option value="aereo">Aéreo Exprés ($4.50/lb)</option>
                     <option value="maritimo">Marítimo Carga ($1.85/lb)</option>
@@ -282,7 +282,7 @@ export default function HomePage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
                     Peso Estimado (Libras)
                   </label>
                   <input
@@ -291,18 +291,18 @@ export default function HomePage() {
                     max="500"
                     value={calcWeight}
                     onChange={(e) => setCalcWeight(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
+                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
                     Sede de Retiro
                   </label>
                   <select 
                     value={calcSede}
                     onChange={(e) => setCalcSede(e.target.value)}
-                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
+                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   >
                     <option value="Managua">Sede Central Managua (Nicaragua)</option>
                     <option value="Miami">Sede Miami Hub (Estados Unidos)</option>
@@ -312,19 +312,19 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm bg-[#1E293B]/90 backdrop-blur-md rounded-2xl p-6 border border-slate-700/70 text-center space-y-4 shadow-xl">
-                <div className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-wider text-slate-300 font-inter">
+              <div className="w-full max-w-sm bg-gradient-to-b from-blue-50/70 via-white to-slate-50 rounded-2xl p-6 border border-blue-100 text-center space-y-4 shadow-md">
+                <div className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-wider text-slate-600 font-inter">
                   <Building2 className="w-3.5 h-3.5 text-primary-blue" />
                   Costo de Retiro en {calcSede}
                 </div>
                 <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta tracking-tight">
-                  ${calculateEstimate()} <span className="text-base text-slate-300 font-normal">USD</span>
+                  ${calculateEstimate()} <span className="text-base text-slate-500 font-normal">USD</span>
                 </div>
-                <div className="p-3 rounded-xl bg-[#0F172A]/70 border border-slate-800 text-xs text-slate-300 space-y-1">
-                  <p className="font-medium text-slate-200">
+                <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-slate-600 space-y-1">
+                  <p className="font-medium text-slate-800">
                     {calcService === 'aereo' ? 'Tiempo estimado: 3 a 5 días hábiles' : 'Tiempo marítimo: 12 a 15 días'}
                   </p>
-                  <p className="text-[11px] text-slate-400">Retiro exclusivo en ventanilla oficial con documento de identidad</p>
+                  <p className="text-[11px] text-slate-500">Retiro exclusivo en ventanilla oficial con documento de identidad</p>
                 </div>
                 <Link href="/catalogo" className="block pt-1">
                   <button 
@@ -564,13 +564,13 @@ export default function HomePage() {
 
       {/* 6. CALL TO ACTION FINAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#0F172A] rounded-3xl p-8 sm:p-12 text-white text-center space-y-6 shadow-soft-xl border border-slate-800 relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary-blue/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white rounded-3xl p-8 sm:p-12 text-slate-900 text-center space-y-6 shadow-soft-xl border border-blue-100 relative overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary-blue/10 rounded-full blur-2xl pointer-events-none"></div>
           <div className="max-w-2xl mx-auto space-y-3 relative z-10">
-            <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-white">
+            <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-900">
               ¿Listo para ordenar y retirar en tu ventanilla oficial?
             </h2>
-            <p className="font-inter text-slate-300 text-sm sm:text-base">
+            <p className="font-inter text-slate-600 text-sm sm:text-base">
               Abre tu cuenta gratis hoy mismo para compras y traslados de encomiendas entre Miami Hub y Managua Central.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
@@ -580,7 +580,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/catalogo">
-                <Button variant="outline" size="lg" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+                <Button variant="outline" size="lg" className="bg-white text-slate-800 border-slate-300 hover:bg-slate-50">
                   Explorar Catálogo
                 </Button>
               </Link>

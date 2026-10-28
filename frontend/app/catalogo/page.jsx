@@ -115,21 +115,21 @@ export default function PublicCatalogPage() {
       {/* Toast Feedback */}
       {addedToast && (
         <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
-          <div className={`p-4 rounded-xl shadow-xl flex items-center gap-3 border ${
+          <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 border ${
             addedToast.isError 
               ? 'bg-rose-50 border-rose-200 text-rose-800' 
-              : 'bg-slate-900 border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-800 shadow-xl'
           }`}>
             <div className={`p-2 rounded-lg ${addedToast.isError ? 'bg-rose-100 text-rose-600' : 'bg-primary-blue text-white'}`}>
               {addedToast.isError ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
             </div>
             <div>
-              <p className="text-xs font-montserrat font-bold">{addedToast.title}</p>
-              <p className="text-xs text-slate-300 font-inter">{addedToast.message}</p>
+              <p className="text-xs font-montserrat font-bold text-slate-900">{addedToast.title}</p>
+              <p className="text-xs text-slate-500 font-inter">{addedToast.message}</p>
             </div>
             <Link 
               href="/carrito" 
-              className="ml-2 px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold font-inter transition-colors"
+              className="ml-2 px-3 py-1.5 bg-primary-blue hover:bg-blue-700 text-white rounded-lg text-xs font-semibold font-inter transition-colors shadow-sm"
             >
               Ver Carrito
             </Link>
