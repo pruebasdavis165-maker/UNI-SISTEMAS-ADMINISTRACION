@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NicaLogistics.Api.Middlewares;
@@ -104,6 +105,18 @@ if (app.Environment.IsDevelopment() || true)
 
 app.UseCors("AllowAll");
 app.UseStaticFiles();
+
+// Servir volumen de subida de imágenes (Política 3, Issue 1.2, 3.1, 3.2)
+var uploadsDir = Path.Combine(app.Environment.ContentRootPath, "uploads");
+if (!Directory.Exists(uploadsDir))
+{
+    Directory.CreateDirectory(uploadsDir);
+}
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsDir),
+    RequestPath = "/uploads"
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
