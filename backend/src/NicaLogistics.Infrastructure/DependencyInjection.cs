@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NicaLogistics.Application.Interfaces;
 using NicaLogistics.Infrastructure.Data;
 using NicaLogistics.Infrastructure.Security;
+using NicaLogistics.Infrastructure.Services;
 
 namespace NicaLogistics.Infrastructure;
 
@@ -19,6 +20,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
