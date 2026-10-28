@@ -14,7 +14,7 @@ export default function Footer() {
             </div>
             <div>
               <h4 className="font-montserrat font-bold text-white text-base">Retiro Seguro en Ventanilla</h4>
-              <p className="text-xs text-slate-400">Retiro seguro en ventanilla física oficial</p>
+              <p className="text-xs text-slate-400">Retiro seguro en ventanilla física oficial.</p>
             </div>
           </div>
 
@@ -24,12 +24,12 @@ export default function Footer() {
             </div>
             <div>
               <h4 className="font-montserrat font-bold text-white text-base">Horarios Cómodos</h4>
-              <p className="text-xs text-slate-400">Atención de Lunes a Sábado hasta 6:00 PM</p>
+              <p className="text-xs text-slate-400">Atención de Lunes a Sábado hasta 6:00 PM.</p>
             </div>
           </div>
 
           <div className="flex items-center justify-center md:justify-start gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-            <div className="w-12 h-12 rounded-xl bg-success-green/20 flex items-center justify-center text-success-green">
+            <div className="w-12 h-12 rounded-xl bg-primary-blue/20 flex items-center justify-center text-primary-blue">
               <MapPin className="w-6 h-6" />
             </div>
             <div>

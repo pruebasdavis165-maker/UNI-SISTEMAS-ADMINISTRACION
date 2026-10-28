@@ -48,8 +48,7 @@ export default function HomePage() {
               </h1>
 
               <p className="font-inter text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-                El sistema logístico más confiable de la región. Sin entregas a domicilio fallidas ni riesgos en la calle. 
-                Tus compras y encomiendas viajan protegidas entre nuestras <strong>bóvedas de seguridad en Managua y Miami Hub</strong> para retiro personal en ventanilla oficial.
+                El sistema comercial y logístico bilateral más seguro de la región. Tus compras y encomiendas viajan protegidas entre nuestras <strong>bóvedas de seguridad en Managua y Miami Hub</strong> para retiro personal en ventanilla oficial.
               </p>
 
               {/* Interactive Tracking Widget */}
@@ -247,15 +246,15 @@ export default function HomePage() {
 
       {/* 3. CALCULADORA DE FLETE INTERNACIONAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 rounded-3xl p-8 sm:p-12 text-white shadow-soft-xl border border-slate-800 relative overflow-hidden">
-          {/* Subtle Ambient Glows */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="bg-[#0F172A] rounded-3xl p-8 sm:p-12 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
+          {/* Subtle Corporate Ambient Glow */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/15 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             
             <div className="lg:col-span-7 space-y-4">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-semibold tracking-wide">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-blue/10 border border-primary-blue/20 text-blue-300 text-xs font-semibold tracking-wide">
                 <Plane className="w-3.5 h-3.5 text-accent-magenta" />
                 Tarifas Oficiales Sin Cargos Ocultos
               </span>
@@ -269,13 +268,13 @@ export default function HomePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
                     Modalidad de Envío
                   </label>
                   <select 
                     value={calcService}
                     onChange={(e) => setCalcService(e.target.value)}
-                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
+                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   >
                     <option value="aereo">Aéreo Exprés ($4.50/lb)</option>
                     <option value="maritimo">Marítimo Carga ($1.85/lb)</option>
@@ -283,7 +282,7 @@ export default function HomePage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
                     Peso Estimado (Libras)
                   </label>
                   <input
@@ -292,18 +291,18 @@ export default function HomePage() {
                     max="500"
                     value={calcWeight}
                     onChange={(e) => setCalcWeight(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
+                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-inter">
+                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1.5 font-montserrat">
                     Sede de Retiro
                   </label>
                   <select 
                     value={calcSede}
                     onChange={(e) => setCalcSede(e.target.value)}
-                    className="w-full bg-slate-800/90 hover:bg-slate-800 text-white rounded-xl p-2.5 border border-slate-700 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue transition-all"
+                    className="w-full bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl p-3 border border-slate-700/80 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   >
                     <option value="Managua">Sede Central Managua (Nicaragua)</option>
                     <option value="Miami">Sede Miami Hub (Estados Unidos)</option>
@@ -313,24 +312,28 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center space-y-3.5 shadow-soft-lg">
+              <div className="w-full max-w-sm bg-[#1E293B]/90 backdrop-blur-md rounded-2xl p-6 border border-slate-700/70 text-center space-y-4 shadow-xl">
                 <div className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-wider text-slate-300 font-inter">
-                  <Building2 className="w-3.5 h-3.5 text-success-green" />
+                  <Building2 className="w-3.5 h-3.5 text-primary-blue" />
                   Costo de Retiro en {calcSede}
                 </div>
                 <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta tracking-tight">
-                  ${calculateEstimate()} <span className="text-base text-white/80 font-normal">USD</span>
+                  ${calculateEstimate()} <span className="text-base text-slate-300 font-normal">USD</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 space-y-1">
-                  <p className="font-medium text-white">
+                <div className="p-3 rounded-xl bg-[#0F172A]/70 border border-slate-800 text-xs text-slate-300 space-y-1">
+                  <p className="font-medium text-slate-200">
                     {calcService === 'aereo' ? 'Tiempo estimado: 3 a 5 días hábiles' : 'Tiempo marítimo: 12 a 15 días'}
                   </p>
-                  <p className="text-[11px] text-slate-400">Entrega en ventanilla con Cédula o Pasaporte</p>
+                  <p className="text-[11px] text-slate-400">Retiro exclusivo en ventanilla oficial con documento de identidad</p>
                 </div>
                 <Link href="/catalogo" className="block pt-1">
-                  <Button variant="accent" className="w-full font-bold shadow-soft-md">
-                    Ver Catálogo Disponible
-                  </Button>
+                  <button 
+                    type="button" 
+                    className="w-full py-3 px-4 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-primary-blue to-blue-700 hover:from-primary-blue hover:to-accent-magenta shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <span>Explorar Catálogo con Flete</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </Link>
               </div>
             </div>
@@ -561,13 +564,14 @@ export default function HomePage() {
 
       {/* 6. CALL TO ACTION FINAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-primary-blue rounded-3xl p-8 sm:p-12 text-white text-center space-y-6 shadow-soft-xl relative overflow-hidden">
+        <div className="bg-[#0F172A] rounded-3xl p-8 sm:p-12 text-white text-center space-y-6 shadow-soft-xl border border-slate-800 relative overflow-hidden">
+          <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary-blue/20 rounded-full blur-2xl pointer-events-none"></div>
           <div className="max-w-2xl mx-auto space-y-3 relative z-10">
             <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-white">
-              ¿Listo para ordenar y retirar en tu ventanilla más cercana?
+              ¿Listo para ordenar y retirar en tu ventanilla oficial?
             </h2>
-            <p className="font-inter text-blue-100 text-sm sm:text-base">
-              Abre tu cuenta gratis hoy mismo y experimenta la tranquilidad del modelo Sede a Sede.
+            <p className="font-inter text-slate-300 text-sm sm:text-base">
+              Abre tu cuenta gratis hoy mismo para compras y traslados de encomiendas entre Miami Hub y Managua Central.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/registro">
@@ -576,7 +580,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/catalogo">
-                <Button variant="outline" size="lg" className="bg-white/10 text-white border-white/30 hover:bg-white/20">
+                <Button variant="outline" size="lg" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
                   Explorar Catálogo
                 </Button>
               </Link>

@@ -154,7 +154,7 @@ export default function PublicCatalogPage() {
           {/* Quick Notice Badge */}
           <div className="pt-2 flex items-center gap-2 text-xs text-blue-200">
             <MapPin className="w-4 h-4 text-accent-magenta shrink-0" />
-            <span>Sin entregas a domicilio. Retiro seguro con identificación oficial en ventanilla.</span>
+            <span>Retiro seguro en ventanilla oficial presentando identificación física.</span>
           </div>
         </div>
       </div>

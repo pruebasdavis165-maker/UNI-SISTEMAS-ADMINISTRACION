@@ -40,7 +40,7 @@ services:
     volumes:
       - db_backups:/backups
       - ./scripts/backup-database.sh:/backup.sh:ro
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache openssl gzip bash && chmod +x /backup.sh && echo '0 2 * * * /backup.sh' > /etc/crontabs/root && /backup.sh && crond -f -l 2"]
+    entrypoint: ["/bin/sh", "-c", "apk add --no-cache openssl gzip bash && echo '0 2 * * * /bin/bash /backup.sh' > /etc/crontabs/root && /bin/bash /backup.sh && crond -f -l 2"]
 
   backend-api:
     build:
@@ -76,7 +76,7 @@ services:
       - backend-api
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://localhost/api
+      - NEXT_PUBLIC_API_URL=https://localhost
     expose:
       - "3000"
     networks:

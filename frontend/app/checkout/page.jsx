@@ -295,7 +295,7 @@ export default function CheckoutPage() {
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs font-inter flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-alert-amber shrink-0 mt-0.5" />
                 <span>
-                  <strong>Política Operativa Estricta:</strong> NicaLogistics no realiza envíos a domicilio particulares. Toda compra debe ser retirada en ventanilla presentando tu documento de identidad.
+                  <strong>Política Operativa Estricta:</strong> NicaLogistics opera exclusivamente bajo entrega y retiro en ventanilla oficial autorizada. Toda orden debe ser retirada presentando tu documento de identidad oficial.
                 </span>
               </div>
 

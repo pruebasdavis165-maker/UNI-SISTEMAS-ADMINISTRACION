@@ -1,6 +1,15 @@
 'use client';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+function getCleanApiUrl() {
+  let url = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+  if (url.endsWith('/')) url = url.slice(0, -1);
+  if (url.endsWith('/api')) url = url.slice(0, -4);
+  return url;
+}
+
+export const API_BASE_URL = typeof window !== 'undefined'
+  ? getCleanApiUrl()
+  : (getCleanApiUrl() || 'http://backend-api:5000');
 
 export function getToken() {
   if (typeof window === 'undefined') return null;
