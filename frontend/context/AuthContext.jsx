@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { 
   getToken, 
   getUser, 
@@ -29,6 +30,7 @@ const AuthContext = createContext({
 });
 
 export function AuthProvider({ children }) {
+  const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +77,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Sincronizar en montaje, cambios de storage/auth y transiciones de ruta
   useEffect(() => {
     syncAuth();
 
@@ -86,11 +89,16 @@ export function AuthProvider({ children }) {
       window.removeEventListener('storage', handleAuthEvent);
       window.removeEventListener('authChanged', handleAuthEvent);
     };
-  }, [syncAuth]);
+  }, [syncAuth, pathname]);
 
   const login = (newToken, newUser) => {
     setSession(newToken, newUser);
-    syncAuth();
+    const normalizedUser = {
+      ...newUser,
+      rol: normalizeRole(newUser?.rol)
+    };
+    setToken(newToken);
+    setUser(normalizedUser);
     window.dispatchEvent(new Event('authChanged'));
   };
 

@@ -1,8 +1,18 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, ShieldCheck, Clock } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Ocultar Footer institucional en paneles corporativos internos (para máxima productividad sin textos institucionales de marketing)
+  if (pathname?.startsWith('/panel') || pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-slate-50 text-slate-600 font-inter border-t border-slate-200">
       {/* Pre-Footer: Beneficios Sede a Sede */}
@@ -58,78 +68,84 @@ export default function Footer() {
             </p>
             <div className="pt-2 flex items-center gap-2 text-xs text-accent-magenta font-semibold">
               <span className="w-2 h-2 rounded-full bg-accent-magenta animate-ping"></span>
-              Sistema Certificado Sede a Sede 2026
+              <span>Miami Hub ⇄ Managua Operando al 100%</span>
             </div>
           </div>
 
-          {/* Columna 2: Enlaces Rápidos */}
-          <div>
-            <h3 className="font-montserrat font-bold text-slate-900 text-xs tracking-wider uppercase mb-4">
-              Navegación
-            </h3>
-            <ul className="space-y-2.5 text-sm">
+          {/* Columna 2: Sedes Oficiales Autorizadas */}
+          <div className="space-y-3 text-sm">
+            <h4 className="font-montserrat font-bold text-slate-900 uppercase tracking-wider text-xs">
+              Sedes Oficiales (Retiro Exclusivo)
+            </h4>
+            <ul className="space-y-2.5">
               <li>
-                <Link href="/" className="text-slate-600 hover:text-primary-blue transition-colors">Inicio</Link>
+                <strong className="text-slate-800 block text-xs">Sede Miami Hub (USA):</strong>
+                <span className="text-xs text-slate-500">8400 NW 25th St, Doral, FL 33198</span>
               </li>
               <li>
-                <Link href="/catalogo" className="text-slate-600 hover:text-primary-blue transition-colors">Catálogo de Productos</Link>
-              </li>
-              <li>
-                <Link href="/rastreo" className="text-slate-600 hover:text-primary-blue transition-colors">Rastreo de Guía / Tracking</Link>
-              </li>
-              <li>
-                <Link href="/sedes" className="text-slate-600 hover:text-primary-blue transition-colors">Directorio de Sedes</Link>
-              </li>
-              <li>
-                <Link href="/carrito" className="text-slate-600 hover:text-primary-blue transition-colors">Mi Carrito</Link>
+                <strong className="text-slate-800 block text-xs">Sede Central Managua:</strong>
+                <span className="text-xs text-slate-500">Km 4.5 Carretera Norte, Frente a Enabas</span>
               </li>
             </ul>
           </div>
 
-          {/* Columna 3: Sedes Principales */}
-          <div>
-            <h3 className="font-montserrat font-bold text-slate-900 text-xs tracking-wider uppercase mb-4">
-              Ventanillas de Retiro
-            </h3>
-            <ul className="space-y-3 text-xs text-slate-600">
-              <li className="border-l-2 border-primary-blue pl-3">
-                <strong className="text-slate-900 block font-montserrat">Sede Miami Hub (EE.UU.)</strong>
-                8400 NW 25th St, Doral, FL 33198
+          {/* Columna 3: Enlaces Rápidos */}
+          <div className="space-y-3 text-sm">
+            <h4 className="font-montserrat font-bold text-slate-900 uppercase tracking-wider text-xs">
+              Accesos Directos
+            </h4>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/catalogo" className="hover:text-primary-blue transition-colors">
+                  Catálogo de Productos
+                </Link>
               </li>
-              <li className="border-l-2 border-accent-magenta pl-3">
-                <strong className="text-slate-900 block font-montserrat">Sede Central Managua (Nicaragua)</strong>
-                Km 4.5 Carretera Norte, Frente Enabas
+              <li>
+                <Link href="/rastreo" className="hover:text-primary-blue transition-colors">
+                  Rastreo en Tiempo Real
+                </Link>
+              </li>
+              <li>
+                <Link href="/sedes" className="hover:text-primary-blue transition-colors">
+                  Directorio de Sedes
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-primary-blue transition-colors">
+                  Acceso a Cuenta
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Columna 4: Contacto */}
-          <div>
-            <h3 className="font-montserrat font-bold text-slate-900 text-xs tracking-wider uppercase mb-4">
-              Atención al Cliente
-            </h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3 text-slate-700">
-                <Phone className="w-4 h-4 text-primary-blue shrink-0" />
-                <span>PBX: +505 2249-0100</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-700">
-                <Mail className="w-4 h-4 text-accent-magenta shrink-0" />
-                <span>contacto@nicalogistics.com</span>
-              </div>
-              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-700 mt-4">
-                <strong className="text-slate-900">Aviso de Entrega:</strong> Recuerda presentar tu documento de identidad en ventanilla para el retiro de encomiendas.
-              </div>
-            </div>
+          {/* Columna 4: Canales de Atención */}
+          <div className="space-y-3 text-sm">
+            <h4 className="font-montserrat font-bold text-slate-900 uppercase tracking-wider text-xs">
+              Canales Oficiales
+            </h4>
+            <ul className="space-y-2.5 text-xs text-slate-500">
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary-blue" />
+                <span>+505 2249-0100 (Managua)</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-accent-magenta" />
+                <span>+1 (305) 555-0199 (Miami Hub)</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary-blue" />
+                <span>soporte@nicalogistics.com</span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Barra Inferior de Copyright */}
-        <div className="mt-12 pt-6 border-t border-slate-200 text-center md:flex md:justify-between items-center text-xs text-slate-500">
-          <p>© 2026 NicaLogistics. Todos los derechos reservados. Arquitectura Hexagonal y Next.js.</p>
-          <p className="mt-2 md:mt-0 font-medium text-slate-600">
-            Regla de Negocio: Envíos Exclusivos Sede a Sede (Pickup en Ventanilla)
-          </p>
+        {/* Barra de Copyright */}
+        <div className="pt-8 mt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+          <p>© {new Date().getFullYear()} NicaLogistics Enterprise. Todos los derechos reservados.</p>
+          <div className="flex gap-4">
+            <span className="text-slate-500 font-medium">Modelo 100% Pickup Oficial en Ventanilla</span>
+          </div>
         </div>
       </div>
     </footer>

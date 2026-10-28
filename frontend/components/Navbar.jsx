@@ -6,18 +6,26 @@ import { usePathname } from 'next/navigation';
 import { 
   ShoppingCart, Menu, X, MapPin, Search, LogOut, 
   ShoppingBag, LayoutDashboard, Users, Building2, 
-  Package, Layers, AlertTriangle, Truck, UserCheck 
+  Package, Layers, AlertTriangle, Truck, UserCheck, ShieldCheck 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getUser, normalizeRole, isInternalRole } from '../lib/auth';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, role, isAuthenticated, isInternal, isAdmin, isVendedor, isLogistica, isCliente, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const auth = useAuth();
+  
+  // Respaldo de sincronización inmediata con localStorage para evitar desfasaje en montaje
+  const [localUser, setLocalUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Cargar contador de carrito solo para clientes o invitados
   useEffect(() => {
+    const syncImmediate = () => {
+      const u = getUser();
+      setLocalUser(u);
+    };
+
     const updateCart = () => {
       try {
         const cart = JSON.parse(localStorage.getItem('nicalogistics_cart') || '[]');
@@ -28,32 +36,49 @@ export default function Navbar() {
       }
     };
 
+    syncImmediate();
     updateCart();
+
+    window.addEventListener('storage', syncImmediate);
     window.addEventListener('storage', updateCart);
+    window.addEventListener('authChanged', syncImmediate);
     window.addEventListener('cartUpdated', updateCart);
 
     return () => {
+      window.removeEventListener('storage', syncImmediate);
       window.removeEventListener('storage', updateCart);
+      window.removeEventListener('authChanged', syncImmediate);
       window.removeEventListener('cartUpdated', updateCart);
     };
-  }, []);
+  }, [pathname]);
+
+  // Usuario efectivo: prioridad al estado de context, con fallback a localStorage
+  const effectiveUser = auth.user || localUser;
+  const effectiveRole = normalizeRole(effectiveUser?.rol);
+  const isAuthenticated = !!effectiveUser;
+  const isInternal = isAuthenticated && isInternalRole(effectiveRole);
+  const isAdmin = isAuthenticated && effectiveRole === 'Admin';
+  const isVendedor = isAuthenticated && effectiveRole === 'Vendedor';
+  const isLogistica = isAuthenticated && effectiveRole === 'Logística';
+  const isCliente = isAuthenticated && effectiveRole === 'Cliente';
 
   const handleLogout = () => {
     setIsOpen(false);
-    logout();
+    auth.logout();
   };
 
-  // Helper para clases activas en enlaces
+  const isPanelRoute = pathname?.startsWith('/panel') || pathname?.startsWith('/admin');
+
+  // Helper para clases de enlace activo
   const getLinkClass = (href) => {
     const isActive = pathname === href || (href !== '/' && pathname?.startsWith(href));
-    return `transition-colors flex items-center gap-1.5 py-1 ${
+    return `transition-colors flex items-center gap-1.5 py-1 text-sm font-inter ${
       isActive 
         ? 'text-primary-blue font-bold border-b-2 border-primary-blue' 
         : 'text-slate-600 hover:text-primary-blue font-medium'
     }`;
   };
 
-  // Badge de rol estilizado con colores corporativos
   const renderRoleBadge = () => {
     if (isAdmin) {
       return (
@@ -85,16 +110,18 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-soft-sm">
-      {/* Top Banner Informativo Sede a Sede */}
-      <div className="bg-primary-blue text-white text-xs py-1.5 px-4 text-center font-medium tracking-wide flex justify-center items-center gap-2">
-        <span className="inline-block w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
-        <span>Comercio Bilateral y Transporte Miami Hub ⇄ Sede Central Managua • Retiro Exclusivo en Ventanilla</span>
-      </div>
+      {/* Top Banner Informativo: Solo en vistas públicas para clientes, NUNCA en paneles corporativos */}
+      {!isInternal && !isPanelRoute && (
+        <div className="bg-primary-blue text-white text-xs py-1.5 px-4 text-center font-medium tracking-wide flex justify-center items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
+          <span>Comercio Bilateral y Transporte Miami Hub ⇄ Sede Central Managua • Retiro Exclusivo en Ventanilla</span>
+        </div>
+      )}
 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 gap-4">
           
-          {/* 1. Logotipo e Identidad (Izquierda) */}
+          {/* 1. Logotipo Corporativo */}
           <Link 
             href={isInternal ? (isAdmin ? '/panel' : isVendedor ? '/panel/vendedor' : '/panel/logistica') : '/'} 
             className="flex items-center gap-3 shrink-0 group"
@@ -117,9 +144,9 @@ export default function Navbar() {
           </Link>
 
           {/* 2. Enlaces Centrales Simplificados y Segregados por Rol */}
-          <div className="hidden lg:flex items-center gap-5 xl:gap-7 font-inter text-sm">
+          <div className="hidden lg:flex items-center gap-5 xl:gap-7">
             
-            {/* Caso A: Administrador (Solo módulos de administración integral) */}
+            {/* ROL: ADMINISTRADOR (Exclusivamente módulos de gestión corporativa) */}
             {isAdmin && (
               <>
                 <Link href="/panel" className={getLinkClass('/panel')}>
@@ -144,7 +171,7 @@ export default function Navbar() {
                 </Link>
                 <Link href="/panel/logistica" className={getLinkClass('/panel/logistica')}>
                   <Truck className="w-4 h-4 text-sky-600" />
-                  <span>Supervisión Logística</span>
+                  <span>Supervisión Encomiendas</span>
                 </Link>
                 <Link href="/rastreo" className={getLinkClass('/rastreo')}>
                   <Search className="w-4 h-4 text-teal-600" />
@@ -153,7 +180,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Caso B: Vendedor (Módulos comerciales y catálogo) */}
+            {/* ROL: VENDEDOR (Módulos de ventas y catálogo comercial) */}
             {isVendedor && (
               <>
                 <Link href="/panel/vendedor" className={getLinkClass('/panel/vendedor')}>
@@ -175,7 +202,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Caso C: Logística (Tablero operativo y rastreo de envíos) */}
+            {/* ROL: LOGÍSTICA (Operaciones de ventanilla y control de rutas) */}
             {isLogistica && (
               <>
                 <Link href="/panel/logistica" className={getLinkClass('/panel/logistica')}>
@@ -197,7 +224,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Caso D: Cliente Autenticado */}
+            {/* ROL: CLIENTE AUTENTICADO */}
             {isCliente && (
               <>
                 <Link href="/" className={getLinkClass('/')}>
@@ -221,7 +248,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Caso E: Invitado (Público no logueado) */}
+            {/* INVITADO (Público no logueado) */}
             {!isAuthenticated && (
               <>
                 <Link href="/" className={getLinkClass('/')}>
@@ -246,7 +273,7 @@ export default function Navbar() {
           {/* 3. Acciones de Usuario y Sesión (Derecha) */}
           <div className="hidden md:flex items-center gap-3 sm:gap-4 shrink-0">
             
-            {/* Carrito de Compras: OCULTO ESTRICTAMENTE PARA TODO EL PERSONAL INTERNO (Admin, Vendedor, Logística) */}
+            {/* Carrito de Compras: OCULTO POR COMPLETO A TODO EL PERSONAL INTERNO (Admin, Vendedor, Logística) */}
             {!isInternal && (
               <Link 
                 href="/carrito" 
@@ -263,11 +290,11 @@ export default function Navbar() {
             )}
 
             {/* Bloque de Sesión Activa */}
-            {isAuthenticated && user ? (
+            {isAuthenticated && effectiveUser ? (
               <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
                 <div className="flex flex-col items-end">
-                  <span className="text-xs font-bold text-slate-900 font-montserrat tracking-tight max-w-[150px] truncate" title={user.nombreCompleto}>
-                    {user.nombreCompleto}
+                  <span className="text-xs font-bold text-slate-900 font-montserrat tracking-tight max-w-[160px] truncate" title={effectiveUser.nombreCompleto}>
+                    {effectiveUser.nombreCompleto}
                   </span>
                   <div className="mt-0.5">
                     {renderRoleBadge()}
@@ -276,7 +303,7 @@ export default function Navbar() {
 
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition-all shadow-xs cursor-pointer"
                   title="Cerrar Sesión Activa"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -331,11 +358,11 @@ export default function Navbar() {
       {/* Menú Desplegable Móvil */}
       {isOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3 font-inter shadow-lg">
-          {isAuthenticated && user && (
+          {isAuthenticated && effectiveUser && (
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 mb-3 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-900 font-montserrat truncate max-w-[200px]">
-                  {user.nombreCompleto}
+                  {effectiveUser.nombreCompleto}
                 </p>
                 <div className="mt-1">
                   {renderRoleBadge()}
@@ -351,7 +378,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Enlaces Móviles para Administrador */}
+          {/* Móvil: Administrador */}
           {isAdmin && (
             <>
               <Link href="/panel" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">
@@ -370,7 +397,7 @@ export default function Navbar() {
                 Inventario & Kardex
               </Link>
               <Link href="/panel/logistica" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">
-                Supervisión Logística
+                Supervisión Encomiendas
               </Link>
               <Link href="/rastreo" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">
                 Rastreo Global
@@ -378,7 +405,7 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Enlaces Móviles para Vendedor */}
+          {/* Móvil: Vendedor */}
           {isVendedor && (
             <>
               <Link href="/panel/vendedor" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-accent-magenta">
@@ -396,7 +423,7 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Enlaces Móviles para Logística */}
+          {/* Móvil: Logística */}
           {isLogistica && (
             <>
               <Link href="/panel/logistica" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">
@@ -414,7 +441,7 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Enlaces Móviles para Cliente */}
+          {/* Móvil: Cliente */}
           {isCliente && (
             <>
               <Link href="/" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">
@@ -435,7 +462,7 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Enlaces Móviles para Invitado */}
+          {/* Móvil: Invitado */}
           {!isAuthenticated && (
             <>
               <Link href="/" onClick={() => setIsOpen(false)} className="block py-2 text-slate-700 font-medium hover:text-primary-blue">

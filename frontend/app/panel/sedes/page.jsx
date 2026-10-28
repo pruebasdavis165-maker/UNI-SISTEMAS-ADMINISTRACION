@@ -227,21 +227,6 @@ export default function SedesManagementPage() {
           </div>
         </div>
 
-        {/* Resumen de Infraestructura Sede a Sede */}
-        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-soft-sm">
-          <div className="max-w-3xl space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/70 text-primary-blue text-xs font-bold font-montserrat uppercase tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5 text-accent-magenta" />
-              <span>Infraestructura Certificada Sede a Sede</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-montserrat font-extrabold text-slate-900">
-              Circuito Comercial Exclusivo en Ventanilla
-            </h2>
-            <p className="text-slate-600 text-xs sm:text-sm font-inter leading-relaxed">
-              Por regla de negocio estricta, NicaLogistics opera únicamente entre la <strong>Sede Central Managua</strong> y la <strong>Sede Miami Hub</strong>. Se prohíbe el despacho a domicilios residenciales para garantizar cero pérdidas y máxima seguridad contra documento de identidad.
-            </p>
-          </div>
-        </div>
 
         {/* Listado de las 2 Sedes Oficiales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

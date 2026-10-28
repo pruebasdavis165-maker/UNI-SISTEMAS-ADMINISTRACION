@@ -225,23 +225,6 @@ export default function PanelDashboardPage() {
 
         </div>
 
-        {/* Operational Notice LUMINOSA (Sin fondos negros ni oscuros) */}
-        <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white text-slate-800 rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-soft-sm relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-primary-blue text-xs font-bold rounded-full uppercase tracking-wider mb-2 font-montserrat">
-              Modelo Estricto Sede a Sede Oficial
-            </span>
-            <h2 className="text-xl sm:text-2xl font-montserrat font-extrabold text-slate-900 mb-2">
-              Supervisión de Operaciones Centralizadas
-            </h2>
-            <p className="text-slate-600 text-xs sm:text-sm font-inter leading-relaxed">
-              La plataforma opera de manera exclusiva mediante entregas presenciales entre la <strong>Sede Central Managua</strong> y la <strong>Sede Miami Hub</strong>. Toda entrega física se realiza en ventanilla oficial contra presentación de cédula o pasaporte. Cero extravíos y total trazabilidad.
-            </p>
-          </div>
-          <div className="absolute right-6 -bottom-6 opacity-10 pointer-events-none text-primary-blue">
-            <Truck className="w-56 h-56" />
-          </div>
-        </div>
 
         {/* Modules Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

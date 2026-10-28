@@ -32,9 +32,11 @@ export default function PublicCatalogPage() {
 
   const sortOptions = [
     { value: 'featured', label: 'Destacados', icon: Sparkles },
-    { value: 'price-asc', label: 'Precio: Menor a Mayor', icon: ArrowUpDown },
-    { value: 'price-desc', label: 'Precio: Mayor a Menor', icon: ArrowUpDown },
-    { value: 'name-asc', label: 'Nombre: A - Z', icon: ArrowUpDown },
+    { value: 'price-asc', label: 'Menor Precio', icon: ArrowUpDown },
+    { value: 'price-desc', label: 'Mayor Precio', icon: ArrowUpDown },
+    { value: 'name-asc', label: 'Alfabético: A - Z', icon: ArrowUpDown },
+    { value: 'name-desc', label: 'Alfabético: Z - A', icon: ArrowUpDown },
+    { value: 'stock-desc', label: 'Disponibilidad de Stock', icon: ArrowUpDown },
   ];
   const currentSortOption = sortOptions.find((o) => o.value === sortBy) || sortOptions[0];
   const [isLoading, setIsLoading] = useState(true);
@@ -85,9 +87,11 @@ export default function PublicCatalogPage() {
         return matchesCategory && matchesSearch;
       })
       .sort((a, b) => {
-        if (sortBy === 'price-asc') return a.precio - b.precio;
-        if (sortBy === 'price-desc') return b.precio - a.precio;
-        if (sortBy === 'name-asc') return a.nombre.localeCompare(b.nombre);
+        if (sortBy === 'price-asc') return (a.precio || 0) - (b.precio || 0);
+        if (sortBy === 'price-desc') return (b.precio || 0) - (a.precio || 0);
+        if (sortBy === 'name-asc') return (a.nombre || '').localeCompare(b.nombre || '');
+        if (sortBy === 'name-desc') return (b.nombre || '').localeCompare(a.nombre || '');
+        if (sortBy === 'stock-desc') return (b.stockActual || 0) - (a.stockActual || 0);
         return 0; // Default featured / server order
       });
   }, [products, selectedCategory, searchTerm, sortBy]);
@@ -184,7 +188,7 @@ export default function PublicCatalogPage() {
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="w-full sm:w-56 h-10 px-3.5 py-2 bg-white rounded-lg border border-slate-200 shadow-md hover:border-primary-blue/50 flex items-center justify-between text-xs font-inter font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue/20 transition-all duration-200 group"
+                  className="w-full sm:w-64 h-10 px-3.5 py-2 bg-white rounded-lg border border-slate-200 shadow-sm hover:border-primary-blue/50 flex items-center justify-between text-xs font-inter font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue/20 transition-all duration-200 group cursor-pointer"
                   aria-haspopup="listbox"
                   aria-expanded={isSortOpen}
                 >
@@ -196,10 +200,10 @@ export default function PublicCatalogPage() {
                 </button>
               </div>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu con Sombra Flotante Elegante */}
               {isSortOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-full sm:w-56 bg-white rounded-lg shadow-md border border-slate-100 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 mt-2 w-full sm:w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
                   role="listbox"
                 >
                   <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter border-b border-slate-100 mb-1">

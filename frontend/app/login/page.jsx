@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
 import { Button, Input, Card, CardContent, Alert } from '../../components/ui';
-import { setSession, API_BASE_URL, normalizeRole } from '../../lib/auth';
+import { API_BASE_URL, normalizeRole } from '../../lib/auth';
+import { useAuth } from '../../context/AuthContext';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams ? searchParams.get('redirect') || '/' : '/';
+  const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,26 +37,27 @@ function LoginForm() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      setSession(data.token, data.user);
-      window.dispatchEvent(new Event('authChanged'));
+      // Sincronizar contexto y cookies
+      login(data.token, data.user);
       window.dispatchEvent(new Event('cartUpdated'));
 
       const userRole = normalizeRole(data.user?.rol);
 
+      let targetUrl = '/catalogo';
       if (redirectPath && redirectPath !== '/') {
-        router.push(redirectPath);
+        targetUrl = redirectPath;
       } else if (userRole === 'Admin') {
-        router.push('/panel');
+        targetUrl = '/panel';
       } else if (userRole === 'Logística') {
-        router.push('/panel/logistica');
+        targetUrl = '/panel/logistica';
       } else if (userRole === 'Vendedor') {
-        router.push('/panel/vendedor');
-      } else {
-        router.push('/catalogo');
+        targetUrl = '/panel/vendedor';
       }
+
+      // Navegación limpia para garantizar que todas las cookies y cabeceras HTTP se envíen
+      window.location.href = targetUrl;
     } catch (err) {
       setError(err.message || 'Error de conexión con el servidor de autenticación');
-    } finally {
       setIsLoading(false);
     }
   };

@@ -406,7 +406,7 @@ export default function PanelLogisticaPage() {
 
         </div>
 
-        {/* Transition Action Modal (Sin Issue 5.3 ni notificaciones automáticas) */}
+        {/* Transition Action Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
