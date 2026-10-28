@@ -1,0 +1,2 @@
+-- NicaLogistics Database Seed Script
+-- Placeholder for Issue 1.1, detailed in Issue 1.4
