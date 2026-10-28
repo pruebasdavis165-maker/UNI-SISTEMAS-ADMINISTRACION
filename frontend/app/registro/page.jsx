@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, User, Phone, ArrowRight } from 'lucide-react';
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, Alert } from '../../components/ui';
+import { Lock, Mail, User, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Button, Input, Card, CardContent, Alert } from '../../components/ui';
 import { setSession, API_BASE_URL } from '../../lib/auth';
 
 export default function RegisterPage() {
@@ -27,8 +27,15 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
+    // Política 2 de TI: Mínimo 8 caracteres, mayúsculas, minúsculas, números y carácter especial
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+
+    if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+      setError('La contraseña no cumple con la Política 2: debe tener al menos 8 caracteres, e incluir mayúsculas, minúsculas, números y al menos un carácter especial.');
       return;
     }
 
@@ -115,15 +122,21 @@ export default function RegisterPage() {
                 onChange={(e) => setTelefono(e.target.value)}
               />
 
-              <Input
-                label="Contraseña"
-                type="password"
-                icon={Lock}
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div>
+                <Input
+                  label="Contraseña"
+                  type="password"
+                  icon={Lock}
+                  placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, @#*)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-inter">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary-blue shrink-0" />
+                  <span>Política 2: Mínimo 8 caracteres, mayúsculas, minúsculas, números y símbolo.</span>
+                </div>
+              </div>
 
               <Input
                 label="Confirmar Contraseña"

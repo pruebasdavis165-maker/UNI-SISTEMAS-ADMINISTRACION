@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NicaLogistics.Application.Common;
 using NicaLogistics.Application.DTOs;
 using NicaLogistics.Application.Interfaces;
 using NicaLogistics.Domain.Entities;
@@ -80,6 +81,12 @@ public class UserService : IUserService
             throw new InvalidOperationException("Ya existe un usuario registrado con este correo electrónico.");
         }
 
+        // Validación de Política 2 para contraseñas de colaboradores
+        if (!PasswordPolicy.IsValid(dto.Password, out var passwordError))
+        {
+            throw new InvalidOperationException(passwordError ?? PasswordPolicy.PolicyErrorMessage);
+        }
+
         var role = await _context.Roles.FindAsync(dto.RolId)
             ?? throw new InvalidOperationException("El rol seleccionado no es válido.");
 
@@ -131,6 +138,12 @@ public class UserService : IUserService
 
         if (!string.IsNullOrWhiteSpace(dto.NewPassword))
         {
+            // Validación de Política 2 al cambiar contraseña
+            if (!PasswordPolicy.IsValid(dto.NewPassword, out var passwordError))
+            {
+                throw new InvalidOperationException(passwordError ?? PasswordPolicy.PolicyErrorMessage);
+            }
+
             user.PasswordHash = _hasher.HashPassword(dto.NewPassword);
         }
 
