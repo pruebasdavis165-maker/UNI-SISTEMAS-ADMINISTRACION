@@ -1,0 +1,19 @@
+﻿# .gitignore
+bin/
+obj/
+*.user
+*.suo
+.vs/
+node_modules/
+.next/
+out/
+build/
+dist/
+*.log
+.env.local
+.env.development.local
+.env.production.local
+pgdata/
+backups/
+uploads/*
+!uploads/.gitkeep
