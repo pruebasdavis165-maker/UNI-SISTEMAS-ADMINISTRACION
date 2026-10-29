@@ -116,14 +116,10 @@ export default function ClientesCRMPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="magenta" size="sm">CRM & Fidelización</Badge>
-              <span className="text-xs text-slate-400 font-inter">Módulo de Clientes (RF-04)</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900">
               Cartera de Clientes
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Consulta perfiles, historial de pedidos e encomiendas con retiro exclusivo en sedes oficiales.
             </p>
           </div>
@@ -289,14 +285,14 @@ export default function ClientesCRMPage() {
                         {new Date(customer.fechaRegistro).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={Eye}
+                        <button
+                          type="button"
                           onClick={() => handleOpenDetail(customer)}
+                          className="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 text-slate-600 hover:text-primary-blue hover:border-primary-blue/30 inline-flex items-center justify-center transition-colors shadow-xs"
+                          title="Ver Expediente e Historial"
                         >
-                          Historial
-                        </Button>
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))

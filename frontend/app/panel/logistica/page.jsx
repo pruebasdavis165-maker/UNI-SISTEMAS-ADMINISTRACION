@@ -220,15 +220,11 @@ export default function PanelLogisticaPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="amber" size="sm">Operaciones Logísticas</Badge>
-              <span className="text-xs text-slate-500 font-inter">Control de Ventanilla y Despacho Sede a Sede</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1 flex items-center gap-2.5">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 flex items-center gap-2.5">
               <Truck className="w-8 h-8 text-alert-amber" />
               Tablero Logístico de Encomiendas
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Gestión operativa entre Sede Central Managua y Sede Miami Hub. Retiro exclusivo en ventanilla física oficial.
             </p>
           </div>

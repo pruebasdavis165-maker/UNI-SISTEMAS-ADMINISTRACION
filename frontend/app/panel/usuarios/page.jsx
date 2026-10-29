@@ -7,7 +7,7 @@ import {
   Edit3, UserX, UserCheck, RefreshCw, Mail, Phone, Lock, Eye, AlertTriangle, Truck
 } from 'lucide-react';
 import { 
-  Button, Input, Select, Card, CardHeader, CardTitle, CardContent, 
+  Button, Input, Select, CustomDropdown, Card, CardHeader, CardTitle, CardContent, 
   Badge, Modal, Alert 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
@@ -33,6 +33,13 @@ export default function UserManagementPage() {
   const [formPassword, setFormPassword] = useState('');
   const [formRole, setFormRole] = useState(4);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const roleDropdownOptions = [
+    { value: 1, label: 'Administrador', description: 'Control total de la plataforma, usuarios, auditoría y configuraciones.' },
+    { value: 2, label: 'Vendedor', description: 'Gestión de pedidos comerciales, catálogo y expedientes de clientes CRM.' },
+    { value: 3, label: 'Logística', description: 'Operación en ventanilla física, recepción, traslados y entrega de encomiendas.' },
+    { value: 4, label: 'Cliente', description: 'Usuario de compras y retiro presencial de paquetes con identificación.' }
+  ];
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -214,14 +221,10 @@ export default function UserManagementPage() {
         {/* Header con título y acción */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="blue" size="sm">Panel Administrativo</Badge>
-              <span className="text-xs text-slate-500 font-inter">Control de Cuentas y Accesos</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
               Gestión de Usuarios y Roles
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Administración centralizada de cuentas de colaboradores, operadores de ventanilla y clientes.
             </p>
           </div>
@@ -342,18 +345,20 @@ export default function UserManagementPage() {
             />
           </div>
 
-          <div className="w-full sm:w-72">
-            <Select
+          <div className="w-full sm:w-64">
+            <CustomDropdown
               icon={Filter}
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-            >
-              <option value="">Todos los Roles del Sistema</option>
-              <option value="Admin">Admin (Control Total)</option>
-              <option value="Vendedor">Vendedor (Comercial)</option>
-              <option value="Logística">Logística (Ventanilla)</option>
-              <option value="Cliente">Cliente (Comprador)</option>
-            </Select>
+              onChange={(val) => setSelectedRole(val)}
+              placeholder="Todos los Roles"
+              options={[
+                { value: '', label: 'Todos los Roles' },
+                { value: 'Admin', label: 'Administrador' },
+                { value: 'Vendedor', label: 'Vendedor' },
+                { value: 'Logística', label: 'Logística' },
+                { value: 'Cliente', label: 'Cliente' }
+              ]}
+            />
           </div>
         </div>
 
@@ -412,40 +417,34 @@ export default function UserManagementPage() {
                         )}
                       </td>
                       
-                      {/* Acciones refinadas: botones alineados con trazos outline limpios */}
+                      {/* Acciones: Botones compactos con iconos limpios */}
                       <td className="px-6 py-4 text-right">
-                        <div className="inline-flex items-center justify-end gap-2.5">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => openEditModal(u)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:border-primary-blue bg-white hover:bg-blue-50/50 text-slate-700 hover:text-primary-blue text-xs font-semibold font-inter shadow-xs transition-all"
+                            className="w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary-blue hover:border-blue-200 transition-colors flex items-center justify-center shadow-2xs"
                             title="Editar Datos"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Editar</span>
+                            <Edit3 className="w-4 h-4" />
                           </button>
 
-                          {u.activo ? (
-                            <button
-                              type="button"
-                              onClick={() => handleToggleStatus(u)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 hover:border-rose-400 bg-rose-50/60 hover:bg-rose-100/80 text-rose-700 text-xs font-semibold font-inter shadow-xs transition-all"
-                              title="Suspender Cuenta (Soft Delete)"
-                            >
-                              <UserX className="w-3.5 h-3.5 text-rose-600" />
-                              <span>Suspender</span>
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleToggleStatus(u)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 hover:border-emerald-400 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold font-inter shadow-xs transition-all"
-                              title="Reactivar Cuenta"
-                            >
-                              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Activar</span>
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(u)}
+                            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors shadow-2xs ${
+                              u.activo
+                                ? 'border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:border-rose-300'
+                                : 'border-emerald-200 bg-emerald-50/50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
+                            }`}
+                            title={u.activo ? "Suspender Cuenta (Soft Delete)" : "Reactivar Cuenta"}
+                          >
+                            {u.activo ? (
+                              <UserX className="w-4 h-4" />
+                            ) : (
+                              <UserCheck className="w-4 h-4" />
+                            )}
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -494,17 +493,12 @@ export default function UserManagementPage() {
               value={formPhone}
               onChange={(e) => setFormPhone(e.target.value)}
             />
-            <Select
+            <CustomDropdown
               label="Rol en el Sistema"
               value={formRole}
-              onChange={(e) => setFormRole(e.target.value)}
-            >
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.nombre} ({r.descripcion})
-                </option>
-              ))}
-            </Select>
+              onChange={(val) => setFormRole(Number(val))}
+              options={roleDropdownOptions}
+            />
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -537,17 +531,12 @@ export default function UserManagementPage() {
               value={formPhone}
               onChange={(e) => setFormPhone(e.target.value)}
             />
-            <Select
+            <CustomDropdown
               label="Rol Asignado"
               value={formRole}
-              onChange={(e) => setFormRole(e.target.value)}
-            >
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.nombre}
-                </option>
-              ))}
-            </Select>
+              onChange={(val) => setFormRole(Number(val))}
+              options={roleDropdownOptions}
+            />
 
             <Input
               label="Nueva Contraseña (Opcional)"

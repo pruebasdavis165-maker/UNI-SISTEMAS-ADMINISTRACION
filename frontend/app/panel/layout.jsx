@@ -11,11 +11,11 @@ export default function PanelLayout({ children }) {
   return (
     <ProtectedRoute allowedRoles={['Admin', 'Vendedor', 'Logística']}>
       <div className="flex min-h-screen bg-slate-50 font-inter">
-        {/* Sidebar Fijo Izquierdo */}
+        {/* Sidebar Fijo Izquierdo (w-72) */}
         <InternalSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-        {/* Área de Contenido Principal a la Derecha */}
-        <div className="flex-1 md:ml-64 min-w-0 flex flex-col min-h-screen">
+        {/* Área de Contenido Principal a la Derecha (md:ml-72) */}
+        <div className="flex-1 md:ml-72 min-w-0 flex flex-col min-h-screen">
           {/* Barra superior mínima exclusiva para dispositivos móviles */}
           <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 sticky top-0 z-20">
             <div className="flex items-center gap-2.5">

@@ -47,10 +47,10 @@ export default function PanelDashboardPage() {
         const usersData = await resUsers.json();
         uCount = usersData.length || 0;
         usersData.forEach(u => {
-          const r = (u.rol || '').toLowerCase();
-          if (r.includes('admin')) dist.admin++;
-          else if (r.includes('vendedor')) dist.vendedor++;
-          else if (r.includes('logistica')) dist.logistica++;
+          const clean = String(u.rol || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          if (clean.includes('admin')) dist.admin++;
+          else if (clean.includes('vendedor')) dist.vendedor++;
+          else if (clean.includes('logistica')) dist.logistica++;
           else dist.cliente++;
         });
         setUsersDistribution(dist);
@@ -108,16 +108,10 @@ export default function PanelDashboardPage() {
       {/* Header Corporativo del Dashboard */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold text-white bg-primary-blue px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              ADMINISTRADOR
-            </span>
-            <span className="text-xs text-slate-500 font-inter">NicaLogistics Enterprise • Supervisión Global</span>
-          </div>
-          <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
+          <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
             Dashboard General de Control
           </h1>
-          <p className="font-inter text-xs sm:text-sm text-slate-500">
+          <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
             Métricas ejecutivas de operación bilateral, inventario centralizado y trazabilidad Sede a Sede.
           </p>
         </div>

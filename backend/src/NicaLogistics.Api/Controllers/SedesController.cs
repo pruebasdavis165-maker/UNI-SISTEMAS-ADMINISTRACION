@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NicaLogistics.Application.DTOs;
 using NicaLogistics.Application.Interfaces;
 
 namespace NicaLogistics.Api.Controllers;
@@ -28,6 +30,64 @@ public class SedesController : ControllerBase
         {
             var sede = await _sedeService.GetByIdAsync(id);
             return Ok(sede);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Create([FromBody] CreateSedeDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Codigo) || string.IsNullOrWhiteSpace(dto.Nombre) || string.IsNullOrWhiteSpace(dto.DireccionVentanilla))
+        {
+            return BadRequest(new { message = "Código, nombre y dirección de ventanilla son requeridos." });
+        }
+
+        var created = await _sedeService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSedeDto dto)
+    {
+        try
+        {
+            var updated = await _sedeService.UpdateAsync(id, dto);
+            return Ok(updated);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id:guid}/toggle-status")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ToggleStatus(Guid id)
+    {
+        try
+        {
+            var activo = await _sedeService.ToggleStatusAsync(id);
+            return Ok(new { activo, message = activo ? "Sede activada exitosamente." : "Sede desactivada exitosamente." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _sedeService.DeleteAsync(id);
+            return Ok(new { message = "Sede eliminada/desactivada exitosamente." });
         }
         catch (KeyNotFoundException ex)
         {

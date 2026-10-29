@@ -126,14 +126,10 @@ export default function InventarioPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="amber" size="sm">Control Operativo</Badge>
-              <span className="text-xs text-slate-500 font-inter">Kardex y Umbrales Críticos Sede a Sede</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
               Inventario y Alertas de Stock
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Supervisión en tiempo real de existencias en bodega, registro de movimientos y detección de quiebres de stock.
             </p>
           </div>

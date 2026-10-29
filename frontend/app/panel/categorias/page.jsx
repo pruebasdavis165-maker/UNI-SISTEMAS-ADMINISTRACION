@@ -152,14 +152,10 @@ export default function CategoriasPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="blue" size="sm">Catálogo y Productos</Badge>
-              <span className="text-xs text-slate-400 font-inter">Clasificación de Inventario</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
               Gestión de Categorías
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Administra las familias y clasificaciones de productos disponibles en NicaLogistics.
             </p>
           </div>
@@ -252,25 +248,30 @@ export default function CategoriasPage() {
                           <Badge variant="slate" size="sm">Inactiva</Badge>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={Edit3}
-                          onClick={() => openEditModal(c)}
-                        >
-                          Editar
-                        </Button>
-                        {c.activo && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            onClick={() => handleDelete(c)}
+                      <td className="px-6 py-4 text-right align-middle">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(c)}
+                            className="w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary-blue hover:border-blue-200 transition-colors flex items-center justify-center shadow-2xs"
+                            title="Editar Categoría"
                           >
-                            Desactivar
-                          </Button>
-                        )}
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(c)}
+                            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors shadow-2xs ${
+                              c.activo
+                                ? 'border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:border-rose-300'
+                                : 'border-emerald-200 bg-emerald-50/50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
+                            }`}
+                            title={c.activo ? "Desactivar Categoría" : "Reactivar Categoría"}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

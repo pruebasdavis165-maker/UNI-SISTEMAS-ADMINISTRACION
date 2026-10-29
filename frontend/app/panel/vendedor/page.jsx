@@ -80,15 +80,11 @@ export default function PanelVendedorPage() {
         {/* Header Comercial */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="magenta" size="sm">Módulo Comercial • Vendedor</Badge>
-              <span className="text-xs text-slate-500 font-inter">Gestión de Ventas y CRM RF-04 / RF-06</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1 flex items-center gap-2.5">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 flex items-center gap-2.5">
               <TrendingUp className="w-8 h-8 text-accent-magenta" />
               Panel Comercial de Ventas
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
               Seguimiento de pedidos de clientes, atención comercial en ventanilla y control de catálogo.
             </p>
           </div>

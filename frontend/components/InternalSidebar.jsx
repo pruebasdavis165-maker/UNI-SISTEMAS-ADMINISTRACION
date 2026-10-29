@@ -40,29 +40,29 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
     auth.logout();
   };
 
-  // Definición estricta de navegación según especificación por rol
+  // Nombres elegantes, concisos y directos por rol (sin desbordamiento)
   let navItems = [];
 
   if (isAdmin) {
     navItems = [
       { name: 'Dashboard General', href: '/panel', icon: LayoutDashboard, exact: true },
-      { name: 'Gestión de Usuarios y Roles', href: '/panel/usuarios', icon: Users },
-      { name: 'Sedes Oficiales (Managua y Miami)', href: '/panel/sedes', icon: Building2 },
+      { name: 'Usuarios y Roles', href: '/panel/usuarios', icon: Users },
+      { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
       { name: 'Productos y Categorías', href: '/panel/productos', icon: Package },
-      { name: 'Inventario y Alertas (Kardex)', href: '/panel/inventario', icon: AlertTriangle },
+      { name: 'Inventario y Kardex', href: '/panel/inventario', icon: AlertTriangle },
       { name: 'Supervisión de Encomiendas', href: '/panel/logistica', icon: Truck },
-      { name: 'Consulta Global de Rastreo', href: '/panel/rastreo', icon: Search }
+      { name: 'Rastreo Global', href: '/panel/rastreo', icon: Search }
     ];
   } else if (isVendedor) {
     navItems = [
       { name: 'Dashboard Comercial', href: '/panel/vendedor', icon: TrendingUp, exact: true },
-      { name: 'Cartera de Clientes (CRM 360)', href: '/panel/clientes', icon: Users },
+      { name: 'Cartera de Clientes', href: '/panel/clientes', icon: Users },
       { name: 'Catálogo de Productos', href: '/panel/catalogo', icon: ShoppingBag },
       { name: 'Inventario y Stock', href: '/panel/inventario', icon: Package }
     ];
   } else if (isLogistica) {
     navItems = [
-      { name: 'Tablero Operativo Kanban', href: '/panel/logistica', icon: Truck, exact: true },
+      { name: 'Tablero Kanban', href: '/panel/logistica', icon: Truck, exact: true },
       { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
       { name: 'Rastreo de Encomiendas', href: '/panel/rastreo', icon: Search },
       { name: 'Inventario Kardex', href: '/panel/inventario', icon: AlertTriangle }
@@ -152,14 +152,14 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
                 key={item.href + item.name}
                 href={item.href}
                 onClick={() => setMobileOpen && setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-inter transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-inter transition-all ${
                   active
                     ? 'bg-blue-50 text-primary-blue font-bold shadow-xs border border-blue-100/80'
                     : 'text-slate-600 hover:text-primary-blue hover:bg-slate-100/80 font-medium'
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-primary-blue' : 'text-slate-400'}`} />
-                <span className="truncate">{item.name}</span>
+                <span className="leading-snug">{item.name}</span>
               </Link>
             );
           })}
@@ -170,15 +170,15 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
       <div className="p-4 border-t border-slate-200 bg-slate-50/60">
         <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs mb-3">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Sesión Activa
             </span>
             {renderBadge()}
           </div>
-          <p className="text-sm font-bold text-slate-900 font-montserrat truncate">
+          <p className="text-[13px] font-bold text-slate-900 font-montserrat leading-tight break-words">
             {effectiveUser?.nombreCompleto || effectiveUser?.email?.split('@')[0] || 'Colaborador'}
           </p>
-          <p className="text-xs text-slate-500 font-inter truncate">
+          <p className="text-[11px] text-slate-500 font-inter truncate mt-0.5">
             {effectiveUser?.email || 'operaciones@nicalogistics.com'}
           </p>
         </div>
@@ -197,8 +197,8 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
 
   return (
     <>
-      {/* Sidebar fijo en escritorio */}
-      <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col justify-between h-screen fixed left-0 top-0 bottom-0 z-30 select-none">
+      {/* Sidebar fijo en escritorio con ancho óptimo w-72 */}
+      <aside className="hidden md:flex w-72 bg-white border-r border-slate-200 flex-col justify-between h-screen fixed left-0 top-0 bottom-0 z-30 select-none">
         {sidebarContent}
       </aside>
 

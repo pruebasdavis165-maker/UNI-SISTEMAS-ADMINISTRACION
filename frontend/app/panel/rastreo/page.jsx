@@ -109,14 +109,10 @@ function TrackingInternalContent() {
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header Interno */}
       <div>
-        <div className="flex items-center gap-2">
-          <Badge variant="blue" size="sm">Trazabilidad Operativa</Badge>
-          <span className="text-xs text-slate-500 font-inter">Control de Encomiendas Sede a Sede</span>
-        </div>
-        <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
+        <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
           Consulta Global de Rastreo
         </h1>
-        <p className="font-inter text-xs sm:text-sm text-slate-500">
+        <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
           Verificación en tiempo real del estado de paquetes, sedes de custodia y bitácora de movimientos.
         </p>
       </div>

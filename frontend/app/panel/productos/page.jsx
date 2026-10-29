@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
   Button, Input, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert 
+  Badge, Modal, Alert, CustomDropdown 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -236,15 +236,11 @@ export default function ProductosPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="blue" size="sm">Administración de Inventario</Badge>
-              <span className="text-xs text-slate-400 font-inter">Control de Productos y Precios</span>
-            </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
               Catálogo de Productos
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
-              Registra, edita y supervisa existencias de productos para venta con retiro en sede.
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
+              Registra, edita y supervisa existencias de productos para venta con retiro en sede oficial.
             </p>
           </div>
 
@@ -282,20 +278,17 @@ export default function ProductosPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <select
+          <div className="w-full sm:w-64">
+            <CustomDropdown
+              icon={Filter}
               value={selectedCat}
-              onChange={(e) => setSelectedCat(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-inter bg-white focus:outline-none focus:border-primary-blue"
-            >
-              <option value="">Todas las Categorías</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedCat(val)}
+              placeholder="Todas las Categorías"
+              options={[
+                { value: '', label: 'Todas las Categorías' },
+                ...categories.map((c) => ({ value: c.id, label: c.nombre }))
+              ]}
+            />
           </div>
         </div>
 
@@ -331,68 +324,75 @@ export default function ProductosPage() {
                     const isLowStock = p.stockActual <= p.stockMinimo;
                     return (
                       <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 align-middle min-w-[280px]">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
                               {p.imagenUrl ? (
                                 <img src={p.imagenUrl} alt={p.nombre} className="w-full h-full object-contain" />
                               ) : (
                                 <Package className="w-6 h-6 text-slate-400" />
                               )}
                             </div>
-                            <div>
-                              <div className="font-semibold text-slate-900 line-clamp-1">{p.nombre}</div>
-                              <span className="text-xs font-mono font-bold text-primary-blue bg-blue-50 px-1.5 py-0.5 rounded">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-slate-900 text-sm leading-snug whitespace-normal">{p.nombre}</div>
+                              <span className="text-[11px] font-mono font-bold text-primary-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-100/60 inline-block mt-0.5">
                                 {p.codigoSku}
                               </span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-xs font-medium text-slate-600">
-                          {p.categoriaNombre}
+                        <td className="px-6 py-4 align-middle">
+                          <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                            {p.categoriaNombre}
+                          </span>
                         </td>
-                        <td className="px-6 py-4 font-montserrat font-bold text-slate-900">
-                          ${p.precio.toFixed(2)}
+                        <td className="px-6 py-4 align-middle font-montserrat font-extrabold text-sm text-slate-900 whitespace-nowrap">
+                          ${Number(p.precio).toFixed(2)} USD
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 align-middle">
                           {isLowStock ? (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-full whitespace-nowrap">
                               <span className="w-2 h-2 rounded-full bg-alert-amber animate-pulse"></span>
                               {p.stockActual} unid. (Bajo Stock)
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full whitespace-nowrap">
                               <span className="w-1.5 h-1.5 rounded-full bg-success-green"></span>
                               {p.stockActual} unid.
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 align-middle">
                           {p.activo ? (
                             <Badge variant="green" size="sm">Activo</Badge>
                           ) : (
                             <Badge variant="slate" size="sm">Inactivo</Badge>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-right space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={Edit3}
-                            onClick={() => openEditModal(p)}
-                          >
-                            Editar
-                          </Button>
-                          {p.activo && (
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              icon={Trash2}
-                              onClick={() => handleDelete(p)}
+                        <td className="px-6 py-4 text-right align-middle">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(p)}
+                              className="w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-primary-blue hover:border-blue-200 transition-colors flex items-center justify-center shadow-2xs"
+                              title="Editar Producto"
                             >
-                              Desactivar
-                            </Button>
-                          )}
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(p)}
+                              className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors shadow-2xs ${
+                                p.activo
+                                  ? 'border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:border-rose-300'
+                                  : 'border-emerald-200 bg-emerald-50/50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
+                              }`}
+                              title={p.activo ? "Desactivar Producto" : "Reactivar Producto"}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
