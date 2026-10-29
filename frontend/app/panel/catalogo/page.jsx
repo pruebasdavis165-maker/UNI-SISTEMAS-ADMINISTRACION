@@ -52,9 +52,9 @@ export default function PanelCatalogoPage() {
     { value: 'destacados', label: 'Destacados' },
     { value: 'precio-asc', label: 'Menor Precio' },
     { value: 'precio-desc', label: 'Mayor Precio' },
-    { value: 'nombre-asc', label: 'Alfabético: A - Z' },
-    { value: 'nombre-desc', label: 'Alfabético: Z - A' },
-    { value: 'stock-desc', label: 'Disponibilidad de Stock' },
+    { value: 'nombre-asc', label: 'Orden Alfabético (A - Z)' },
+    { value: 'nombre-desc', label: 'Orden Alfabético (Z - A)' },
+    { value: 'stock-desc', label: 'Mayor Disponibilidad (Stock)' },
   ];
 
   const currentSortLabel = sortOptions.find(o => o.value === sortBy)?.label || 'Destacados';
@@ -97,7 +97,7 @@ export default function PanelCatalogoPage() {
       {/* Header Comercial */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
+          <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-800">
             Catálogo Corporativo de Productos
           </h1>
           <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
@@ -152,7 +152,7 @@ export default function PanelCatalogoPage() {
             </button>
 
             {isSortOpen && (
-              <div className="absolute right-0 mt-1 w-full sm:w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
+              <div className="absolute right-0 mt-1 w-full sm:w-56 bg-white border border-slate-200 rounded-lg shadow-2xl z-[9999] py-1.5">
                 {sortOptions.map((opt) => (
                   <button
                     key={opt.value}
@@ -214,10 +214,11 @@ export default function PanelCatalogoPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      {p.categoriaNombre || 'General'}
-                    </span>
+                  <div className="p-4 space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 font-bold uppercase">
+                      <span>SKU: {p.codigoSku || p.sku || 'N/A'}</span>
+                      <span className="font-sans font-semibold text-slate-500">{p.categoriaNombre || 'General'}</span>
+                    </div>
                     <h3 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
                       {p.nombre}
                     </h3>

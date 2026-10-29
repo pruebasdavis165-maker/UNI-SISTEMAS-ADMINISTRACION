@@ -24,13 +24,21 @@ export const addToCart = (product, quantity = 1) => {
     };
   }
 
+  const skuVal = product.codigoSku || product.sku || 'N/A';
+
   if (existingIndex > -1) {
     cart[existingIndex].quantity = newQty;
+    // ensure sku is updated if it was previously undefined
+    if (!cart[existingIndex].sku || cart[existingIndex].sku === 'undefined') {
+      cart[existingIndex].sku = skuVal;
+      cart[existingIndex].codigoSku = skuVal;
+    }
   } else {
     cart.push({
       id: product.id,
       nombre: product.nombre,
-      sku: product.sku,
+      sku: skuVal,
+      codigoSku: skuVal,
       precio: product.precio,
       stockActual: product.stockActual,
       categoriaNombre: product.categoriaNombre,
@@ -63,8 +71,7 @@ export const updateCartItemQuantity = (productId, newQuantity, maxStock) => {
 
 export const removeFromCart = (productId) => {
   if (typeof window === 'undefined') return;
-  let cart = getCart();
-  cart = cart.filter(i => i.id !== productId);
+  const cart = getCart().filter(item => item.id !== productId);
   localStorage.setItem('nicalogistics_cart', JSON.stringify(cart));
   window.dispatchEvent(new Event('cartUpdated'));
 };
@@ -73,4 +80,9 @@ export const clearCart = () => {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('nicalogistics_cart');
   window.dispatchEvent(new Event('cartUpdated'));
+};
+
+export const getCartTotal = () => {
+  const cart = getCart();
+  return cart.reduce((total, item) => total + (item.precio * item.quantity), 0);
 };

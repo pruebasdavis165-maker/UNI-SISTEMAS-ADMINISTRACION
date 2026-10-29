@@ -45,9 +45,9 @@ export default function PublicCatalogPage() {
     { value: 'featured', label: 'Destacados', icon: Sparkles },
     { value: 'price-asc', label: 'Menor Precio', icon: ArrowUpDown },
     { value: 'price-desc', label: 'Mayor Precio', icon: ArrowUpDown },
-    { value: 'name-asc', label: 'Alfabético: A - Z', icon: ArrowUpDown },
-    { value: 'name-desc', label: 'Alfabético: Z - A', icon: ArrowUpDown },
-    { value: 'stock-desc', label: 'Disponibilidad de Stock', icon: ArrowUpDown },
+    { value: 'name-asc', label: 'Orden Alfabético (A - Z)', icon: ArrowUpDown },
+    { value: 'name-desc', label: 'Orden Alfabético (Z - A)', icon: ArrowUpDown },
+    { value: 'stock-desc', label: 'Mayor Disponibilidad (Stock)', icon: ArrowUpDown },
   ];
   const currentSortOption = sortOptions.find((o) => o.value === sortBy) || sortOptions[0];
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +68,12 @@ export default function PublicCatalogPage() {
         ]);
 
         if (!resProds.ok) throw new Error('Error al consultar el catálogo.');
-        const dataProds = await resProds.json();
+        const rawProds = await resProds.json();
+        const dataProds = rawProds.map(p => ({
+          ...p,
+          sku: p.codigoSku || p.sku || 'N/A',
+          codigoSku: p.codigoSku || p.sku || 'N/A'
+        }));
         setProducts(dataProds);
 
         if (resCats.ok) {
@@ -92,10 +97,11 @@ export default function PublicCatalogPage() {
         const matchesCategory =
           selectedCategory === 'ALL' || item.categoriaId === selectedCategory;
         const term = searchTerm.toLowerCase().trim();
+        const pSku = (item.codigoSku || item.sku || '').toLowerCase();
         const matchesSearch =
           !term ||
           item.nombre.toLowerCase().includes(term) ||
-          item.sku.toLowerCase().includes(term) ||
+          pSku.includes(term) ||
           (item.descripcion && item.descripcion.toLowerCase().includes(term));
         return matchesCategory && matchesSearch;
       })
@@ -141,12 +147,12 @@ export default function PublicCatalogPage() {
               {addedToast.isError ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
             </div>
             <div>
-              <p className="text-xs font-montserrat font-bold text-slate-900">{addedToast.title}</p>
+              <p className="text-xs font-montserrat font-bold text-slate-800">{addedToast.title}</p>
               <p className="text-xs text-slate-500 font-inter">{addedToast.message}</p>
             </div>
             <Link 
               href="/carrito" 
-              className="ml-2 px-3 py-1.5 bg-primary-blue hover:bg-blue-700 text-white rounded-lg text-xs font-semibold font-inter transition-colors shadow-sm"
+              className="ml-2 px-3 py-1.5 bg-primary-blue hover:bg-blue-700 text-white rounded-lg text-xs font-semibold font-inter transition-colors shadow-sm cursor-pointer"
             >
               Ver Carrito
             </Link>
@@ -159,18 +165,18 @@ export default function PublicCatalogPage() {
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-accent-magenta" />
-            <span>Retiro Exclusivo en Ventanilla (Pickup Oficial)</span>
+            <span>Retiro Exclusivo en Ventanilla (Pickup Oficial Sede a Sede)</span>
           </div>
           <h1 className="font-montserrat font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight">
             Catálogo Oficial NicaLogistics
           </h1>
-          <p className="font-inter text-blue-100/80 text-sm sm:text-base max-w-2xl leading-relaxed">
-            Explora productos tradicionales nicaragüenses (rosquillas, cajetas, quesillo, café de altura y artesanías) y tecnología de alta gama importada desde EE.UU. Retiro en ventanilla oficial en Managua o Miami Hub.
+          <p className="font-inter text-blue-100/90 text-sm sm:text-base max-w-2xl leading-relaxed">
+            Explora productos tradicionales nicaragüenses (rosquillas, cajetas, quesillo, café de altura y artesanías) y tecnología de alta gama. Logística bilateral disponible para traslado oficial entre cualquier sede de la red.
           </p>
 
           {/* Quick Notice Badge */}
           <div className="pt-2 flex items-center gap-2 text-xs text-blue-200">
-            <MapPin className="w-4 h-4 text-accent-magenta shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Retiro seguro en ventanilla oficial presentando identificación física.</span>
           </div>
         </div>
@@ -180,7 +186,7 @@ export default function PublicCatalogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
         
         {/* Search & Sort Card */}
-        <Card className="p-4 sm:p-5 shadow-lg border-0 rounded-2xl bg-white mb-8">
+        <Card className="p-4 sm:p-5 shadow-lg border-0 rounded-2xl bg-white mb-8 overflow-visible relative">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search Input */}
             <div className="w-full md:w-96">
@@ -201,7 +207,7 @@ export default function PublicCatalogPage() {
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="w-full sm:w-64 h-10 px-3.5 py-2 bg-white rounded-lg border border-slate-200 shadow-sm hover:border-primary-blue/50 flex items-center justify-between text-xs font-inter font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue/20 transition-all duration-200 group cursor-pointer"
+                  className="w-full sm:w-64 h-10 px-3.5 py-2 bg-white rounded-xl border border-slate-200 shadow-xs hover:border-primary-blue/50 flex items-center justify-between text-xs font-inter font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue/20 transition-all duration-200 group cursor-pointer"
                   aria-haspopup="listbox"
                   aria-expanded={isSortOpen}
                 >
@@ -217,7 +223,7 @@ export default function PublicCatalogPage() {
               {isSortOpen && (
                 <div 
                   onWheel={(e) => e.stopPropagation()}
-                  className="absolute right-0 mt-2 w-full sm:w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-1.5 z-[999] max-h-60 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 mt-2 w-full sm:w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-1.5 z-[9999] max-h-60 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150"
                   role="listbox"
                 >
                   <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter border-b border-slate-100 mb-1">
@@ -234,20 +240,20 @@ export default function PublicCatalogPage() {
                           setSortBy(option.value);
                           setIsSortOpen(false);
                         }}
-                        className={`w-full px-3 py-2 text-xs font-inter flex items-center justify-between transition-all duration-150 rounded-md my-0.5 text-left ${
+                        className={`w-full px-3 py-2 text-xs font-inter flex items-center justify-between transition-all duration-150 rounded-lg my-0.5 text-left cursor-pointer ${
                           isSelected
-                            ? 'bg-blue-50/90 text-primary-blue font-bold'
+                            ? 'bg-blue-50 text-primary-blue font-bold'
                             : 'text-slate-700 hover:bg-slate-50 hover:text-primary-blue'
                         }`}
                         role="option"
                         aria-selected={isSelected}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 truncate">
                           <OptionIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-primary-blue' : 'text-slate-400'}`} />
-                          <span>{option.label}</span>
+                          <span className="truncate">{option.label}</span>
                         </div>
                         {isSelected && (
-                          <Check className="w-4 h-4 text-primary-blue shrink-0" />
+                          <Check className="w-4 h-4 text-primary-blue shrink-0 ml-2" />
                         )}
                       </button>
                     );
@@ -261,7 +267,7 @@ export default function PublicCatalogPage() {
           <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold font-inter transition-all shrink-0 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold font-inter transition-all shrink-0 cursor-pointer ${
                 selectedCategory === 'ALL'
                   ? 'bg-primary-blue text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -275,11 +281,12 @@ export default function PublicCatalogPage() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold font-inter transition-all shrink-0 ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold font-inter transition-all shrink-0 cursor-pointer max-w-[200px] truncate ${
                     selectedCategory === cat.id
                       ? 'bg-primary-blue text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
+                  title={`${cat.nombre} (${count})`}
                 >
                   {cat.nombre} ({count})
                 </button>
@@ -334,16 +341,17 @@ export default function PublicCatalogPage() {
               {filteredProducts.map((product) => {
                 const isOutOfStock = product.stockActual <= 0;
                 const isLowStock = !isOutOfStock && product.stockActual <= product.stockMinimo;
+                const skuCode = product.codigoSku || product.sku || 'N/A';
 
                 return (
                   <Card 
                     key={product.id}
-                    className="h-full flex flex-col justify-between group rounded-2xl overflow-hidden border border-slate-200 hover:border-primary-blue/40 hover:shadow-xl transition-all duration-300 bg-white"
+                    className="h-full flex flex-col justify-between group rounded-2xl overflow-hidden border border-slate-200/90 hover:border-primary-blue/40 hover:shadow-xl transition-all duration-300 bg-white"
                   >
                     {/* Image & Badges Container */}
                     <div 
                       onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
-                      className="relative aspect-video sm:aspect-square bg-slate-100 flex items-center justify-center overflow-hidden cursor-pointer"
+                      className="relative aspect-video sm:aspect-square bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer"
                       title="Haz clic para ver detalles y especificaciones"
                     >
                       {product.imagenUrl ? (
@@ -356,9 +364,12 @@ export default function PublicCatalogPage() {
                         <Package className="w-16 h-16 text-slate-300" />
                       )}
 
-                      {/* Category Badge */}
-                      <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm font-montserrat">
-                        {product.categoriaNombre || 'Tecnología'}
+                      {/* Category Badge with Truncation (Max 55% so it doesn't overlap Stock Badge) */}
+                      <span 
+                        className="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs font-montserrat max-w-[55%] truncate"
+                        title={product.categoriaNombre || 'General'}
+                      >
+                        {product.categoriaNombre || 'General'}
                       </span>
 
                       {/* Stock Warning Badge */}
@@ -378,47 +389,47 @@ export default function PublicCatalogPage() {
                       )}
                     </div>
 
-                    {/* Product Details */}
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    {/* Product Details (Middle Block) */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                       <div>
-                        <div className="text-[11px] font-bold text-slate-400 font-inter uppercase tracking-wider">
-                          SKU: {product.sku}
+                        <div className="text-[11px] font-bold text-slate-400 font-mono uppercase tracking-wider">
+                          SKU: {skuCode}
                         </div>
                         <h2 
                           onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
-                          className="font-montserrat font-bold text-base text-slate-900 group-hover:text-primary-blue transition-colors line-clamp-2 mt-1 cursor-pointer"
-                          title="Ver detalle del producto"
+                          className="font-montserrat font-bold text-sm sm:text-base text-slate-800 group-hover:text-primary-blue transition-colors line-clamp-2 min-h-[2.75rem] mt-1 cursor-pointer leading-snug"
+                          title={product.nombre}
                         >
                           {product.nombre}
                         </h2>
                         {product.descripcion && (
-                          <p className="font-inter text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                          <p className="font-inter text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed min-h-[2rem]">
                             {product.descripcion}
                           </p>
                         )}
                       </div>
 
-                      {/* Sede a Sede Notice */}
-                      <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] text-slate-500 font-inter">
-                        <MapPin className="w-3.5 h-3.5 text-accent-magenta shrink-0" />
-                        <span>Retiro en Ventanilla (Miami ➔ Sede)</span>
+                      {/* Dinamismo Sede a Sede Notice (Cero estático de Miami) */}
+                      <div className="pt-2 flex items-center gap-1.5 text-xs text-emerald-700 font-medium font-inter bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">Disponible para envío Sede a Sede</span>
                       </div>
 
-                      {/* Price and Add Button */}
-                      <div className="pt-2 flex items-center justify-between gap-3">
-                        <div>
+                      {/* Price and Action Buttons (Bottom Anchored Block) */}
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+                        <div className="min-w-0">
                           <span className="text-[10px] text-slate-400 block font-inter uppercase font-semibold">Precio Sede</span>
-                          <span className="font-montserrat font-extrabold text-2xl text-slate-900">
-                            ${product.precio.toFixed(2)}
+                          <span className="font-montserrat font-extrabold text-xl sm:text-2xl text-slate-800 truncate block">
+                            ${(product.precio || 0).toFixed(2)}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
-                            className="hidden sm:inline-flex text-xs px-2.5"
+                            className="text-xs px-2.5 py-1.5 font-medium text-slate-700 hover:text-primary-blue hover:bg-blue-50 border-slate-200 cursor-pointer"
                             title="Ver ficha completa"
                           >
                             Detalle
@@ -429,9 +440,9 @@ export default function PublicCatalogPage() {
                             disabled={isOutOfStock}
                             icon={ShoppingCart}
                             onClick={() => handleAddToCart(product)}
-                            className={isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'shadow-md'}
+                            className={`text-xs px-3 py-1.5 font-semibold cursor-pointer ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'shadow-sm'}`}
                           >
-                            {isOutOfStock ? 'Sin existencias' : 'Agregar'}
+                            {isOutOfStock ? 'Agotado' : 'Agregar'}
                           </Button>
                         </div>
                       </div>
@@ -451,11 +462,11 @@ export default function PublicCatalogPage() {
           isOpen={!!quickViewProduct}
           onClose={() => setQuickViewProduct(null)}
           title="Ficha Detallada del Producto"
-          description={`Identificador SKU: ${quickViewProduct.sku}`}
+          description={`Identificador SKU: ${quickViewProduct.codigoSku || quickViewProduct.sku || 'N/A'}`}
           maxWidth="max-w-2xl"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
-            <div className="aspect-square rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shadow-xs">
+            <div className="aspect-square rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shadow-xs">
               {quickViewProduct.imagenUrl ? (
                 <img
                   src={quickViewProduct.imagenUrl}
@@ -472,7 +483,7 @@ export default function PublicCatalogPage() {
                 <span className="inline-block bg-blue-50 text-primary-blue font-bold px-2.5 py-1 rounded-lg text-[11px] font-montserrat border border-blue-100">
                   {quickViewProduct.categoriaNombre || 'Categoría Oficial'}
                 </span>
-                <h3 className="font-montserrat font-extrabold text-lg text-slate-900 leading-snug">
+                <h3 className="font-montserrat font-extrabold text-lg text-slate-800 leading-snug">
                   {quickViewProduct.nombre}
                 </h3>
                 <p className="text-slate-600 leading-relaxed text-xs">
@@ -486,9 +497,9 @@ export default function PublicCatalogPage() {
                       {quickViewProduct.stockActual > 0 ? `${quickViewProduct.stockActual} unidades en bodega` : 'Agotado'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-accent-magenta shrink-0" />
-                    <span>Retiro físico exclusivo en ventanilla oficial autorizada</span>
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium pt-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Disponible para envío Sede a Sede (Ruta seleccionable en Checkout)</span>
                   </div>
                 </div>
               </div>
@@ -496,8 +507,8 @@ export default function PublicCatalogPage() {
               <div className="pt-4 border-t border-slate-100 space-y-3">
                 <div className="flex items-baseline justify-between">
                   <span className="text-slate-400 font-semibold uppercase text-[10px]">Precio Unitario:</span>
-                  <span className="font-montserrat font-extrabold text-2xl text-slate-900">
-                    ${quickViewProduct.precio.toFixed(2)} USD
+                  <span className="font-montserrat font-extrabold text-2xl text-slate-800">
+                    ${(quickViewProduct.precio || 0).toFixed(2)} USD
                   </span>
                 </div>
 
@@ -506,18 +517,18 @@ export default function PublicCatalogPage() {
                     <button
                       type="button"
                       onClick={() => setQuickViewQty(Math.max(1, quickViewQty - 1))}
-                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold transition-colors"
+                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold transition-colors cursor-pointer"
                     >
                       -
                     </button>
-                    <span className="px-3 py-2 font-bold text-slate-900 font-mono text-xs min-w-[2rem] text-center">
+                    <span className="px-3 py-2 font-bold text-slate-800 font-mono text-xs min-w-[2rem] text-center">
                       {quickViewQty}
                     </span>
                     <button
                       type="button"
                       onClick={() => setQuickViewQty(Math.min(quickViewProduct.stockActual, quickViewQty + 1))}
                       disabled={quickViewQty >= quickViewProduct.stockActual}
-                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold disabled:opacity-40 transition-colors"
+                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold disabled:opacity-40 transition-colors cursor-pointer"
                     >
                       +
                     </button>
@@ -528,7 +539,7 @@ export default function PublicCatalogPage() {
                     size="md"
                     disabled={quickViewProduct.stockActual <= 0}
                     icon={ShoppingCart}
-                    className="flex-1 justify-center shadow-md font-montserrat font-bold"
+                    className="flex-1 justify-center shadow-md font-montserrat font-bold cursor-pointer"
                     onClick={() => {
                       const res = addToCart(quickViewProduct, quickViewQty);
                       if (res.success) {

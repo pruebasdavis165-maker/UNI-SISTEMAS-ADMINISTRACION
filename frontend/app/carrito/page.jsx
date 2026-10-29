@@ -158,13 +158,13 @@ export default function CartPage() {
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-inter">
-                            SKU: {item.sku}
+                            SKU: {item.sku && item.sku !== "undefined" ? item.sku : (item.codigoSku || "N/A")}
                           </span>
                           {item.categoriaNombre && (
                             <Badge variant="blue" size="sm">{item.categoriaNombre}</Badge>
                           )}
                         </div>
-                        <h3 className="font-montserrat font-bold text-base text-slate-900">
+                        <h3 className="font-montserrat font-bold text-base text-slate-800">
                           {item.nombre}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-inter">
