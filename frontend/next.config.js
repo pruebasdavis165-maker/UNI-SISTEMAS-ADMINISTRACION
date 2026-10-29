@@ -5,6 +5,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/register',
+        destination: '/registro',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig

@@ -48,7 +48,8 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
       { name: 'Dashboard General', href: '/panel', icon: LayoutDashboard, exact: true },
       { name: 'Usuarios y Roles', href: '/panel/usuarios', icon: Users },
       { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
-      { name: 'Productos y Categorías', href: '/panel/productos', icon: Package },
+      { name: 'Gestión de Productos', href: '/panel/productos', icon: Package, exact: true },
+      { name: 'Gestión de Categorías', href: '/panel/categorias', icon: Layers },
       { name: 'Inventario Kardex', href: '/panel/inventario', icon: AlertTriangle },
       { name: 'Supervisión Encomiendas', href: '/panel/logistica', icon: Truck },
       { name: 'Rastreo Global', href: '/panel/rastreo', icon: Search }

@@ -9,8 +9,11 @@ import {
 } from 'lucide-react';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, ConfirmModal } from '../../components/ui';
 import { getCart, updateCartItemQuantity, removeFromCart, clearCart } from '../../lib/cart';
+import { getUser, clearSession, isInternalRole } from '../../lib/auth';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
+  const router = useRouter();
   const [cartItems, setCartItems] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [stockNotice, setStockNotice] = useState('');
@@ -23,6 +26,16 @@ export default function CartPage() {
   };
 
   useEffect(() => {
+    const currentUser = getUser();
+    if (currentUser && (isInternalRole(currentUser.rol) || (currentUser.rolId && currentUser.rolId !== 4))) {
+      alert('Los roles administrativos o internos no pueden realizar compras de clientes.');
+      clearSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
+      router.push('/login');
+      return;
+    }
     refreshCart();
 
     const handleStorage = () => refreshCart();
@@ -64,6 +77,20 @@ export default function CartPage() {
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
   const totalItemsCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  const handleProceedToCheckout = (e) => {
+    const currentUser = getUser();
+    if (currentUser && (isInternalRole(currentUser.rol) || (currentUser.rolId && currentUser.rolId !== 4))) {
+      e.preventDefault();
+      alert('Los roles administrativos o internos no pueden realizar compras de clientes.');
+      clearSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
+      router.push('/login');
+      return;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50/60 py-10 px-4 sm:px-6 lg:px-8">
@@ -271,7 +298,7 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                <Link href="/checkout" className="block">
+                <Link href="/checkout" onClick={handleProceedToCheckout} className="block">
                   <Button
                     variant="primary"
                     size="lg"

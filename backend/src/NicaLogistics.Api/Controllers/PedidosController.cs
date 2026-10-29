@@ -30,6 +30,10 @@ public class PedidosController : ControllerBase
             var result = await _orderService.CreateOrderAsync(userId, dto);
             return StatusCode(201, result);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });

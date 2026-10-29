@@ -53,6 +53,46 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequestDto request)
+    {
+        try
+        {
+            var response = await _authService.VerifyOtpAsync(request);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("resend-otp")]
+    public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequestDto request)
+    {
+        try
+        {
+            var success = await _authService.ResendOtpAsync(request.Email);
+            if (!success)
+            {
+                return BadRequest(new { message = "No se pudo reenviar el código. Verifica que el correo esté registrado." });
+            }
+            return Ok(new { message = "Código de verificación reenviado exitosamente." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
     {

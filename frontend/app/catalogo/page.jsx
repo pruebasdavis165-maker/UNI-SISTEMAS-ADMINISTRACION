@@ -115,14 +115,26 @@ export default function PublicCatalogPage() {
       });
   }, [products, selectedCategory, searchTerm, sortBy]);
 
-  const handleAddToCart = (product) => {
-    const res = addToCart(product, 1);
+  const handleAddToCart = (product, quantity = 1) => {
+    const currentUser = getUser();
+    if (currentUser && (isInternalRole(currentUser.rol) || (currentUser.rolId && currentUser.rolId !== 4))) {
+      alert('Los roles administrativos o internos no pueden realizar compras de clientes.');
+      clearSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
+      router.push('/login');
+      return;
+    }
+
+    const res = addToCart(product, quantity);
     if (res.success) {
       setAddedToast({
         title: '¡Producto Agregado!',
-        message: `${product.nombre} se sumó a tu carrito de compras.`
+        message: `${product.nombre} ${quantity > 1 ? `(${quantity}x) ` : ''}se sumó a tu carrito de compras.`
       });
       setTimeout(() => setAddedToast(null), 3500);
+      setQuickViewProduct(null);
     } else {
       setAddedToast({
         title: 'Atención',
@@ -529,20 +541,7 @@ export default function PublicCatalogPage() {
                     disabled={quickViewProduct.stockActual <= 0}
                     icon={ShoppingCart}
                     className="flex-1 justify-center shadow-md font-montserrat font-bold cursor-pointer"
-                    onClick={() => {
-                      const res = addToCart(quickViewProduct, quickViewQty);
-                      if (res.success) {
-                        setAddedToast({
-                          title: '¡Producto Agregado!',
-                          message: `${quickViewProduct.nombre} (${quickViewQty}x) se sumó a tu carrito.`
-                        });
-                        setTimeout(() => setAddedToast(null), 3500);
-                        setQuickViewProduct(null);
-                      } else {
-                        setAddedToast({ title: 'Atención', message: res.message, isError: true });
-                        setTimeout(() => setAddedToast(null), 3500);
-                      }
-                    }}
+                    onClick={() => handleAddToCart(quickViewProduct, quickViewQty)}
                   >
                     {quickViewProduct.stockActual <= 0 ? 'Sin existencias' : 'Agregar al Carrito'}
                   </Button>

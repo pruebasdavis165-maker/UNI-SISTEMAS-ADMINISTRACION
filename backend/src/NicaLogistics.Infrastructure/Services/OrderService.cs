@@ -45,9 +45,19 @@ public class OrderService : IOrderService
         if (sedeDestino == null)
             throw new KeyNotFoundException("La Sede de Destino seleccionada no es válida o está inactiva.");
 
-        var cliente = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == clienteId && u.Activo);
+        var cliente = await _context.Usuarios
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Id == clienteId && u.Activo);
+
         if (cliente == null)
             throw new KeyNotFoundException("Cliente no encontrado.");
+
+        // Regla de Seguridad RF-Checkout: Exclusivo para el rol Cliente
+        var roleName = cliente.Rol?.Nombre ?? "";
+        if (cliente.RolId != 4 && !roleName.Equals("Cliente", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException("Los roles administrativos o internos no pueden realizar compras de clientes.");
+        }
 
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
@@ -324,6 +334,18 @@ public class OrderService : IOrderService
         if (order.Estado == "CANCELADO")
             throw new InvalidOperationException("El pedido ya se encuentra cancelado.");
 
+        // Restricción Estricta de Cancelación: Un pedido ÚNICAMENTE puede ser cancelado si su encomienda está en 'REGISTRADA'
+        var shipmentCheck = await _context.Encomiendas.FirstOrDefaultAsync(e => e.PedidoId == order.Id);
+        if (shipmentCheck != null)
+        {
+            var normalizedShipmentState = shipmentCheck.Estado.Trim().ToUpper();
+            if (normalizedShipmentState != "REGISTRADA")
+            {
+                throw new InvalidOperationException(
+                    $"No se puede cancelar el pedido porque la encomienda asociada ya se encuentra en estado '{shipmentCheck.Estado}'. Únicamente se permite cancelar pedidos cuya encomienda esté estrictamente en estado 'Registrada' en sede de origen.");
+            }
+        }
+
         if (userRole != "Admin" && userRole != "Vendedor" && order.ClienteId != userId)
             throw new UnauthorizedAccessException("No tienes permisos para cancelar este pedido.");
 
@@ -440,7 +462,8 @@ public class OrderService : IOrderService
             payment?.MetodoPago,
             shipment?.CodigoTracking,
             order.CreadoEn,
-            itemDtos
+            itemDtos,
+            shipment?.Estado
         );
     }
 }

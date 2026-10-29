@@ -12,7 +12,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { getStripe } from '../../lib/stripe';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown, PhoneInput } from '../../components/ui';
 import { getCart, clearCart } from '../../lib/cart';
-import { getToken, getUser, API_BASE_URL } from '../../lib/auth';
+import { getToken, getUser, API_BASE_URL, clearSession, isInternalRole } from '../../lib/auth';
 
 function CheckoutContent() {
   const router = useRouter();
@@ -43,6 +43,18 @@ function CheckoutContent() {
       router.push('/login?redirect=/checkout');
       return;
     }
+
+    // Bloqueo de Checkout para roles administrativos/internos
+    if (isInternalRole(currentUser.rol) || (currentUser.rolId && currentUser.rolId !== 4)) {
+      alert('Los roles administrativos o internos no pueden realizar compras de clientes.');
+      clearSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
+      router.push('/login');
+      return;
+    }
+
     setUser(currentUser);
     setCardHolder(currentUser.nombreCompleto || '');
     setContactoTelefono(currentUser.telefono || '');
@@ -82,6 +94,17 @@ function CheckoutContent() {
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     setError('');
+
+    const currentUser = getUser();
+    if (isInternalRole(currentUser?.rol) || (currentUser?.rolId && currentUser.rolId !== 4)) {
+      alert('Los roles administrativos o internos no pueden realizar compras de clientes.');
+      clearSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
+      router.push('/login');
+      return;
+    }
 
     // Strict Sede a Sede Validation
     if (!sedeOrigenId || !sedeDestinoId) {

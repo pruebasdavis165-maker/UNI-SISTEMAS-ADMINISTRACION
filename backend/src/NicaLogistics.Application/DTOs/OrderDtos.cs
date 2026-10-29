@@ -41,7 +41,8 @@ public record OrderResponseDto(
     string? MetodoPago,
     string? CodigoTracking,
     DateTime CreadoEn,
-    IEnumerable<OrderItemDetailDto> Items
+    IEnumerable<OrderItemDetailDto> Items,
+    string? EstadoEncomienda = null
 );
 
 public record CancelOrderDto(

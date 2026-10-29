@@ -23,6 +23,9 @@ public class AuthService : IAuthService
     // Almacenamiento en memoria para tokens de recuperación de contraseña con expiración (15 min)
     private static readonly ConcurrentDictionary<string, (string Token, DateTime ExpiresAt)> _passwordResetTokens = new();
 
+    // Almacenamiento en memoria para códigos OTP de verificación de registro con expiración (15 min)
+    private static readonly ConcurrentDictionary<string, (string Code, DateTime ExpiresAt)> _registrationOtps = new();
+
     public AuthService(
         AppDbContext context,
         IPasswordHasher hasher,
@@ -104,7 +107,7 @@ public class AuthService : IAuthService
         return new AuthResponseDto(token, userDto);
     }
 
-    public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
+    public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
@@ -142,6 +145,8 @@ public class AuthService : IAuthService
             await _context.SaveChangesAsync();
         }
 
+        var isClient = role.Nombre == "Cliente";
+
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -151,7 +156,7 @@ public class AuthService : IAuthService
             Telefono = normalizedPhone,
             RolId = role.Id,
             Rol = role,
-            Activo = true,
+            Activo = !isClient, // Clientes quedan inactivos hasta verificar su correo con el código OTP
             CreadoEn = DateTime.UtcNow,
             ActualizadoEn = DateTime.UtcNow
         };
@@ -159,21 +164,18 @@ public class AuthService : IAuthService
         _context.Usuarios.Add(user);
         await _context.SaveChangesAsync();
 
-        // Caso 1: Envío automático de código de verificación (OTP) transaccional vía Resend
+        // Caso 1: Envío automático de código de verificación (OTP de 6 dígitos) vía Resend
         var otpCode = Random.Shared.Next(100000, 999999).ToString();
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await _emailService.SendVerificationOtpEmailAsync(user.Email, user.NombreCompleto, otpCode);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al enviar código OTP a {Email}", user.Email);
-            }
-        });
+        _registrationOtps[normalizedEmail] = (otpCode, DateTime.UtcNow.AddMinutes(15));
 
-        var token = _jwtGenerator.GenerateToken(user, role.Nombre);
+        try
+        {
+            await _emailService.SendVerificationOtpEmailAsync(user.Email, user.NombreCompleto, otpCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al enviar código OTP a {Email}", user.Email);
+        }
 
         var userDto = new UserDto(
             user.Id,
@@ -185,7 +187,83 @@ public class AuthService : IAuthService
             user.Activo
         );
 
+        return new RegisterResponseDto(
+            RequiresVerification: isClient,
+            Email: user.Email,
+            Message: isClient 
+                ? "Hemos enviado un código de verificación de 6 dígitos a tu correo electrónico."
+                : "Usuario registrado exitosamente.",
+            User: userDto
+        );
+    }
+
+    public async Task<AuthResponseDto> VerifyOtpAsync(VerifyOtpRequestDto request)
+    {
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        var code = request.OtpCode.Trim();
+
+        if (!_registrationOtps.TryGetValue(normalizedEmail, out var entry) || entry.ExpiresAt < DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("El código de verificación ha expirado o no es válido. Por favor solicita uno nuevo.");
+        }
+
+        if (entry.Code != code)
+        {
+            throw new InvalidOperationException("El código de verificación de 6 dígitos ingresado es incorrecto.");
+        }
+
+        var user = await _context.Usuarios
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        if (user == null)
+            throw new KeyNotFoundException("Usuario no encontrado.");
+
+        // Activar la cuenta de cliente
+        user.Activo = true;
+        user.ActualizadoEn = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        // Consumir OTP
+        _registrationOtps.TryRemove(normalizedEmail, out _);
+
+        var roleName = user.Rol?.Nombre ?? "Cliente";
+        var token = _jwtGenerator.GenerateToken(user, roleName);
+
+        var userDto = new UserDto(
+            user.Id,
+            user.NombreCompleto,
+            user.Email,
+            user.Telefono,
+            roleName,
+            user.RolId,
+            user.Activo
+        );
+
         return new AuthResponseDto(token, userDto);
+    }
+
+    public async Task<bool> ResendOtpAsync(string email)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
+        if (user == null) return false;
+
+        var otpCode = Random.Shared.Next(100000, 999999).ToString();
+        _registrationOtps[normalizedEmail] = (otpCode, DateTime.UtcNow.AddMinutes(15));
+
+        try
+        {
+            await _emailService.SendVerificationOtpEmailAsync(user.Email, user.NombreCompleto, otpCode);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al reenviar código OTP a {Email}", user.Email);
+            return false;
+        }
     }
 
     public async Task<bool> RequestPasswordResetAsync(string email)

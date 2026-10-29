@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+
 import React, { useState, useEffect, useRef } from 'react';
 import ProtectedRoute from '../../../components/auth/ProtectedRoute';
 import { 
   Package, Plus, Search, Filter, Edit3, Trash2, RefreshCw, 
-  AlertTriangle, CheckCircle2, Image as ImageIcon, Upload, DollarSign, UploadCloud, X 
+  AlertTriangle, CheckCircle2, Image as ImageIcon, Upload, DollarSign, UploadCloud, X, Layers 
 } from 'lucide-react';
 import { 
   Button, Input, Card, CardHeader, CardTitle, CardContent, 

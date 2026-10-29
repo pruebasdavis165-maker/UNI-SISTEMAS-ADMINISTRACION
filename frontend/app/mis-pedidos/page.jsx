@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '../../components/auth/ProtectedRoute';
 import { 
-  ShoppingBag, Truck, MapPin, ArrowRight, RefreshCw, 
+  ShoppingBag, Truck, MapPin, Lock, ArrowRight, RefreshCw, 
   XCircle, AlertTriangle, CheckCircle2, Calendar, 
   Clock, DollarSign, Package, ShieldCheck
 } from 'lucide-react';
@@ -54,6 +54,11 @@ export default function MisPedidosPage() {
   };
 
   const handleConfirmCancel = async () => {
+    if (orderToCancel?.estadoEncomienda && orderToCancel.estadoEncomienda.toUpperCase().trim() !== 'REGISTRADA') {
+      setError(`No es posible cancelar este pedido. Su encomienda ya se encuentra en estado '${orderToCancel.estadoEncomienda}'. Únicamente pedidos en estado 'Registrada' pueden cancelarse.`);
+      setIsCancelModalOpen(false);
+      return;
+    }
     if (!selectedOrder) return;
     setIsCancelling(true);
     setError('');
@@ -163,7 +168,8 @@ export default function MisPedidosPage() {
           ) : (
             <div className="space-y-6">
               {orders.map((order) => {
-                const canCancel = order.estado !== 'CANCELADO';
+                const estadoEnc = (order.estadoEncomienda || '').toUpperCase().trim();
+                const isCancelable = order.estado !== 'CANCELADO' && (!order.estadoEncomienda || estadoEnc === 'REGISTRADA');
 
                 return (
                   <Card key={order.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -194,16 +200,26 @@ export default function MisPedidosPage() {
                           </Link>
                         )}
 
-                        {canCancel && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            icon={XCircle}
-                            onClick={() => handleOpenCancel(order)}
-                            className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 border-rose-200"
-                          >
-                            Cancelar
-                          </Button>
+                        {order.estado !== 'CANCELADO' && (
+                          isCancelable ? (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              icon={XCircle}
+                              onClick={() => handleOpenCancel(order)}
+                              className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 border-rose-200"
+                            >
+                              Cancelar
+                            </Button>
+                          ) : (
+                            <span 
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-100 border border-slate-200 shadow-2xs"
+                              title="Solo se pueden cancelar pedidos antes de que la encomienda inicie su traslado logístico."
+                            >
+                              <Lock className="w-3.5 h-3.5 text-slate-400" />
+                              <span>No cancelable ({order.estadoEncomienda})</span>
+                            </span>
+                          )
                         )}
                       </div>
                     </div>
