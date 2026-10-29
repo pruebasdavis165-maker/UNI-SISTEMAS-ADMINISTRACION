@@ -160,8 +160,8 @@ export default function PanelVendedorPage() {
         </div>
 
         {/* Tabla de Historial Comercial y Pedidos */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm space-y-4 p-6 overflow-visible relative">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-20">
             <div>
               <h2 className="font-montserrat font-bold text-lg text-slate-900">
                 Historial de Pedidos Comerciales
@@ -171,7 +171,7 @@ export default function PanelVendedorPage() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
               <div className="w-full sm:w-64">
                 <Input
                   icon={Search}
@@ -181,11 +181,12 @@ export default function PanelVendedorPage() {
                 />
               </div>
 
-              <div className="w-full sm:w-56">
+              <div className="w-full sm:w-60 relative z-30">
                 <CustomDropdown
                   value={statusFilter}
                   onChange={(val) => setStatusFilter(val)}
                   placeholder="Todos los Estados"
+                  className="z-[9999]"
                   options={[
                     { value: '', label: 'Todos los Estados' },
                     { value: 'PAGADO', label: 'PAGADO', description: 'Órdenes confirmadas y cobradas' },
@@ -197,7 +198,7 @@ export default function PanelVendedorPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-slate-100">
             <table className="w-full text-left font-inter text-xs">
               <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
                 <tr>

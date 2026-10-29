@@ -1,11 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShieldAlert, ArrowLeft, Home, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShieldAlert, Home, Lock, Truck, TrendingUp, LayoutDashboard } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import { getUser, normalizeRole } from '../../lib/auth';
 
 export default function ForbiddenPage() {
+  const router = useRouter();
+  const [targetDashboard, setTargetDashboard] = useState({
+    url: '/',
+    label: 'Volver al Inicio',
+    icon: Home
+  });
+
+  useEffect(() => {
+    const user = getUser();
+    const role = normalizeRole(user?.rol);
+
+    if (role === 'Logística') {
+      setTargetDashboard({
+        url: '/panel/logistica',
+        label: 'Ir a Tablero Logístico',
+        icon: Truck
+      });
+    } else if (role === 'Vendedor') {
+      setTargetDashboard({
+        url: '/panel/vendedor',
+        label: 'Ir a Panel Comercial',
+        icon: TrendingUp
+      });
+    } else if (role === 'Admin') {
+      setTargetDashboard({
+        url: '/panel',
+        label: 'Ir a Dashboard General',
+        icon: LayoutDashboard
+      });
+    } else {
+      setTargetDashboard({
+        url: '/',
+        label: 'Volver al Inicio',
+        icon: Home
+      });
+    }
+  }, []);
+
+  const DashboardIcon = targetDashboard.icon;
+
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-16 bg-slate-50">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200/80 shadow-soft-lg text-center">
@@ -23,18 +65,18 @@ export default function ForbiddenPage() {
 
         <p className="font-inter text-sm text-slate-600 mb-8 leading-relaxed">
           Tu cuenta actual no posee el rol requerido para consultar este recurso o panel administrativo.
-          Si eres empleado, contacta a soporte o al Administrador para actualizar tu perfil.
+          Si eres colaborador interno, puedes regresar a tu módulo de trabajo asignado.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/">
-            <Button variant="outline" icon={Home} className="w-full">
-              Volver al Inicio
+          <Link href={targetDashboard.url} className="w-full">
+            <Button variant="primary" icon={DashboardIcon} className="w-full justify-center">
+              {targetDashboard.label}
             </Button>
           </Link>
-          <Link href="/login">
-            <Button variant="primary" icon={Lock} className="w-full">
-              Cambiar de Cuenta
+          <Link href="/login" className="w-full">
+            <Button variant="outline" icon={Lock} className="w-full justify-center">
+              Cambiar Cuenta
             </Button>
           </Link>
         </div>

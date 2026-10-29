@@ -8,7 +8,7 @@ import {
   MapPin, CheckCircle2, AlertTriangle, Sparkles, RefreshCw, 
   Check, ArrowRight, ShieldCheck 
 } from 'lucide-react';
-import { Button, Input, Card, Badge } from '../../components/ui';
+import { Button, Input, Card, Badge, Modal } from '../../components/ui';
 import { API_BASE_URL, getUser, isInternalRole } from '../../lib/auth';
 import { addToCart } from '../../lib/cart';
 
@@ -53,6 +53,8 @@ export default function PublicCatalogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [addedToast, setAddedToast] = useState(null);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [quickViewQty, setQuickViewQty] = useState(1);
 
   // Load catalog data
   useEffect(() => {
@@ -339,7 +341,11 @@ export default function PublicCatalogPage() {
                     className="h-full flex flex-col justify-between group rounded-2xl overflow-hidden border border-slate-200 hover:border-primary-blue/40 hover:shadow-xl transition-all duration-300 bg-white"
                   >
                     {/* Image & Badges Container */}
-                    <div className="relative aspect-video sm:aspect-square bg-slate-100 flex items-center justify-center overflow-hidden">
+                    <div 
+                      onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
+                      className="relative aspect-video sm:aspect-square bg-slate-100 flex items-center justify-center overflow-hidden cursor-pointer"
+                      title="Haz clic para ver detalles y especificaciones"
+                    >
                       {product.imagenUrl ? (
                         <img
                           src={product.imagenUrl}
@@ -378,7 +384,11 @@ export default function PublicCatalogPage() {
                         <div className="text-[11px] font-bold text-slate-400 font-inter uppercase tracking-wider">
                           SKU: {product.sku}
                         </div>
-                        <h2 className="font-montserrat font-bold text-base text-slate-900 group-hover:text-primary-blue transition-colors line-clamp-2 mt-1">
+                        <h2 
+                          onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
+                          className="font-montserrat font-bold text-base text-slate-900 group-hover:text-primary-blue transition-colors line-clamp-2 mt-1 cursor-pointer"
+                          title="Ver detalle del producto"
+                        >
                           {product.nombre}
                         </h2>
                         {product.descripcion && (
@@ -403,16 +413,27 @@ export default function PublicCatalogPage() {
                           </span>
                         </div>
 
-                        <Button
-                          variant={isOutOfStock ? 'secondary' : 'primary'}
-                          size="sm"
-                          disabled={isOutOfStock}
-                          icon={ShoppingCart}
-                          onClick={() => handleAddToCart(product)}
-                          className={isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'shadow-md'}
-                        >
-                          {isOutOfStock ? 'Sin existencias' : 'Agregar'}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
+                            className="hidden sm:inline-flex text-xs px-2.5"
+                            title="Ver ficha completa"
+                          >
+                            Detalle
+                          </Button>
+                          <Button
+                            variant={isOutOfStock ? 'secondary' : 'primary'}
+                            size="sm"
+                            disabled={isOutOfStock}
+                            icon={ShoppingCart}
+                            onClick={() => handleAddToCart(product)}
+                            className={isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'shadow-md'}
+                          >
+                            {isOutOfStock ? 'Sin existencias' : 'Agregar'}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -423,6 +444,114 @@ export default function PublicCatalogPage() {
         )}
 
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <Modal
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+          title="Ficha Detallada del Producto"
+          description={`Identificador SKU: ${quickViewProduct.sku}`}
+          maxWidth="max-w-2xl"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+            <div className="aspect-square rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shadow-xs">
+              {quickViewProduct.imagenUrl ? (
+                <img
+                  src={quickViewProduct.imagenUrl}
+                  alt={quickViewProduct.nombre}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Package className="w-20 h-20 text-slate-300" />
+              )}
+            </div>
+
+            <div className="flex flex-col justify-between space-y-4 font-inter text-xs">
+              <div className="space-y-2.5">
+                <span className="inline-block bg-blue-50 text-primary-blue font-bold px-2.5 py-1 rounded-lg text-[11px] font-montserrat border border-blue-100">
+                  {quickViewProduct.categoriaNombre || 'Categoría Oficial'}
+                </span>
+                <h3 className="font-montserrat font-extrabold text-lg text-slate-900 leading-snug">
+                  {quickViewProduct.nombre}
+                </h3>
+                <p className="text-slate-600 leading-relaxed text-xs">
+                  {quickViewProduct.descripcion || 'Artículo verificado para logística bilateral Sede a Sede.'}
+                </p>
+
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 mt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium">Existencias Disponibles:</span>
+                    <span className={`font-bold ${quickViewProduct.stockActual > 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+                      {quickViewProduct.stockActual > 0 ? `${quickViewProduct.stockActual} unidades en bodega` : 'Agotado'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-accent-magenta shrink-0" />
+                    <span>Retiro físico exclusivo en ventanilla oficial autorizada</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-slate-400 font-semibold uppercase text-[10px]">Precio Unitario:</span>
+                  <span className="font-montserrat font-extrabold text-2xl text-slate-900">
+                    ${quickViewProduct.precio.toFixed(2)} USD
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border border-slate-300 rounded-xl bg-white overflow-hidden shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() => setQuickViewQty(Math.max(1, quickViewQty - 1))}
+                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold transition-colors"
+                    >
+                      -
+                    </button>
+                    <span className="px-3 py-2 font-bold text-slate-900 font-mono text-xs min-w-[2rem] text-center">
+                      {quickViewQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuickViewQty(Math.min(quickViewProduct.stockActual, quickViewQty + 1))}
+                      disabled={quickViewQty >= quickViewProduct.stockActual}
+                      className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 font-bold disabled:opacity-40 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="md"
+                    disabled={quickViewProduct.stockActual <= 0}
+                    icon={ShoppingCart}
+                    className="flex-1 justify-center shadow-md font-montserrat font-bold"
+                    onClick={() => {
+                      const res = addToCart(quickViewProduct, quickViewQty);
+                      if (res.success) {
+                        setAddedToast({
+                          title: '¡Producto Agregado!',
+                          message: `${quickViewProduct.nombre} (${quickViewQty}x) se sumó a tu carrito.`
+                        });
+                        setTimeout(() => setAddedToast(null), 3500);
+                        setQuickViewProduct(null);
+                      } else {
+                        setAddedToast({ title: 'Atención', message: res.message, isError: true });
+                        setTimeout(() => setAddedToast(null), 3500);
+                      }
+                    }}
+                  >
+                    {quickViewProduct.stockActual <= 0 ? 'Sin existencias' : 'Agregar al Carrito'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

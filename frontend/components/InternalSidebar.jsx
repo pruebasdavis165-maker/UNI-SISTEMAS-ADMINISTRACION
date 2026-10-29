@@ -63,7 +63,6 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
   } else if (isLogistica) {
     navItems = [
       { name: 'Tablero Kanban', href: '/panel/logistica', icon: Truck, exact: true },
-      { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
       { name: 'Rastreo de Encomiendas', href: '/panel/rastreo', icon: Search },
       { name: 'Inventario Kardex', href: '/panel/inventario', icon: AlertTriangle }
     ];

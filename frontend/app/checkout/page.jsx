@@ -6,29 +6,32 @@ import { useRouter } from 'next/navigation';
 import { 
   ShieldCheck, MapPin, CreditCard, Building2, 
   ArrowRight, CheckCircle2, AlertTriangle, Package, 
-  Clock, Phone, ArrowLeft, RefreshCw, Truck, Lock
+  Clock, Phone, ArrowLeft, RefreshCw, Truck, Lock, Copy, Check
 } from 'lucide-react';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { getStripe } from '../../lib/stripe';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown } from '../../components/ui';
 import { getCart, clearCart } from '../../lib/cart';
 import { getToken, getUser, API_BASE_URL } from '../../lib/auth';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [cartItems, setCartItems] = useState([]);
   const [sedes, setSedes] = useState([]);
   const [sedeOrigenId, setSedeOrigenId] = useState('');
   const [sedeDestinoId, setSedeDestinoId] = useState('');
   const [metodoPago, setMetodoPago] = useState('TARJETA');
   const [cardHolder, setCardHolder] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
 
   const [isLoadingSedes, setIsLoadingSedes] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [orderResult, setOrderResult] = useState(null);
   const [user, setUser] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Load auth, cart & sedes
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function CheckoutPage() {
         const data = await res.json();
         setSedes(data);
 
-        // Preselección recomendada: Origen Miami Hub (o primera sede), Destino Managua
+        // Preselección: Origen Miami Hub, Destino Managua Central
         const miami = data.find(s => s.codigo.includes('MIA') || s.ciudad.toLowerCase().includes('miami')) || data[0];
         const managua = data.find(s => s.codigo.includes('MGA') || s.ciudad.toLowerCase().includes('managua')) || data[1] || data[0];
 
@@ -89,23 +92,72 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (metodoPago === 'TARJETA') {
-      if (!cardNumber || !cardExpiry || !cardCvv) {
-        setError('Por favor completa todos los datos de tu tarjeta bancaria.');
-        return;
-      }
-    }
-
     setIsSubmitting(true);
     try {
       const token = getToken();
+      let transactionReference = `DEP-${Date.now()}`;
+
+      // Procesamiento atómico con Stripe Sandbox cuando el método es TARJETA
+      if (metodoPago === 'TARJETA') {
+        if (!stripe || !elements) {
+          throw new Error('La pasarela de pagos Stripe se está inicializando. Por favor intenta de nuevo en unos segundos.');
+        }
+
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          throw new Error('No se encontró el formulario seguro de tarjeta bancaria.');
+        }
+
+        // 1. Solicitar PaymentIntent al backend
+        const intentRes = await fetch(`${API_BASE_URL}/api/pagos/create-payment-intent`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            monto: subtotal,
+            descripcion: `Orden de compra Sede a Sede - ${user?.nombreCompleto || 'Cliente'}`,
+            items: cartItems.map(item => ({
+              productoId: item.id,
+              cantidad: item.quantity
+            }))
+          })
+        });
+
+        const intentData = await intentRes.json();
+        if (!intentRes.ok) {
+          throw new Error(intentData.message || 'Error al iniciar la pasarela de pagos.');
+        }
+
+        // 2. Confirmar el pago en Stripe con la tarjeta de crédito
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(intentData.clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: cardHolder || user?.nombreCompleto || 'Cliente NicaLogistics',
+              email: user?.email
+            }
+          }
+        });
+
+        if (stripeError) {
+          throw new Error(stripeError.message || 'El pago fue rechazado por la pasarela de pagos.');
+        }
+
+        if (paymentIntent.status !== 'succeeded') {
+          throw new Error(`La transacción no fue autorizada (Estado: ${paymentIntent.status}).`);
+        }
+
+        transactionReference = paymentIntent.id;
+      }
+
+      // 3. Registrar el pedido atómico en el backend
       const payload = {
         sedeOrigenId,
         sedeDestinoId,
         metodoPago,
-        referenciaTransaccion: metodoPago === 'TARJETA' 
-          ? `VISA-${cardNumber.slice(-4)}-${Date.now()}` 
-          : `DEP-${Date.now()}`,
+        referenciaTransaccion: transactionReference,
         items: cartItems.map(item => ({
           productoId: item.id,
           cantidad: item.quantity
@@ -126,7 +178,7 @@ export default function CheckoutPage() {
         throw new Error(data.message || 'Error al procesar el pedido.');
       }
 
-      // Success: Clear cart and show confirmation screen
+      // Success: Limpiar carrito y mostrar pantalla de éxito
       clearCart();
       setOrderResult(data);
     } catch (err) {
@@ -139,63 +191,104 @@ export default function CheckoutPage() {
   const selectedSedeOrigen = sedes.find(s => s.id === sedeOrigenId);
   const selectedSedeDestino = sedes.find(s => s.id === sedeDestinoId);
 
-  // Success Confirmation Screen
+  // Rediseño de la Pantalla de Éxito y Código de Rastreo Focal
   if (orderResult) {
+    const handleCopyCode = () => {
+      if (orderResult.codigoTracking) {
+        navigator.clipboard.writeText(orderResult.codigoTracking);
+        setCopiedCode(true);
+        setTimeout(() => setCopiedCode(false), 3000);
+      }
+    };
+
     return (
-      <div className="min-h-screen bg-slate-50/60 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50/70 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
           
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-2">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle2 className="w-10 h-10" />
+              <CheckCircle2 className="w-9 h-9" />
             </div>
-            <Badge variant="green" size="md">¡Pedido Pagado y Confirmado Exitosamente!</Badge>
+            <Badge variant="green" size="md">¡Pago Aprobado y Confirmado Exitosamente!</Badge>
             <h1 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-900">
               Orden #{orderResult.numeroPedido}
             </h1>
-            <p className="font-inter text-slate-500 text-sm max-w-md mx-auto">
-              Tu pedido ha sido procesado de forma atómica y se ha generado la encomienda para traslado entre sedes.
+            <p className="font-inter text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
+              Tu compra ha sido procesada de forma atómica y se ha generado la encomienda para traslado entre sedes oficiales.
             </p>
           </div>
 
-          {/* Tracking Card */}
-          <Card className="p-6 bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded-2xl shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4">
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-200 font-semibold font-inter">Código de Rastreo Oficial</span>
-                <div className="text-2xl sm:text-3xl font-montserrat font-extrabold text-accent-magenta tracking-wide mt-0.5">
+          {/* Focal Point: Tarjeta Gigante del Código de Rastreo con Degradado Corporativo */}
+          <div className="p-7 sm:p-10 bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white rounded-3xl shadow-2xl border border-slate-700/60 relative overflow-hidden text-center space-y-6">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-magenta/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold uppercase tracking-wider font-inter">
+                <Truck className="w-4 h-4 text-accent-magenta" />
+                <span>Código de Rastreo Oficial NicaLogistics</span>
+              </div>
+              <p className="text-xs text-slate-300 font-inter max-w-md mx-auto">
+                Guarda este identificador de encomienda. Es obligatorio presentarlo físicamente junto a tu documento en ventanilla.
+              </p>
+            </div>
+
+            {/* Código Gigante y Llamativo */}
+            <div className="relative z-10 py-5 px-6 bg-slate-900/90 rounded-2xl border border-white/10 max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
+              <div className="text-center sm:text-left">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block font-inter">Tracking ID Oficial</span>
+                <span className="text-3xl sm:text-5xl font-mono font-extrabold text-[#D946EF] tracking-wider select-all block mt-0.5 drop-shadow-sm">
                   {orderResult.codigoTracking || 'NL-2026-GENERADO'}
-                </div>
+                </span>
               </div>
-              <Badge variant="blue" size="md">Estado: Registrada</Badge>
+
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold font-inter transition-all border border-white/20 active:scale-95 shadow-sm shrink-0"
+                title="Copiar código al portapapeles"
+              >
+                {copiedCode ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-accent-magenta" />
+                    <span>Copiar Código</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-inter">
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10">
-                <span className="text-slate-400 block mb-1">Sede Origen (Despacho):</span>
+            {/* Trazabilidad y Sedes Oficiales */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-inter text-left relative z-10 pt-2">
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <span className="text-slate-400 block mb-1 font-semibold">Sede Origen (Despacho):</span>
                 <p className="font-bold text-white text-sm">{orderResult.sedeOrigenNombre}</p>
-                <p className="text-slate-300 mt-0.5">{orderResult.sedeOrigenDireccion}</p>
+                <p className="text-slate-300 text-[11px] mt-0.5">{orderResult.sedeOrigenDireccion}</p>
               </div>
 
-              <div className="p-3 bg-white/5 rounded-xl border border-emerald-400/30">
-                <span className="text-emerald-400 font-semibold block mb-1">Sede de Retiro Final (Pickup):</span>
+              <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
+                <span className="text-emerald-400 font-bold block mb-1">Sede de Retiro Final (Pickup Oficial):</span>
                 <p className="font-bold text-white text-sm">{orderResult.sedeDestinoNombre}</p>
-                <p className="text-slate-300 mt-0.5">{orderResult.sedeDestinoDireccion}</p>
+                <p className="text-slate-200 text-[11px] mt-0.5">{orderResult.sedeDestinoDireccion}</p>
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs text-blue-100">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Presenta tu cédula o pasaporte en ventanilla para retirar.</span>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 relative z-10">
+              <div className="flex items-center gap-2 text-xs text-blue-100 text-left">
+                <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span>Presenta tu cédula o pasaporte físico en ventanilla para el retiro oficial.</span>
               </div>
               <Link href={`/rastreo?code=${orderResult.codigoTracking}`}>
-                <Button variant="magenta" size="sm" icon={Truck}>
-                  Rastrear Encomienda
+                <Button variant="magenta" size="md" icon={Truck} className="shadow-lg font-montserrat font-bold">
+                  Rastrear Encomienda Ahora
                 </Button>
               </Link>
             </div>
-          </Card>
+          </div>
 
           {/* Items Summary Card */}
           <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -219,7 +312,7 @@ export default function CheckoutPage() {
             <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
               <span className="font-montserrat font-bold text-base text-slate-900">Total Facturado</span>
               <span className="font-montserrat font-extrabold text-2xl text-primary-blue">
-                ${orderResult.total.toFixed(2)}
+                ${orderResult.total.toFixed(2)} USD
               </span>
             </div>
           </Card>
@@ -238,21 +331,21 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/60 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-50/70 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="blue" size="sm">Checkout Seguro</Badge>
-              <span className="text-xs text-slate-400 font-inter">Comercio Bilateral Miami ⇄ Managua</span>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary-blue mb-1 font-inter">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Checkout Oficial Sede a Sede</span>
             </div>
-            <h1 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-1">
+            <h1 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900">
               Confirmación de Pedido y Retiro
             </h1>
-            <p className="font-inter text-xs sm:text-sm text-slate-500">
-              Selecciona tus sedes oficiales para el traslado y retiro en ventanilla.
+            <p className="font-inter text-xs sm:text-sm text-slate-500 mt-1">
+              Selecciona las sucursales oficiales para despacho y retiro presencial en ventanilla.
             </p>
           </div>
 
@@ -263,16 +356,18 @@ export default function CheckoutPage() {
           </Link>
         </div>
 
-        {/* Error Alert */}
-        {error && <Alert type="error" title="Error en el Checkout">{error}</Alert>}
+        {error && (
+          <Alert type="error" title="Atención">
+            {error}
+          </Alert>
+        )}
 
-        {/* Form Grid */}
-        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Main Selectors (Left 2 cols) */}
+          {/* Left Columns (2/3): Branch Selection & Payment */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Step 1: Branch Selectors (STRICT SEDE A SEDE - NO HOME ADDRESSES) */}
+            {/* Step 1: Branch Selection */}
             <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
@@ -281,72 +376,68 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <h2 className="font-montserrat font-bold text-lg text-slate-900">
-                      Ruta Logística Oficial (Miami Hub ⇄ Sede Central Managua)
+                      Ruta Logística Bilateral (Pickup en Ventanilla)
                     </h2>
                     <p className="text-xs text-slate-500 font-inter">
-                      Selecciona las sucursales oficiales de origen y retiro en ventanilla.
+                      Cero envíos a domicilio. Todo flujo opera estrictamente entre sedes autorizadas.
                     </p>
                   </div>
                 </div>
-                <Badge variant="magenta" size="sm">Pickup en Ventanilla</Badge>
-              </div>
-
-              {/* Strict Notice: No Home Deliveries */}
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs font-inter flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-alert-amber shrink-0 mt-0.5" />
-                <span>
-                  <strong>Política Operativa Estricta:</strong> NicaLogistics opera exclusivamente bajo entrega y retiro en ventanilla oficial autorizada. Toda orden debe ser retirada presentando tu documento de identidad oficial.
-                </span>
+                <Badge variant="blue" size="sm">Sede a Sede</Badge>
               </div>
 
               {isLoadingSedes ? (
-                <div className="py-8 text-center text-slate-400">
+                <div className="py-8 text-center text-slate-400 text-xs">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto text-primary-blue mb-2" />
-                  <p className="text-xs">Cargando sedes oficiales...</p>
+                  <span>Cargando red de sedes oficiales...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
                   
                   {/* Sede Origen */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter">
+                      Sede de Origen (Bodega de Despacho) <span className="text-rose-500">*</span>
+                    </label>
                     <CustomDropdown
-                      label="Sede de Origen (Despacho)"
                       value={sedeOrigenId}
                       onChange={(val) => setSedeOrigenId(val)}
-                      placeholder="-- Seleccionar Sede Origen --"
-                      options={sedes.map((s) => ({
+                      options={sedes.map(s => ({
                         value: s.id,
                         label: `${s.nombre} (${s.ciudad}, ${s.pais})`,
-                        description: s.direccionVentanilla
+                        description: `Ventanilla: ${s.direccionVentanilla}`
                       }))}
+                      placeholder="Selecciona Sede de Origen"
+                      icon={Building2}
                       required
                     />
 
                     {selectedSedeOrigen && (
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 font-inter space-y-1">
-                        <p className="font-semibold text-slate-800">{selectedSedeOrigen.direccionVentanilla}</p>
+                        <p className="font-semibold text-slate-800">Dirección: {selectedSedeOrigen.direccionVentanilla}</p>
                         <p className="text-slate-500 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {selectedSedeOrigen.horarioAtencion || 'Lun - Vie 8:00 AM - 5:00 PM'}
+                          <Phone className="w-3 h-3" />
+                          {selectedSedeOrigen.telefonoContacto || 'Contacto directo en ventanilla'}
                         </p>
                       </div>
                     )}
                   </div>
 
                   {/* Sede Destino */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter">
+                      Sede de Destino (Ventanilla de Retiro Oficial) <span className="text-rose-500">*</span>
+                    </label>
                     <CustomDropdown
-                      label="Sede de Destino (Retiro Cliente)"
                       value={sedeDestinoId}
                       onChange={(val) => setSedeDestinoId(val)}
-                      placeholder="-- Seleccionar Sede de Retiro --"
-                      options={sedes
-                        .filter((s) => s.id !== sedeOrigenId)
-                        .map((s) => ({
-                          value: s.id,
-                          label: `${s.nombre} (${s.ciudad}, ${s.pais})`,
-                          description: s.direccionVentanilla
-                        }))}
+                      options={sedes.map(s => ({
+                        value: s.id,
+                        label: `${s.nombre} (${s.ciudad}, ${s.pais})`,
+                        description: `Retiro: ${s.direccionVentanilla}`
+                      }))}
+                      placeholder="Selecciona Sede de Destino"
+                      icon={MapPin}
                       required
                     />
 
@@ -377,13 +468,13 @@ export default function CheckoutPage() {
                       Método de Pago Seguro
                     </h2>
                     <p className="text-xs text-slate-500 font-inter">
-                      Transacciones cifradas con registro atómico de pago (RF-11).
+                      Pasarela desacoplada con cobro seguro SSL y registro atómico.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-slate-400">
                   <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>SSL 256-bit</span>
+                  <span>Stripe 256-bit</span>
                 </div>
               </div>
 
@@ -398,9 +489,9 @@ export default function CheckoutPage() {
                       : 'border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
-                  <CreditCard className="w-5 h-5 mb-2" />
-                  <p className="font-montserrat font-bold text-xs">Tarjeta de Crédito / Débito</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Visa, Mastercard</p>
+                  <CreditCard className="w-5 h-5 mb-2 text-primary-blue" />
+                  <p className="font-montserrat font-bold text-xs">Tarjeta (Stripe Sandbox)</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Visa, Mastercard, Amex</p>
                 </button>
 
                 <button
@@ -412,7 +503,7 @@ export default function CheckoutPage() {
                       : 'border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
-                  <Building2 className="w-5 h-5 mb-2" />
+                  <Building2 className="w-5 h-5 mb-2 text-accent-magenta" />
                   <p className="font-montserrat font-bold text-xs">Transferencia Bancaria</p>
                   <p className="text-[10px] text-slate-500 mt-0.5">BAC, Banpro, Lafise</p>
                 </button>
@@ -426,50 +517,58 @@ export default function CheckoutPage() {
                       : 'border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
-                  <MapPin className="w-5 h-5 mb-2" />
+                  <MapPin className="w-5 h-5 mb-2 text-amber-500" />
                   <p className="font-montserrat font-bold text-xs">Pago en Ventanilla</p>
                   <p className="text-[10px] text-slate-500 mt-0.5">Efectivo al retirar</p>
                 </button>
               </div>
 
-              {/* Card Inputs */}
+              {/* Stripe Card Element */}
               {metodoPago === 'TARJETA' && (
                 <div className="space-y-4 pt-2">
-                  <Input
-                    label="Nombre en la Tarjeta"
-                    placeholder="Ej. Juan Pérez"
-                    value={cardHolder}
-                    onChange={(e) => setCardHolder(e.target.value)}
-                    required
-                  />
-
-                  <Input
-                    label="Número de Tarjeta"
-                    placeholder="4000 1234 5678 9010"
-                    maxLength={19}
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    required
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <Input
-                      label="Expiración (MM/AA)"
-                      placeholder="12/28"
-                      maxLength={5}
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
+                      label="Nombre del Titular"
+                      placeholder="Ej. Juan Pérez"
+                      value={cardHolder}
+                      onChange={(e) => setCardHolder(e.target.value)}
                       required
                     />
-                    <Input
-                      label="Código de Seguridad (CVV)"
-                      placeholder="123"
-                      maxLength={4}
-                      type="password"
-                      value={cardCvv}
-                      onChange={(e) => setCardCvv(e.target.value)}
-                      required
-                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter mb-1.5">
+                      Datos de Tarjeta Bancaria (Stripe Sandbox) <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="p-3.5 rounded-xl border border-slate-300 bg-white shadow-2xs hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-2 focus-within:ring-primary-blue/20 transition-all">
+                      <CardElement
+                        options={{
+                          style: {
+                            base: {
+                              fontSize: '14px',
+                              color: '#0f172a',
+                              fontFamily: 'Inter, system-ui, sans-serif',
+                              '::placeholder': {
+                                color: '#94a3b8',
+                              },
+                            },
+                            invalid: {
+                              color: '#ef4444',
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-primary-blue font-inter flex items-start gap-2.5">
+                    <CreditCard className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold">Modo Sandbox Activo (Stripe.net):</p>
+                      <p className="text-slate-600 mt-0.5">
+                        Puedes probar con la tarjeta <span className="font-mono font-bold text-primary-blue">4242 4242 4242 4242</span>, cualquier fecha futura (ej. <span className="font-mono font-bold">12/28</span>) y CVC <span className="font-mono font-bold">123</span>.
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -559,5 +658,15 @@ export default function CheckoutPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  const stripePromise = getStripe();
+
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutContent />
+    </Elements>
   );
 }

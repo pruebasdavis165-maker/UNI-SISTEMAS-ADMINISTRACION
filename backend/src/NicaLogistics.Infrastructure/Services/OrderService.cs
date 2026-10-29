@@ -9,10 +9,12 @@ namespace NicaLogistics.Infrastructure.Services;
 public class OrderService : IOrderService
 {
     private readonly AppDbContext _context;
+    private readonly IPaymentGatewayService _paymentGateway;
 
-    public OrderService(AppDbContext context)
+    public OrderService(AppDbContext context, IPaymentGatewayService paymentGateway)
     {
         _context = context;
+        _paymentGateway = paymentGateway;
     }
 
     public async Task<OrderResponseDto> CreateOrderAsync(Guid clienteId, CreateOrderDto dto)
@@ -104,6 +106,18 @@ public class OrderService : IOrderService
                     UsuarioId = clienteId,
                     Fecha = DateTime.UtcNow
                 });
+            }
+
+            // Validación atómica de pasarela de pagos (Stripe Sandbox)
+            if (string.Equals(dto.MetodoPago, "TARJETA", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(dto.ReferenciaTransaccion) &&
+                dto.ReferenciaTransaccion.StartsWith("pi_"))
+            {
+                var verification = await _paymentGateway.VerifyPaymentAsync(dto.ReferenciaTransaccion);
+                if (!verification.IsSuccessful)
+                {
+                    throw new InvalidOperationException($"La pasarela de pagos Stripe no ha confirmado el cobro. Estado: {verification.Status}. {verification.FailureMessage}");
+                }
             }
 
             order.Total = grandTotal;

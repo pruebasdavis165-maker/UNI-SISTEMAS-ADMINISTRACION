@@ -1,4 +1,7 @@
-﻿# .gitignore
+# .gitignore
+.env
+.env*.local
+*.env
 bin/
 obj/
 *.user
