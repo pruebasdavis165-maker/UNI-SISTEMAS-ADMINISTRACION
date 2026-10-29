@@ -49,8 +49,8 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
       { name: 'Usuarios y Roles', href: '/panel/usuarios', icon: Users },
       { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
       { name: 'Productos y Categorías', href: '/panel/productos', icon: Package },
-      { name: 'Inventario y Kardex', href: '/panel/inventario', icon: AlertTriangle },
-      { name: 'Supervisión de Encomiendas', href: '/panel/logistica', icon: Truck },
+      { name: 'Inventario Kardex', href: '/panel/inventario', icon: AlertTriangle },
+      { name: 'Supervisión Encomiendas', href: '/panel/logistica', icon: Truck },
       { name: 'Rastreo Global', href: '/panel/rastreo', icon: Search }
     ];
   } else if (isVendedor) {
@@ -159,7 +159,7 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-primary-blue' : 'text-slate-400'}`} />
-                <span className="leading-snug">{item.name}</span>
+                <span className="leading-snug whitespace-normal break-words">{item.name}</span>
               </Link>
             );
           })}

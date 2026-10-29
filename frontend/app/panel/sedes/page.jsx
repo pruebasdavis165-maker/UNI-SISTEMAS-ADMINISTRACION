@@ -418,25 +418,25 @@ export default function SedesManagementPage() {
                   {/* Indicadores Operativos de la Sucursal */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
                     <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-center">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter">En Bodega</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter leading-tight">Paquetes en Bodega</span>
                       <span className="text-lg font-montserrat font-extrabold text-primary-blue mt-0.5 block">{stats.enBodega}</span>
-                      <span className="text-[9px] text-slate-400 block">Listos pickup</span>
+                      <span className="text-[9px] text-slate-400 block">Ventanilla física</span>
                     </div>
 
                     <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100 text-center">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter">En Tránsito</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter leading-tight">Encomiendas en Tránsito</span>
                       <span className="text-lg font-montserrat font-extrabold text-amber-600 mt-0.5 block">{stats.enTransito}</span>
                       <span className="text-[9px] text-slate-400 block">Hacia esta sede</span>
                     </div>
 
                     <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100 text-center">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter">Entregadas</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter leading-tight">Entregas Completadas</span>
                       <span className="text-lg font-montserrat font-extrabold text-emerald-600 mt-0.5 block">{stats.entregadas}</span>
                       <span className="text-[9px] text-slate-400 block">En ventanilla</span>
                     </div>
 
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter">Capacidad</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block font-inter leading-tight">Capacidad Operativa</span>
                       <span className="text-xs font-montserrat font-bold text-slate-800 mt-1.5 block">{stats.capacidad}</span>
                       <span className="text-[9px] text-emerald-600 font-semibold block">Pickup Activo</span>
                     </div>
@@ -473,7 +473,7 @@ export default function SedesManagementPage() {
                       className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-primary-blue hover:border-blue-200 transition-colors flex items-center gap-1.5 shadow-2xs"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>Modificar Datos</span>
+                      <span>Modificar Parámetros</span>
                     </button>
 
                     <button
