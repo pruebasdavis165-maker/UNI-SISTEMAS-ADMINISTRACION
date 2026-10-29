@@ -366,7 +366,7 @@ export default function PublicCatalogPage() {
 
                       {/* Category Badge with Truncation (Max 55% so it doesn't overlap Stock Badge) */}
                       <span 
-                        className="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs font-montserrat max-w-[55%] truncate"
+                        className="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs font-montserrat max-w-[55%] line-clamp-1 truncate"
                         title={product.categoriaNombre || 'General'}
                       >
                         {product.categoriaNombre || 'General'}
@@ -416,35 +416,24 @@ export default function PublicCatalogPage() {
                       </div>
 
                       {/* Price and Action Buttons (Bottom Anchored Block) */}
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 mt-auto">
                         <div className="min-w-0">
                           <span className="text-[10px] text-slate-400 block font-inter uppercase font-semibold">Precio Sede</span>
-                          <span className="font-montserrat font-extrabold text-xl sm:text-2xl text-slate-800 truncate block">
+                          <span className="font-montserrat font-extrabold text-xl sm:text-2xl text-[#1A56DB] truncate block">
                             ${(product.precio || 0).toFixed(2)}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setQuickViewProduct(product); setQuickViewQty(1); }}
-                            className="text-xs px-2.5 py-1.5 font-medium text-slate-700 hover:text-primary-blue hover:bg-blue-50 border-slate-200 cursor-pointer"
-                            title="Ver ficha completa"
-                          >
-                            Detalle
-                          </Button>
-                          <Button
-                            variant={isOutOfStock ? 'secondary' : 'primary'}
-                            size="sm"
-                            disabled={isOutOfStock}
-                            icon={ShoppingCart}
-                            onClick={() => handleAddToCart(product)}
-                            className={`text-xs px-3 py-1.5 font-semibold cursor-pointer ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'shadow-sm'}`}
-                          >
-                            {isOutOfStock ? 'Agotado' : 'Agregar'}
-                          </Button>
-                        </div>
+                        <Button
+                          variant={isOutOfStock ? 'secondary' : 'primary'}
+                          size="sm"
+                          disabled={isOutOfStock}
+                          icon={ShoppingCart}
+                          onClick={() => handleAddToCart(product)}
+                          className={`text-xs px-3.5 py-2 font-semibold cursor-pointer shrink-0 shadow-sm ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}`}
+                        >
+                          {isOutOfStock ? 'Agotado' : 'Agregar'}
+                        </Button>
                       </div>
                     </div>
                   </Card>

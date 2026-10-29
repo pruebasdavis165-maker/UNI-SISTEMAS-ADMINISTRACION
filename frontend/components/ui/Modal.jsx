@@ -35,7 +35,7 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
@@ -55,7 +55,7 @@ export default function Modal({
                 </h3>
               )}
               {description && (
-                <p className="font-inter text-xs text-slate-500 mt-0.5">
+                <p className="font-inter text-xs text-slate-500 mt-1">
                   {description}
                 </p>
               )}
@@ -69,7 +69,7 @@ export default function Modal({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-5">
+          <div className="px-6 py-6">
             {children}
           </div>
         </div>

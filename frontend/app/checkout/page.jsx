@@ -210,7 +210,7 @@ function CheckoutContent() {
               <CheckCircle2 className="w-9 h-9" />
             </div>
             <Badge variant="green" size="md">¡Pago Aprobado y Confirmado Exitosamente!</Badge>
-            <h1 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-900">
+            <h1 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-800">
               Orden #{orderResult.numeroPedido}
             </h1>
             <p className="font-inter text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
@@ -218,26 +218,23 @@ function CheckoutContent() {
             </p>
           </div>
 
-          {/* Focal Point: Tarjeta Gigante del Código de Rastreo con Degradado Corporativo */}
-          <div className="p-7 sm:p-10 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-2xl text-white rounded-3xl relative overflow-hidden text-center space-y-6">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-magenta/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 space-y-1.5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold uppercase tracking-wider font-inter">
-                <Truck className="w-4 h-4 text-accent-magenta" />
+          {/* Focal Point: Tarjeta Luminosa y Corporativa del Código de Rastreo */}
+          <div className="p-7 sm:p-10 bg-white text-slate-800 rounded-3xl shadow-xl border border-slate-200 relative overflow-hidden text-center space-y-6">
+            <div className="relative z-10 space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-[#1A56DB] text-xs font-bold uppercase tracking-wider font-inter border border-blue-100">
+                <Truck className="w-4 h-4 text-[#1A56DB]" />
                 <span>Código de Rastreo Oficial NicaLogistics</span>
               </div>
-              <p className="text-xs text-slate-300 font-inter max-w-md mx-auto">
+              <p className="text-xs text-slate-500 font-inter max-w-md mx-auto leading-relaxed">
                 Guarda este identificador de encomienda. Es obligatorio presentarlo físicamente junto a tu documento en ventanilla.
               </p>
             </div>
 
-            {/* Código Gigante y Llamativo en una sola línea horizontal */}
-            <div className="relative z-10 py-5 px-6 bg-black/40 rounded-2xl border border-white/10 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
+            {/* Código Gigante y Llamativo en una sola línea horizontal (Tema Luminoso) */}
+            <div className="relative z-10 py-5 px-6 sm:px-8 bg-slate-50 rounded-2xl border border-slate-200/90 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
               <div className="text-center sm:text-left min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block font-inter">Tracking ID Oficial</span>
-                <span className="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold text-[#D946EF] tracking-tight whitespace-nowrap select-all block mt-0.5 drop-shadow-sm">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold text-[#1A56DB] tracking-tight whitespace-nowrap select-all block mt-0.5">
                   {orderResult.codigoTracking || 'NL-2026-GENERADO'}
                 </span>
               </div>
@@ -245,17 +242,17 @@ function CheckoutContent() {
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold font-inter transition-all active:scale-95 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#1A56DB] border border-blue-200 text-xs font-bold font-inter transition-all active:scale-95 shadow-xs shrink-0 whitespace-nowrap cursor-pointer"
                 title="Copiar código al portapapeles"
               >
                 {copiedCode ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-400">¡Copiado!</span>
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    <span className="text-emerald-700">¡Copiado!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 text-accent-magenta" />
+                    <Copy className="w-4 h-4 text-[#1A56DB]" />
                     <span>Copiar Código</span>
                   </>
                 )}
@@ -264,26 +261,26 @@ function CheckoutContent() {
 
             {/* Trazabilidad y Sedes Oficiales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-inter text-left relative z-10 pt-2">
-              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                <span className="text-slate-400 block mb-1 font-semibold">Sede Origen (Despacho):</span>
-                <p className="font-bold text-white text-sm">{orderResult.sedeOrigenNombre}</p>
-                <p className="text-slate-300 text-[11px] mt-0.5">{orderResult.sedeOrigenDireccion}</p>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <span className="text-slate-500 block mb-1 font-semibold text-[11px]">Sede Origen (Despacho):</span>
+                <p className="font-bold text-slate-800 text-sm">{orderResult.sedeOrigenNombre}</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">{orderResult.sedeOrigenDireccion}</p>
               </div>
 
-              <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
-                <span className="text-emerald-400 font-bold block mb-1">Sede de Retiro Final (Pickup Oficial):</span>
-                <p className="font-bold text-white text-sm">{orderResult.sedeDestinoNombre}</p>
-                <p className="text-slate-200 text-[11px] mt-0.5">{orderResult.sedeDestinoDireccion}</p>
+              <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                <span className="text-emerald-700 font-bold block mb-1 text-[11px]">Sede de Retiro Final (Pickup Oficial):</span>
+                <p className="font-bold text-emerald-950 text-sm">{orderResult.sedeDestinoNombre}</p>
+                <p className="text-emerald-800 text-[11px] mt-0.5">{orderResult.sedeDestinoDireccion}</p>
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 relative z-10">
-              <div className="flex items-center gap-2 text-xs text-blue-100 text-left">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 relative z-10">
+              <div className="flex items-center gap-2 text-xs text-slate-600 text-left">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                 <span>Presenta tu cédula o pasaporte físico en ventanilla para el retiro oficial.</span>
               </div>
               <Link href={`/rastreo?code=${orderResult.codigoTracking}`}>
-                <Button variant="magenta" size="md" icon={Truck} className="shadow-lg font-montserrat font-bold">
+                <Button variant="primary" size="md" icon={Truck} className="shadow-md font-montserrat font-bold cursor-pointer">
                   Rastrear Encomienda Ahora
                 </Button>
               </Link>
@@ -292,7 +289,7 @@ function CheckoutContent() {
 
           {/* Items Summary Card */}
           <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="font-montserrat font-bold text-base text-slate-900 border-b border-slate-100 pb-2">
+            <h3 className="font-montserrat font-bold text-base text-slate-800 border-b border-slate-100 pb-2">
               Detalle de Productos Facturados
             </h3>
             <div className="divide-y divide-slate-100">
