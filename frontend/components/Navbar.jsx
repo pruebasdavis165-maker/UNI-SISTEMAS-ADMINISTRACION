@@ -69,6 +69,11 @@ export default function Navbar() {
 
   const isPanelRoute = pathname?.startsWith('/panel') || pathname?.startsWith('/admin');
 
+  // Supresión absoluta de la Navbar superior pública para personal interno o rutas de panel/admin
+  if (isInternal || isPanelRoute) {
+    return null;
+  }
+
   // Helper para clases de enlace activo
   const getLinkClass = (href) => {
     const isActive = pathname === href || (href !== '/' && pathname?.startsWith(href));

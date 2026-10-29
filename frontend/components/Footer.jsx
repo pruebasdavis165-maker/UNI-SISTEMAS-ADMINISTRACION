@@ -1,15 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, ShieldCheck, Clock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getUser, normalizeRole, isInternalRole } from '../lib/auth';
 
 export default function Footer() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const [localUser, setLocalUser] = useState(null);
 
-  // Ocultar Footer institucional en paneles corporativos internos (para máxima productividad sin textos institucionales de marketing)
-  if (pathname?.startsWith('/panel') || pathname?.startsWith('/admin')) {
+  useEffect(() => {
+    const sync = () => setLocalUser(getUser());
+    sync();
+    window.addEventListener('storage', sync);
+    window.addEventListener('authChanged', sync);
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('authChanged', sync);
+    };
+  }, [pathname]);
+
+  const effectiveUser = auth.user || localUser;
+  const effectiveRole = normalizeRole(effectiveUser?.rol);
+  const isInternal = isInternalRole(effectiveRole);
+
+  // Supresión 100% total del footer corporativo y bloques comerciales para personal interno o rutas administrativas
+  if (isInternal || pathname?.startsWith('/panel') || pathname?.startsWith('/admin')) {
     return null;
   }
 

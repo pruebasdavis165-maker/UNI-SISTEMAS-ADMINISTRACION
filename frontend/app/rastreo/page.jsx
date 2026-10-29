@@ -9,12 +9,21 @@ import {
   Building2, Phone, AlertTriangle, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { Button, Input, Card, Badge, Alert } from '../../components/ui';
-import { API_BASE_URL } from '../../lib/auth';
+import { API_BASE_URL, getUser, isInternalRole } from '../../lib/auth';
 
 function TrackingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialCode = searchParams.get('code') || '';
+
+  // Redirigir a personal interno a la consulta de rastreo dentro del panel con Sidebar
+  useEffect(() => {
+    const user = getUser();
+    if (isInternalRole(user?.rol)) {
+      const q = initialCode ? `?code=${encodeURIComponent(initialCode)}` : '';
+      router.replace(`/panel/rastreo${q}`);
+    }
+  }, [router, initialCode]);
 
   const [trackingCode, setTrackingCode] = useState(initialCode);
   const [shipment, setShipment] = useState(null);

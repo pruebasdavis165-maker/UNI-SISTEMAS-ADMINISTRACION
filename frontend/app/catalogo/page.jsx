@@ -2,16 +2,27 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Search, ShoppingCart, Filter, ArrowUpDown, Package, ChevronDown, 
   MapPin, CheckCircle2, AlertTriangle, Sparkles, RefreshCw, 
   Check, ArrowRight, ShieldCheck 
 } from 'lucide-react';
 import { Button, Input, Card, Badge } from '../../components/ui';
-import { API_BASE_URL } from '../../lib/auth';
+import { API_BASE_URL, getUser, isInternalRole } from '../../lib/auth';
 import { addToCart } from '../../lib/cart';
 
 export default function PublicCatalogPage() {
+  const router = useRouter();
+
+  // Redirigir a personal interno al catálogo corporativo dentro del panel con Sidebar
+  useEffect(() => {
+    const user = getUser();
+    if (isInternalRole(user?.rol)) {
+      router.replace('/panel/catalogo');
+    }
+  }, [router]);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('ALL');

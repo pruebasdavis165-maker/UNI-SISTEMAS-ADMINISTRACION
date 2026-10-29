@@ -163,57 +163,6 @@ export default function PanelVendedorPage() {
 
         </div>
 
-        {/* Acceso Rápido a Módulos Comerciales */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link href="/panel/clientes" className="group block">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 hover:border-primary-blue/50 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-              <div className="p-3.5 rounded-xl bg-blue-50 text-primary-blue border border-blue-100 group-hover:scale-105 transition-transform">
-                <Users className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-montserrat font-bold text-slate-900 group-hover:text-primary-blue transition-colors">
-                  Cartera de Clientes (CRM 360)
-                </h3>
-                <p className="text-xs text-slate-500 font-inter mt-1">
-                  Consulta expedientes, historial de transacciones y pedidos por cliente.
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/catalogo" className="group block">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 hover:border-accent-magenta/50 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-              <div className="p-3.5 rounded-xl bg-fuchsia-50 text-accent-magenta border border-fuchsia-100 group-hover:scale-105 transition-transform">
-                <ShoppingBag className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-montserrat font-bold text-slate-900 group-hover:text-accent-magenta transition-colors">
-                  Consulta de Catálogo Oficial
-                </h3>
-                <p className="text-xs text-slate-500 font-inter mt-1">
-                  Ver especificaciones de productos, precios y disponibilidad en ventanillas.
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/panel/inventario" className="group block">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 hover:border-alert-amber/50 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-              <div className="p-3.5 rounded-xl bg-amber-50 text-alert-amber border border-amber-100 group-hover:scale-105 transition-transform">
-                <Package className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-montserrat font-bold text-slate-900 group-hover:text-alert-amber transition-colors">
-                  Supervisión de Stock y Kardex
-                </h3>
-                <p className="text-xs text-slate-500 font-inter mt-1">
-                  Alertas de existencias mínimas y movimientos de almacén Sede a Sede.
-                </p>
-              </div>
-            </div>
-          </Link>
-        </div>
-
         {/* Tabla de Historial Comercial y Pedidos */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
