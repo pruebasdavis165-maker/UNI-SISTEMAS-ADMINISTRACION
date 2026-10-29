@@ -25,8 +25,8 @@ ON CONFLICT (codigo) DO UPDATE SET
     direccion_ventanilla = EXCLUDED.direccion_ventanilla,
     activo = EXCLUDED.activo;
 
--- Garantizar que únicamente las 2 sedes oficiales estén activas
-UPDATE sedes SET activo = FALSE WHERE codigo NOT IN ('MIA-01', 'MGA-01');
+-- Garantizar que únicamente existan en el sistema las 2 sedes oficiales autorizadas
+DELETE FROM sedes WHERE codigo NOT IN ('MIA-01', 'MGA-01');
 
 -- 3. Usuarios Iniciales por Defecto con Password Bcrypt
 -- Passwords en texto plano para testing:

@@ -8,7 +8,7 @@ import {
   ArrowRight, CheckCircle2, AlertTriangle, Package, 
   Clock, Phone, ArrowLeft, RefreshCw, Truck, Lock
 } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input } from '../../components/ui';
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown } from '../../components/ui';
 import { getCart, clearCart } from '../../lib/cart';
 import { getToken, getUser, API_BASE_URL } from '../../lib/auth';
 
@@ -309,22 +309,18 @@ export default function CheckoutPage() {
                   
                   {/* Sede Origen */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700 font-montserrat uppercase tracking-wider">
-                      Sede de Origen (Despacho) *
-                    </label>
-                    <select
+                    <CustomDropdown
+                      label="Sede de Origen (Despacho)"
                       value={sedeOrigenId}
-                      onChange={(e) => setSedeOrigenId(e.target.value)}
-                      className="w-full text-sm font-inter py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      onChange={(val) => setSedeOrigenId(val)}
+                      placeholder="-- Seleccionar Sede Origen --"
+                      options={sedes.map((s) => ({
+                        value: s.id,
+                        label: `${s.nombre} (${s.ciudad}, ${s.pais})`,
+                        description: s.direccionVentanilla
+                      }))}
                       required
-                    >
-                      <option value="">-- Seleccionar Sede Origen --</option>
-                      {sedes.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.nombre} ({s.ciudad}, {s.pais})
-                        </option>
-                      ))}
-                    </select>
+                    />
 
                     {selectedSedeOrigen && (
                       <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 font-inter space-y-1">
@@ -339,22 +335,20 @@ export default function CheckoutPage() {
 
                   {/* Sede Destino */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700 font-montserrat uppercase tracking-wider">
-                      Sede de Destino (Retiro Cliente) *
-                    </label>
-                    <select
+                    <CustomDropdown
+                      label="Sede de Destino (Retiro Cliente)"
                       value={sedeDestinoId}
-                      onChange={(e) => setSedeDestinoId(e.target.value)}
-                      className="w-full text-sm font-inter py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      onChange={(val) => setSedeDestinoId(val)}
+                      placeholder="-- Seleccionar Sede de Retiro --"
+                      options={sedes
+                        .filter((s) => s.id !== sedeOrigenId)
+                        .map((s) => ({
+                          value: s.id,
+                          label: `${s.nombre} (${s.ciudad}, ${s.pais})`,
+                          description: s.direccionVentanilla
+                        }))}
                       required
-                    >
-                      <option value="">-- Seleccionar Sede de Retiro --</option>
-                      {sedes.map((s) => (
-                        <option key={s.id} value={s.id} disabled={s.id === sedeOrigenId}>
-                          {s.nombre} ({s.ciudad}, {s.pais}) {s.id === sedeOrigenId ? '(Origen actual)' : ''}
-                        </option>
-                      ))}
-                    </select>
+                    />
 
                     {selectedSedeDestino && (
                       <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900 font-inter space-y-1">

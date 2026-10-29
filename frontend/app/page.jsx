@@ -8,7 +8,7 @@ import {
   Plane, Ship, CheckCircle2, ShoppingCart, Sparkles, Building2,
   ChevronRight, Award, Warehouse, ArrowUpRight
 } from 'lucide-react';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent, Badge } from '../components/ui';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, Badge, CustomDropdown } from '../components/ui';
 
 export default function HomePage() {
   const router = useRouter();
@@ -268,17 +268,15 @@ export default function HomePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
-                    Modalidad de Envío
-                  </label>
-                  <select 
+                  <CustomDropdown
+                    label="Modalidad de Envío"
                     value={calcService}
-                    onChange={(e) => setCalcService(e.target.value)}
-                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
-                  >
-                    <option value="aereo">Aéreo Exprés ($4.50/lb)</option>
-                    <option value="maritimo">Marítimo Carga ($1.85/lb)</option>
-                  </select>
+                    onChange={(val) => setCalcService(val)}
+                    options={[
+                      { value: 'aereo', label: 'Aéreo Exprés ($4.50/lb)' },
+                      { value: 'maritimo', label: 'Marítimo Carga ($1.85/lb)' }
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -291,22 +289,20 @@ export default function HomePage() {
                     max="500"
                     value={calcWeight}
                     onChange={(e) => setCalcWeight(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
+                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl py-2.5 px-3.5 border border-slate-200 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
-                    Sede de Retiro
-                  </label>
-                  <select 
+                  <CustomDropdown
+                    label="Sede de Retiro"
                     value={calcSede}
-                    onChange={(e) => setCalcSede(e.target.value)}
-                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl p-3 border border-slate-300 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
-                  >
-                    <option value="Managua">Sede Central Managua (Nicaragua)</option>
-                    <option value="Miami">Sede Miami Hub (Estados Unidos)</option>
-                  </select>
+                    onChange={(val) => setCalcSede(val)}
+                    options={[
+                      { value: 'Managua', label: 'Sede Central Managua (Nicaragua)' },
+                      { value: 'Miami', label: 'Sede Miami Hub (Estados Unidos)' }
+                    ]}
+                  />
                 </div>
               </div>
             </div>

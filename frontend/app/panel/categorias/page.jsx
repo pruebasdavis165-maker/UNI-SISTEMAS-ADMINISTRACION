@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
   Button, Input, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert 
+  Badge, Modal, Alert, ConfirmModal, Toast 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -23,6 +23,16 @@ export default function CategoriasPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [currentCat, setCurrentCat] = useState(null);
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    variant: 'danger',
+    onConfirm: () => {}
+  });
 
   // Form fields
   const [formName, setFormName] = useState('');
@@ -116,8 +126,19 @@ export default function CategoriasPage() {
     }
   };
 
-  const handleDelete = async (cat) => {
-    if (!confirm(`¿Deseas desactivar la categoría "${cat.nombre}"?`)) return;
+  const handleDelete = (cat) => {
+    setConfirmModal({
+      isOpen: true,
+      title: '¿Desactivar Categoría?',
+      message: `¿Estás seguro de que deseas desactivar la categoría "${cat.nombre}"? Los productos pertenecientes a esta clasificación no podrán ser asignados mientras permanezca inactiva.`,
+      confirmText: 'Sí, Desactivar',
+      variant: 'danger',
+      onConfirm: () => executeDelete(cat)
+    });
+  };
+
+  const executeDelete = async (cat) => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     try {
       const token = getToken();
       const res = await fetch(`${API_BASE_URL}/api/categorias/${cat.id}`, {
@@ -178,9 +199,17 @@ export default function CategoriasPage() {
           </div>
         </div>
 
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
         {/* Alerts */}
         {error && <Alert type="error" title="Error">{error}</Alert>}
-        {successMsg && <Alert type="success" title="Completado">{successMsg}</Alert>}
 
         {/* Search */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-soft-sm flex items-center justify-between">
@@ -366,6 +395,17 @@ export default function CategoriasPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Confirmación Corporativo */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          variant={confirmModal.variant}
+        />
 
       </div>
     </ProtectedRoute>

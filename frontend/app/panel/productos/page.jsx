@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProtectedRoute from '../../../components/auth/ProtectedRoute';
 import { 
   Package, Plus, Search, Filter, Edit3, Trash2, RefreshCw, 
-  AlertTriangle, CheckCircle2, Image as ImageIcon, Upload, DollarSign 
+  AlertTriangle, CheckCircle2, Image as ImageIcon, Upload, DollarSign, UploadCloud, X 
 } from 'lucide-react';
 import { 
   Button, Input, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert, CustomDropdown 
+  Badge, Modal, Alert, CustomDropdown, ConfirmModal, Toast 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -35,9 +35,24 @@ export default function ProductosPage() {
   const [formMinStock, setFormMinStock] = useState('5');
   const [formCatId, setFormCatId] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState('');
   const [formActive, setFormActive] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  // File input refs
+  const fileInputRefCreate = useRef(null);
+  const fileInputRefEdit = useRef(null);
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    variant: 'danger',
+    onConfirm: () => {}
+  });
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -94,7 +109,8 @@ export default function ProductosPage() {
       if (!res.ok) throw new Error(data.message || 'Error al subir imagen.');
 
       setFormImageUrl(data.imageUrl);
-      setSuccessMsg('Imagen subida correctamente al volumen persistente.');
+      setSelectedFileName(file.name);
+      setSuccessMsg(`Imagen "${file.name}" cargada correctamente al volumen persistente.`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -180,8 +196,19 @@ export default function ProductosPage() {
     }
   };
 
-  const handleDelete = async (prod) => {
-    if (!confirm(`¿Deseas desactivar el producto "${prod.nombre}"?`)) return;
+  const handleDelete = (prod) => {
+    setConfirmModal({
+      isOpen: true,
+      title: '¿Desactivar Producto?',
+      message: `¿Estás seguro de que deseas desactivar "${prod.nombre}" (${prod.codigoSku})? El artículo dejará de estar visible para compras en el catálogo de clientes.`,
+      confirmText: 'Sí, Desactivar',
+      variant: 'danger',
+      onConfirm: () => executeDelete(prod)
+    });
+  };
+
+  const executeDelete = async (prod) => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     try {
       const token = getToken();
       const res = await fetch(`${API_BASE_URL}/api/productos/${prod.id}`, {
@@ -189,7 +216,7 @@ export default function ProductosPage() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Error al desactivar producto.');
-      setSuccessMsg(`Producto "${prod.nombre}" desactivado.`);
+      setSuccessMsg(`Producto "${prod.nombre}" desactivado del catálogo.`);
       fetchProducts();
     } catch (err) {
       setError(err.message);
@@ -206,6 +233,7 @@ export default function ProductosPage() {
     setFormMinStock(prod.stockMinimo.toString());
     setFormCatId(prod.categoriaId);
     setFormImageUrl(prod.imagenUrl || '');
+    setSelectedFileName(prod.imagenUrl ? prod.imagenUrl.split('/').pop() : '');
     setFormActive(prod.activo);
     setIsEditOpen(true);
   };
@@ -219,6 +247,7 @@ export default function ProductosPage() {
     setFormStock('10');
     setFormMinStock('5');
     setFormImageUrl('');
+    setSelectedFileName('');
     setFormActive(true);
   };
 
@@ -261,9 +290,17 @@ export default function ProductosPage() {
           </div>
         </div>
 
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
         {/* Alerts */}
         {error && <Alert type="error" title="Error">{error}</Alert>}
-        {successMsg && <Alert type="success" title="Completado">{successMsg}</Alert>}
 
         {/* Filter bar */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-soft-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -420,24 +457,14 @@ export default function ProductosPage() {
                 onChange={(e) => setFormSku(e.target.value)}
                 required
               />
-              <div>
-                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
-                  Categoría
-                </label>
-                <select
-                  value={formCatId}
-                  onChange={(e) => setFormCatId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm font-inter focus:outline-none focus:border-primary-blue"
-                  required
-                >
-                  <option value="">Selecciona Categoría...</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomDropdown
+                label="Categoría"
+                value={formCatId}
+                onChange={(val) => setFormCatId(val)}
+                options={categories.map((c) => ({ value: c.id, label: c.nombre }))}
+                placeholder="Selecciona Categoría..."
+                required
+              />
             </div>
 
             <Input
@@ -490,26 +517,69 @@ export default function ProductosPage() {
               />
             </div>
 
-            {/* Subida de Imagen al Volumen Docker */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            {/* Subida de Imagen al Volumen Persistente Docker */}
+            <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase text-slate-700 font-inter">
                 Imagen del Producto (Volumen Persistente)
               </label>
-              <div className="flex items-center gap-4">
+              
+              <div 
+                onClick={() => fileInputRefCreate.current?.click()}
+                className={`relative border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
+                  formImageUrl 
+                    ? 'border-emerald-300 bg-emerald-50/20 hover:bg-emerald-50/40' 
+                    : 'border-slate-300 hover:border-primary-blue bg-slate-50/60 hover:bg-blue-50/30'
+                }`}
+              >
                 <input
+                  ref={fileInputRefCreate}
                   type="file"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleImageUpload}
-                  className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary-blue file:text-white hover:file:bg-blue-700 cursor-pointer"
+                  className="hidden"
                 />
-                {isUploading && <span className="text-xs text-primary-blue font-semibold animate-pulse">Subiendo...</span>}
+
+                {isUploading ? (
+                  <div className="py-3 flex flex-col items-center gap-2">
+                    <RefreshCw className="w-8 h-8 text-primary-blue animate-spin" />
+                    <p className="text-xs font-semibold text-primary-blue font-inter">Subiendo imagen al volumen de Docker (/app/uploads)...</p>
+                  </div>
+                ) : formImageUrl ? (
+                  <div className="flex flex-col sm:flex-row items-center gap-4 text-left">
+                    <img
+                      src={formImageUrl}
+                      alt="Previsualización"
+                      className="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white p-1 shadow-sm shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Guardada en Docker
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-800 mt-1 font-inter truncate">
+                        {selectedFileName || formImageUrl.split('/').pop()}
+                      </p>
+                      <p className="text-[11px] text-slate-400 font-mono truncate">{formImageUrl}</p>
+                      <p className="text-[11px] text-primary-blue hover:underline font-semibold mt-1">
+                        Haz clic aquí para seleccionar o cambiar la imagen
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-3 flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-primary-blue flex items-center justify-center mb-2 border border-blue-100">
+                      <UploadCloud className="w-6 h-6 stroke-[2]" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 font-montserrat">
+                      Seleccionar imagen del producto (PNG, JPG, WEBP)
+                    </p>
+                    <p className="text-[11px] text-slate-400 font-inter mt-0.5">
+                      Haz clic para buscar en tu equipo (almacenamiento en volumen persistente /app/uploads)
+                    </p>
+                  </div>
+                )}
               </div>
-              {formImageUrl && (
-                <div className="flex items-center gap-2 mt-2">
-                  <img src={formImageUrl} alt="Preview" className="w-12 h-12 object-contain rounded-lg border border-slate-200 bg-white p-1" />
-                  <span className="text-xs text-slate-500 font-mono truncate">{formImageUrl}</span>
-                </div>
-              )}
             </div>
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
@@ -538,23 +608,14 @@ export default function ProductosPage() {
               onChange={(e) => setFormName(e.target.value)}
               required
             />
-            <div>
-              <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
-                Categoría
-              </label>
-              <select
-                value={formCatId}
-                onChange={(e) => setFormCatId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm font-inter focus:outline-none focus:border-primary-blue"
-                required
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomDropdown
+              label="Categoría"
+              value={formCatId}
+              onChange={(val) => setFormCatId(val)}
+              options={categories.map((c) => ({ value: c.id, label: c.nombre }))}
+              placeholder="Selecciona Categoría..."
+              required
+            />
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-700 mb-1 font-inter">
                 Descripción
@@ -584,11 +645,71 @@ export default function ProductosPage() {
                 required
               />
             </div>
-            <Input
-              label="URL de Imagen"
-              value={formImageUrl}
-              onChange={(e) => setFormImageUrl(e.target.value)}
-            />
+            {/* Subida o reemplazo de Imagen al Volumen Persistente Docker */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase text-slate-700 font-inter">
+                Imagen del Producto (Volumen Persistente)
+              </label>
+              
+              <div 
+                onClick={() => fileInputRefEdit.current?.click()}
+                className={`relative border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
+                  formImageUrl 
+                    ? 'border-emerald-300 bg-emerald-50/20 hover:bg-emerald-50/40' 
+                    : 'border-slate-300 hover:border-primary-blue bg-slate-50/60 hover:bg-blue-50/30'
+                }`}
+              >
+                <input
+                  ref={fileInputRefEdit}
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+
+                {isUploading ? (
+                  <div className="py-3 flex flex-col items-center gap-2">
+                    <RefreshCw className="w-8 h-8 text-primary-blue animate-spin" />
+                    <p className="text-xs font-semibold text-primary-blue font-inter">Subiendo nueva imagen al volumen Docker...</p>
+                  </div>
+                ) : formImageUrl ? (
+                  <div className="flex flex-col sm:flex-row items-center gap-4 text-left">
+                    <img
+                      src={formImageUrl}
+                      alt="Previsualización"
+                      className="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white p-1 shadow-sm shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Guardada en Docker
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-800 mt-1 font-inter truncate">
+                        {selectedFileName || formImageUrl.split('/').pop()}
+                      </p>
+                      <p className="text-[11px] text-slate-400 font-mono truncate">{formImageUrl}</p>
+                      <p className="text-[11px] text-primary-blue hover:underline font-semibold mt-1">
+                        Haz clic aquí para seleccionar o cambiar la imagen
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-3 flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-primary-blue flex items-center justify-center mb-2 border border-blue-100">
+                      <UploadCloud className="w-6 h-6 stroke-[2]" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 font-montserrat">
+                      Seleccionar imagen del producto (PNG, JPG, WEBP)
+                    </p>
+                    <p className="text-[11px] text-slate-400 font-inter mt-0.5">
+                      Haz clic para buscar en tu equipo (almacenamiento en volumen persistente /app/uploads)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
@@ -611,6 +732,17 @@ export default function ProductosPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Confirmación Corporativo */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          variant={confirmModal.variant}
+        />
 
       </div>
     </ProtectedRoute>

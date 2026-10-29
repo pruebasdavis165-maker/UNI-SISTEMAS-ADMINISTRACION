@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { 
   Button, Input, Select, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert 
+  Badge, Modal, Alert, Toast 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -222,9 +222,17 @@ export default function InventarioPage() {
           </div>
         )}
 
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
         {/* Alerts and messages */}
         {error && <Alert type="error" title="Error">{error}</Alert>}
-        {successMsg && <Alert type="success" title="Completado">{successMsg}</Alert>}
 
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-200 gap-4">

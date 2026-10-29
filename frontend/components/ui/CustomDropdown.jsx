@@ -12,10 +12,13 @@ export default function CustomDropdown({
   icon: Icon,
   error,
   className = '',
-  containerClassName = ''
+  containerClassName = '',
+  dropUp = false,
+  required = false
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const listRef = useRef(null);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function CustomDropdown({
     <div className={`w-full space-y-1.5 ${containerClassName}`} ref={dropdownRef}>
       {label && (
         <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter">
-          {label}
+          {label} {required && <span className="text-rose-500">*</span>}
         </label>
       )}
 
@@ -60,36 +63,48 @@ export default function CustomDropdown({
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1.5 max-h-64 overflow-y-auto divide-y divide-slate-50 font-inter">
-            {options.map((opt) => {
-              const isSelected = String(opt.value) === String(value);
-              return (
-                <div
-                  key={String(opt.value)}
-                  onClick={() => {
-                    onChange(opt.value);
-                    setIsOpen(false);
-                  }}
-                  className={`px-3.5 py-2.5 cursor-pointer flex items-center justify-between transition-colors ${
-                    isSelected
-                      ? 'bg-blue-50 text-primary-blue font-bold'
-                      : 'hover:bg-blue-50/70 hover:text-primary-blue text-slate-700'
-                  }`}
-                >
-                  <div className="min-w-0 pr-2">
-                    <p className={`text-xs ${isSelected ? 'font-bold text-primary-blue' : 'font-semibold text-slate-800'}`}>
-                      {opt.label}
-                    </p>
-                    {opt.description && (
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                        {opt.description}
+          <div 
+            ref={listRef}
+            onWheel={(e) => e.stopPropagation()}
+            className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-2xl z-[999] py-1.5 max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50 font-inter ${
+              dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+            }`}
+          >
+            {options.length === 0 ? (
+              <div className="px-3.5 py-3 text-xs text-slate-400 text-center">
+                No hay opciones disponibles
+              </div>
+            ) : (
+              options.map((opt) => {
+                const isSelected = String(opt.value) === String(value);
+                return (
+                  <div
+                    key={String(opt.value)}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                    }}
+                    className={`px-3.5 py-2.5 cursor-pointer flex items-center justify-between transition-colors ${
+                      isSelected
+                        ? 'bg-blue-50 text-primary-blue font-bold'
+                        : 'hover:bg-blue-50/70 hover:text-primary-blue text-slate-700'
+                    }`}
+                  >
+                    <div className="min-w-0 pr-2">
+                      <p className={`text-xs ${isSelected ? 'font-bold text-primary-blue' : 'font-semibold text-slate-800'}`}>
+                        {opt.label}
                       </p>
-                    )}
+                      {opt.description && (
+                        <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
+                          {opt.description}
+                        </p>
+                      )}
+                    </div>
+                    {isSelected && <Check className="w-4 h-4 text-primary-blue shrink-0 ml-2" />}
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-primary-blue shrink-0 ml-2" />}
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         )}
       </div>

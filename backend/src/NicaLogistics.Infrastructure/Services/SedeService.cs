@@ -125,7 +125,20 @@ public class SedeService : ISedeService
         if (sede == null)
             throw new KeyNotFoundException("Sede no encontrada.");
 
-        sede.Activo = false;
+        // Verificar si la sede tiene encomiendas o pedidos vinculados
+        var hasEncomiendas = await _context.Encomiendas.AnyAsync(e => e.SedeOrigenId == id || e.SedeDestinoId == id);
+        var hasPedidos = await _context.Pedidos.AnyAsync(p => p.SedeOrigenId == id || p.SedeDestinoId == id);
+
+        if (hasEncomiendas || hasPedidos)
+        {
+            // Si tiene registros históricos o activos, se desactiva para mantener la integridad referencial
+            sede.Activo = false;
+            await _context.SaveChangesAsync();
+            return false;
+        }
+
+        // Eliminación física directa de la tabla sedes en PostgreSQL
+        _context.Sedes.Remove(sede);
         await _context.SaveChangesAsync();
         return true;
     }

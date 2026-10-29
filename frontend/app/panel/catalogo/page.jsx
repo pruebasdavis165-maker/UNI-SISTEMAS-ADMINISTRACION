@@ -7,7 +7,7 @@ import {
   ArrowRight, RefreshCw, AlertTriangle, CheckCircle2, 
   DollarSign, ChevronDown, Check 
 } from 'lucide-react';
-import { Button, Input, Select, Badge, Card } from '../../../components/ui';
+import { Button, Input, Select, CustomDropdown, Badge, Card } from '../../../components/ui';
 import { API_BASE_URL, getToken } from '../../../lib/auth';
 
 export default function PanelCatalogoPage() {
@@ -124,11 +124,12 @@ export default function PanelCatalogoPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Selector de Categoría */}
-          <div className="w-full sm:w-48">
-            <Select
+          {/* Selector de Categoría con Dropdown Personalizado */}
+          <div className="w-full sm:w-56">
+            <CustomDropdown
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(val) => setSelectedCategory(val)}
+              placeholder="Todas las categorías"
               options={[
                 { value: '', label: 'Todas las categorías' },
                 ...categories.map(c => ({ value: c.id, label: c.nombre }))

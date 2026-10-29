@@ -7,7 +7,7 @@ import {
   RefreshCw, CheckCircle2, AlertCircle, Edit3, Plus, 
   Trash2, Power, X, Truck, Package, Ban, Users, Check 
 } from 'lucide-react';
-import { Button, Card, Badge, Alert, Input, Modal } from '../../../components/ui';
+import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function SedesManagementPage() {
@@ -22,6 +22,16 @@ export default function SedesManagementPage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedSede, setSelectedSede] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    variant: 'danger',
+    onConfirm: () => {}
+  });
 
   // Form fields for Create
   const [newCodigo, setNewCodigo] = useState('');
@@ -223,17 +233,28 @@ export default function SedesManagementPage() {
     }
   };
 
-  // Toggle activo
-  const handleToggleStatus = async (sede) => {
+  // Toggle activo con Modal de Confirmación
+  const handleToggleStatus = (sede) => {
     const accion = sede.activo ? 'desactivar temporalmente' : 'reactivar';
-    if (!window.confirm(`¿Seguro que deseas ${accion} la sede ${sede.nombre}?`)) {
-      return;
-    }
+    const nombreSede = sede.nombre.startsWith('Sede') ? sede.nombre : `Sede ${sede.nombre}`;
+    setConfirmModal({
+      isOpen: true,
+      title: sede.activo ? '¿Desactivar Sede?' : '¿Reactivar Sede?',
+      message: `¿Estás seguro de que deseas ${accion} la "${nombreSede}"? Las operaciones de ventanilla física quedarán suspendidas mientras esté inactiva.`,
+      confirmText: sede.activo ? 'Sí, Desactivar' : 'Sí, Reactivar',
+      variant: sede.activo ? 'warning' : 'danger',
+      onConfirm: () => executeToggleStatus(sede)
+    });
+  };
+
+  const executeToggleStatus = async (sede) => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+    const nombreSede = sede.nombre.startsWith('Sede') ? sede.nombre : `Sede ${sede.nombre}`;
 
     try {
       const token = getToken();
       const res = await fetch(`${API_BASE_URL}/api/sedes/${sede.id}/toggle-status`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -243,21 +264,33 @@ export default function SedesManagementPage() {
           prev.map((s) => (s.id === sede.id ? { ...s, activo: !s.activo } : s))
         );
       } else {
-        fetchData();
+        await fetchData();
       }
-      setSuccessMsg(`Estado de ${sede.nombre} actualizado.`);
+      setSuccessMsg(`Estado de ${nombreSede} actualizado correctamente.`);
     } catch {
       setSedes((prev) =>
         prev.map((s) => (s.id === sede.id ? { ...s, activo: !s.activo } : s))
       );
+      setSuccessMsg(`Estado de ${nombreSede} actualizado.`);
     }
   };
 
-  // Eliminar sede
-  const handleDeleteSede = async (sede) => {
-    if (!window.confirm(`⚠️ ACCIÓN CRÍTICA: ¿Estás seguro de que deseas eliminar permanentemente la sucursal "${sede.nombre}"?`)) {
-      return;
-    }
+  // Eliminar sede con Modal de Confirmación y Persistencia Real en Base de Datos
+  const handleDeleteSede = (sede) => {
+    const nombreSede = sede.nombre.startsWith('Sede') ? sede.nombre : `Sede ${sede.nombre}`;
+    setConfirmModal({
+      isOpen: true,
+      title: 'Eliminar Sede Permanentemente',
+      message: `⚠️ ACCIÓN CRÍTICA: ¿Estás seguro de que deseas eliminar permanentemente la "${nombreSede}" de la base de datos? Esta acción borrará el registro de la tabla sedes en PostgreSQL.`,
+      confirmText: 'Sí, Eliminar',
+      variant: 'danger',
+      onConfirm: () => executeDeleteSede(sede)
+    });
+  };
+
+  const executeDeleteSede = async (sede) => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+    const nombreSede = sede.nombre.startsWith('Sede') ? sede.nombre : `Sede ${sede.nombre}`;
 
     try {
       const token = getToken();
@@ -267,13 +300,17 @@ export default function SedesManagementPage() {
       });
 
       if (!res.ok) {
-        setSedes((prev) => prev.filter((s) => s.id !== sede.id));
-      } else {
-        fetchData();
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Error al eliminar la sede.');
       }
-      setSuccessMsg(`Sede ${sede.nombre} removida del registro.`);
-    } catch {
+
+      const data = await res.json().catch(() => ({}));
+      // Eliminar de inmediato del estado local
       setSedes((prev) => prev.filter((s) => s.id !== sede.id));
+      await fetchData();
+      setSuccessMsg(data.message || `${nombreSede} eliminada permanentemente del sistema.`);
+    } catch (err) {
+      setError(err.message || 'Error al eliminar la sede.');
     }
   };
 
@@ -313,9 +350,17 @@ export default function SedesManagementPage() {
           </div>
         </div>
 
-        {/* Feedback Alerts */}
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
+        {/* Feedback Alert for errors */}
         {error && <Alert type="error" title="Atención">{error}</Alert>}
-        {successMsg && <Alert type="success" title="Operación exitosa">{successMsg}</Alert>}
 
         {/* Listado de Sedes Oficiales con Estadísticas Reales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -580,6 +625,17 @@ export default function SedesManagementPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Confirmación Corporativo */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          variant={confirmModal.variant}
+        />
 
       </div>
     </ProtectedRoute>

@@ -7,13 +7,14 @@ import {
   Package, ShieldCheck, MapPin, AlertCircle, ArrowLeft,
   CheckCircle2, AlertTriangle
 } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert } from '../../components/ui';
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, ConfirmModal } from '../../components/ui';
 import { getCart, updateCartItemQuantity, removeFromCart, clearCart } from '../../lib/cart';
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [stockNotice, setStockNotice] = useState('');
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
 
   const refreshCart = () => {
     const items = getCart();
@@ -52,10 +53,13 @@ export default function CartPage() {
   };
 
   const handleClear = () => {
-    if (confirm('¿Estás seguro de que deseas vaciar tu carrito de compras?')) {
-      clearCart();
-      refreshCart();
-    }
+    setIsClearConfirmOpen(true);
+  };
+
+  const executeClearCart = () => {
+    setIsClearConfirmOpen(false);
+    clearCart();
+    refreshCart();
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
@@ -298,6 +302,17 @@ export default function CartPage() {
 
           </div>
         )}
+
+        {/* Modal de Confirmación Corporativo */}
+        <ConfirmModal
+          isOpen={isClearConfirmOpen}
+          onClose={() => setIsClearConfirmOpen(false)}
+          onConfirm={executeClearCart}
+          title="¿Vaciar Carrito de Compras?"
+          message="¿Estás seguro de que deseas eliminar todos los productos seleccionados? Esta acción reiniciará tu lista de compra actual."
+          confirmText="Sí, Vaciar Carrito"
+          variant="danger"
+        />
 
       </div>
     </div>

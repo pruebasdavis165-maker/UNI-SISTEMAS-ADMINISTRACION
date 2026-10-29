@@ -66,6 +66,7 @@ public class SedesController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/toggle-status")]
+    [HttpPut("{id:guid}/toggle-status")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ToggleStatus(Guid id)
     {
@@ -86,8 +87,14 @@ public class SedesController : ControllerBase
     {
         try
         {
-            await _sedeService.DeleteAsync(id);
-            return Ok(new { message = "Sede eliminada/desactivada exitosamente." });
+            var physicallyDeleted = await _sedeService.DeleteAsync(id);
+            return Ok(new { 
+                success = true, 
+                physicallyDeleted,
+                message = physicallyDeleted 
+                    ? "Sede eliminada permanentemente de la base de datos." 
+                    : "Sede desactivada para conservar histórico de envíos." 
+            });
         }
         catch (KeyNotFoundException ex)
         {

@@ -8,7 +8,7 @@ import {
   AlertTriangle, ShieldCheck, UserCheck, Eye, 
   Send, CheckSquare
 } from 'lucide-react';
-import { Button, Input, Select, Card, Badge, Modal, Alert } from '../../../components/ui';
+import { Button, Input, Select, Card, Badge, Modal, Alert, Toast } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function PanelLogisticaPage() {
@@ -236,9 +236,17 @@ export default function PanelLogisticaPage() {
           </div>
         </div>
 
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
         {/* Alerts */}
         {error && <Alert type="error" title="Error en Operaciones">{error}</Alert>}
-        {successMsg && <Alert type="success" title="Completado">{successMsg}</Alert>}
 
         {/* Top Metric Cards (Corporate accents #1A56DB, #D946EF, #F59E0B, emerald) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

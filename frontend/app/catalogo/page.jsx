@@ -214,7 +214,8 @@ export default function PublicCatalogPage() {
               {/* Dropdown Menu con Sombra Flotante Elegante */}
               {isSortOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-full sm:w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+                  onWheel={(e) => e.stopPropagation()}
+                  className="absolute right-0 mt-2 w-full sm:w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-1.5 z-[999] max-h-60 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150"
                   role="listbox"
                 >
                   <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter border-b border-slate-100 mb-1">

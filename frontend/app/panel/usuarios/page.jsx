@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
   Button, Input, Select, CustomDropdown, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert 
+  Badge, Modal, Alert, ConfirmModal, Toast 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -25,6 +25,16 @@ export default function UserManagementPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    variant: 'danger',
+    onConfirm: () => {}
+  });
 
   // Form fields
   const [formName, setFormName] = useState('');
@@ -155,13 +165,22 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleToggleStatus = async (user) => {
-    const confirmMessage = user.activo 
-      ? `¿Deseas suspender la cuenta de ${user.nombreCompleto}? (Soft Delete: No podrá iniciar sesión)` 
-      : `¿Deseas reactivar la cuenta de ${user.nombreCompleto}?`;
+  const handleToggleStatus = (user) => {
+    const isSuspension = user.activo;
+    setConfirmModal({
+      isOpen: true,
+      title: isSuspension ? '¿Suspender Cuenta de Usuario?' : '¿Reactivar Cuenta de Usuario?',
+      message: isSuspension 
+        ? `¿Deseas suspender la cuenta de "${user.nombreCompleto}"? El usuario quedará inhabilitado temporalmente y no podrá iniciar sesión en la plataforma.` 
+        : `¿Deseas reactivar la cuenta de "${user.nombreCompleto}"? El usuario recuperará el acceso inmediato al sistema con su rol correspondiente.`,
+      confirmText: isSuspension ? 'Sí, Suspender Cuenta' : 'Sí, Reactivar Cuenta',
+      variant: isSuspension ? 'warning' : 'danger',
+      onConfirm: () => executeToggleStatus(user)
+    });
+  };
 
-    if (!confirm(confirmMessage)) return;
-
+  const executeToggleStatus = async (user) => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     try {
       const token = getToken();
       const res = await fetch(`${API_BASE_URL}/api/usuarios/${user.id}/toggle-status`, {
@@ -172,7 +191,7 @@ export default function UserManagementPage() {
       if (!res.ok) throw new Error('Error al modificar estado de la cuenta.');
 
       const data = await res.json();
-      setSuccessMsg(data.message);
+      setSuccessMsg(data.message || `Estado de cuenta para ${user.nombreCompleto} actualizado.`);
       fetchUsers();
     } catch (err) {
       setError(err.message);
@@ -251,15 +270,19 @@ export default function UserManagementPage() {
           </div>
         </div>
 
-        {/* Feedback Alerts */}
+        {/* Global Floating Toast (Top Right 10s auto-dismiss) */}
+        <Toast
+          message={successMsg}
+          title="Operación Exitosa"
+          type="success"
+          duration={10000}
+          onClose={() => setSuccessMsg('')}
+        />
+
+        {/* Feedback Alert for errors */}
         {error && (
           <Alert type="error" title="Error en operación">
             {error}
-          </Alert>
-        )}
-        {successMsg && (
-          <Alert type="success" title="Operación exitosa">
-            {successMsg}
           </Alert>
         )}
 
@@ -498,6 +521,7 @@ export default function UserManagementPage() {
               value={formRole}
               onChange={(val) => setFormRole(Number(val))}
               options={roleDropdownOptions}
+              dropUp={true}
             />
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
@@ -556,6 +580,17 @@ export default function UserManagementPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Confirmación Corporativo */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          variant={confirmModal.variant}
+        />
 
       </div>
     </ProtectedRoute>
