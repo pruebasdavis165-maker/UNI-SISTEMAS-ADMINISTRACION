@@ -89,11 +89,6 @@ function CheckoutContent() {
       return;
     }
 
-    if (sedeOrigenId === sedeDestinoId) {
-      setError('La Sede de Origen y la Sede de Destino no pueden ser iguales. La mercancía debe viajar entre dos sucursales oficiales.');
-      return;
-    }
-
     if (!contactoTelefono || !contactoTelefono.trim()) {
       setError('Debes ingresar un número telefónico de contacto para recibir las alertas y el código de retiro.');
       return;
@@ -461,6 +456,19 @@ function CheckoutContent() {
                           <Clock className="w-3 h-3" />
                           {selectedSedeDestino.horarioAtencion || 'Lun - Sáb 8:00 AM - 5:00 PM'}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Local Pickup Alert */}
+                    {sedeOrigenId && sedeDestinoId && sedeOrigenId === sedeDestinoId && (
+                      <div className="p-3.5 bg-blue-50/90 rounded-xl border border-blue-200 text-xs text-blue-900 font-inter flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-primary-blue shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-blue-950">Modalidad Pickup Local (Misma Sede)</p>
+                          <p className="text-blue-800 text-[11px] mt-0.5 leading-relaxed">
+                            Al seleccionar la misma sede para origen y destino, la encomienda se generará directamente en estado <strong>&quot;Lista para retiro&quot;</strong>, lista para entrega en ventanilla sin trámites de transporte internacional.
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>

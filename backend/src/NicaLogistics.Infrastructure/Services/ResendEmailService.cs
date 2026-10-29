@@ -74,12 +74,49 @@ public class ResendEmailService : IEmailService
 
             _logger.LogWarning("[ResendEmailService] Resend API devolvió estado {StatusCode}: {ResponseBody}", response.StatusCode, responseBody);
 
-            // Si Resend está en modo sandbox (onboarding@resend.dev) y rechaza el correo porque no está verificado en el plan gratuito,
-            // registramos el correo enviado en los logs de auditoría sin romper la operación del usuario.
-            if (responseBody.Contains("validation_error") || responseBody.Contains("restricted") || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            // Manejo automático del Sandbox de Resend:
+            // En cuentas gratuitas/sandbox sin dominio corporativo verificado, Resend solo permite enviar al correo del propietario (davismunoz05@gmail.com).
+            // Si el destinatario no está verificado en Resend, redirigimos automáticamente a la bandeja verificada del usuario para que SIEMPRE reciba la prueba en su Gmail real.
+            if (responseBody.Contains("You can only send testing emails to your own email address") || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                _logger.LogInformation("[ResendEmailService Sandbox Fallback] El correo para {To} fue procesado en modo sandbox de pruebas Resend.", to);
-                return true;
+                var match = System.Text.RegularExpressions.Regex.Match(responseBody, @"\(([^)]+@[^)]+)\)");
+                var verifiedOwner = match.Success ? match.Groups[1].Value : "davismunoz05@gmail.com";
+
+                _logger.LogInformation("[Resend Sandbox Delivery] Redirigiendo a la bandeja verificada {Owner} para destinatario {To}", verifiedOwner, to);
+
+                var banner = $"""
+                <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
+                  <strong>⚡ Notificación de Modo Pruebas (Resend Sandbox):</strong> Este correo transaccional fue generado en el sistema para el cliente <strong>{to}</strong> y entregado a tu bandeja verificada (<strong>{verifiedOwner}</strong>) para validación en tiempo real.
+                </div>
+                """;
+
+                var retryPayload = new
+                {
+                    from = _fromEmail,
+                    to = new[] { verifiedOwner },
+                    subject = $"[Prueba NicaLogistics -> {to}] {subject}",
+                    html = banner + htmlContent
+                };
+
+                var retryJson = JsonSerializer.Serialize(retryPayload);
+                using var retryRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails")
+                {
+                    Content = new StringContent(retryJson, Encoding.UTF8, "application/json")
+                };
+                retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
+                var retryResponse = await _httpClient.SendAsync(retryRequest);
+                var retryBody = await retryResponse.Content.ReadAsStringAsync();
+
+                if (retryResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("[ResendEmailService] Correo sandbox entregado exitosamente en bandeja real {Owner}. Respuesta: {Response}", verifiedOwner, retryBody);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogWarning("[ResendEmailService] Error en reintento a bandeja verificada: {RetryBody}", retryBody);
+                }
             }
 
             return false;
@@ -235,7 +272,7 @@ public class ResendEmailService : IEmailService
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
               <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                  <th style="padding: 10px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase;">Producto</th>
+                  <th style="padding: 10px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase;">Producto Facturado</th>
                   <th style="padding: 10px; text-align: center; font-size: 11px; color: #64748b; text-transform: uppercase;">Cant.</th>
                   <th style="padding: 10px; text-align: right; font-size: 11px; color: #64748b; text-transform: uppercase;">Subtotal</th>
                 </tr>
@@ -245,11 +282,24 @@ public class ResendEmailService : IEmailService
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="2" style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 14px; color: #1e293b;">Total Pagado:</td>
+                  <td colspan="2" style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 14px; color: #1e293b;">Total Facturado:</td>
                   <td style="padding: 12px 10px; text-align: right; font-weight: 800; font-size: 16px; color: #1a56db;">${total:F2} USD</td>
                 </tr>
               </tfoot>
             </table>
+
+            <!-- Instrucciones Obligatorias para Retiro en Ventanilla -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
+                📋 Requisitos Obligatorios para Retiro en Ventanilla Oficial
+              </h4>
+              <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #334155; line-height: 1.6;">
+                <li>Presentar documento de identidad original oficial (<strong>Cédula de Identidad de Nicaragua o Pasaporte Oficial vigente</strong>).</li>
+                <li>Presentar el <strong>Código de Rastreo Oficial ({trackingCode})</strong> en pantalla de tu móvil o comprobante impreso.</li>
+                <li>El retiro debe realizarse estrictamente en la sucursal de destino autorizada: <strong>{sedeDestino}</strong>.</li>
+                <li>En caso de retiro por una tercera persona autorizada, deberá presentar carta poder firmada y fotocopia de la cédula del titular de la cuenta.</li>
+              </ul>
+            </div>
 
             <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;"/>
             <p style="font-size: 11px; text-align: center; color: #94a3b8; margin: 0;">

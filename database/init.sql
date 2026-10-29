@@ -89,8 +89,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
     total NUMERIC(12,2) NOT NULL CHECK (total >= 0),
     estado VARCHAR(50) NOT NULL DEFAULT 'PENDIENTE_PAGO', -- 'PENDIENTE_PAGO', 'PAGADO', 'CANCELADO', 'COMPLETADO'
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_sedes_diferentes CHECK (sede_origen_id <> sede_destino_id)
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 8. Tabla de Detalles de Pedido

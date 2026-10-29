@@ -31,14 +31,17 @@ public class OrderService : IOrderService
         if (dto.Items == null || !dto.Items.Any())
             throw new InvalidOperationException("El pedido debe contener al menos un producto.");
 
-        if (dto.SedeOrigenId == dto.SedeDestinoId)
-            throw new InvalidOperationException("La Sede de Origen y la Sede de Destino no pueden ser iguales según la política operativa Sede a Sede.");
+        // Regla Operativa: Se permite Pickup Local (SedeOrigenId == SedeDestinoId) para retiro en la misma sucursal
+        var isLocalPickup = dto.SedeOrigenId == dto.SedeDestinoId;
 
         var sedeOrigen = await _context.Sedes.FirstOrDefaultAsync(s => s.Id == dto.SedeOrigenId && s.Activo);
         if (sedeOrigen == null)
             throw new KeyNotFoundException("La Sede de Origen seleccionada no es válida o está inactiva.");
 
-        var sedeDestino = await _context.Sedes.FirstOrDefaultAsync(s => s.Id == dto.SedeDestinoId && s.Activo);
+        var sedeDestino = isLocalPickup
+            ? sedeOrigen
+            : await _context.Sedes.FirstOrDefaultAsync(s => s.Id == dto.SedeDestinoId && s.Activo);
+
         if (sedeDestino == null)
             throw new KeyNotFoundException("La Sede de Destino seleccionada no es válida o está inactiva.");
 
@@ -154,7 +157,11 @@ public class OrderService : IOrderService
             await _context.Pagos.AddAsync(payment);
 
             // Trigger Automático de Encomienda (RF-08, Milestone 5)
+            // Si es Pickup Local (Origen == Destino), la encomienda inicia directamente en "LISTA_PARA_RETIRO"
+            // Si es Despacho Bilateral (Origen != Destino), inicia en "REGISTRADA" para transporte internacional
             var trackingCode = $"NL-{DateTime.UtcNow:yyyy}-{Random.Shared.Next(10000, 99999)}";
+            var initialShipmentState = isLocalPickup ? "LISTA_PARA_RETIRO" : "REGISTRADA";
+
             var shipment = new Shipment
             {
                 CodigoTracking = trackingCode,
@@ -162,7 +169,7 @@ public class OrderService : IOrderService
                 ClienteId = clienteId,
                 SedeOrigenId = dto.SedeOrigenId,
                 SedeDestinoId = dto.SedeDestinoId,
-                Estado = "REGISTRADA",
+                Estado = initialShipmentState,
                 FechaRegistro = DateTime.UtcNow,
                 ActualizadoEn = DateTime.UtcNow
             };
@@ -172,9 +179,11 @@ public class OrderService : IOrderService
             var history = new TrackingHistory
             {
                 EncomiendaId = shipment.Id,
-                Estado = "REGISTRADA",
-                UbicacionSedeId = dto.SedeOrigenId,
-                Comentario = $"Encomienda generada automáticamente tras confirmación de pago de orden {orderNumber}. Origen: {sedeOrigen.Nombre}, Destino final para retiro: {sedeDestino.Nombre}.",
+                Estado = initialShipmentState,
+                UbicacionSedeId = dto.SedeDestinoId,
+                Comentario = isLocalPickup
+                    ? $"Pickup Local en {sedeDestino.Nombre}. Mercancía verificada y disponible de inmediato para retiro en ventanilla oficial."
+                    : $"Encomienda generada automáticamente tras confirmación de pago de orden {orderNumber}. Origen: {sedeOrigen.Nombre}, Destino final para retiro: {sedeDestino.Nombre}.",
                 RegistradoPorId = clienteId,
                 Fecha = DateTime.UtcNow
             };
@@ -183,48 +192,59 @@ public class OrderService : IOrderService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            // Notificaciones Transaccionales (Resend API)
-            _ = Task.Run(async () =>
+            // Despacho Inmediato de Correo Transaccional (Resend API)
+            try
             {
-                try
+                if (!string.IsNullOrWhiteSpace(cliente.Email))
                 {
-                    // Caso 2: Recibo de compra con Código de Rastreo focal para el cliente
-                    if (!string.IsNullOrWhiteSpace(cliente.Email))
-                    {
-                        var emailItems = orderItems.Select(i => (
-                            ProductName: products.FirstOrDefault(p => p.Id == i.ProductoId)?.Nombre ?? "Producto",
-                            Quantity: i.Cantidad,
-                            Subtotal: i.Subtotal
-                        ));
+                    var emailItems = orderItems.Select(i => (
+                        ProductName: products.FirstOrDefault(p => p.Id == i.ProductoId)?.Nombre ?? "Producto",
+                        Quantity: i.Cantidad,
+                        Subtotal: i.Subtotal
+                    )).ToList();
 
-                        await _emailService.SendOrderReceiptEmailAsync(
-                            to: cliente.Email,
-                            clientName: cliente.NombreCompleto,
-                            orderNumber: orderNumber,
-                            trackingCode: trackingCode,
-                            total: grandTotal,
-                            sedeOrigen: sedeOrigen.Nombre,
-                            sedeDestino: sedeDestino.Nombre,
-                            items: emailItems
-                        );
-                    }
+                    _logger.LogInformation("Despachando recibo de compra Resend para orden {OrderNumber} a {Email}", orderNumber, cliente.Email);
 
-                    // Caso 4: Alertas de Stock (0 o mínimo) para el Administrador
-                    foreach (var p in lowStockProducts)
-                    {
-                        await _emailService.SendLowStockAlertEmailAsync(
-                            productName: p.Nombre,
-                            sku: p.CodigoSku,
-                            currentStock: p.StockActual,
-                            minStock: p.StockMinimo
-                        );
-                    }
+                    await _emailService.SendOrderReceiptEmailAsync(
+                        to: cliente.Email,
+                        clientName: cliente.NombreCompleto,
+                        orderNumber: orderNumber,
+                        trackingCode: trackingCode,
+                        total: grandTotal,
+                        sedeOrigen: sedeOrigen.Nombre,
+                        sedeDestino: sedeDestino.Nombre,
+                        items: emailItems
+                    );
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al enviar recibo de compra Resend para orden {OrderNumber}", orderNumber);
+            }
+
+            // Alertas de Stock Bajo (Administrador)
+            if (lowStockProducts.Any())
+            {
+                _ = Task.Run(async () =>
                 {
-                    _logger.LogError(ex, "Error al despachar correos transaccionales para orden {OrderNumber}", orderNumber);
-                }
-            });
+                    try
+                    {
+                        foreach (var p in lowStockProducts)
+                        {
+                            await _emailService.SendLowStockAlertEmailAsync(
+                                productName: p.Nombre,
+                                sku: p.CodigoSku,
+                                currentStock: p.StockActual,
+                                minStock: p.StockMinimo
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error al enviar alertas de stock bajo para orden {OrderNumber}", orderNumber);
+                    }
+                });
+            }
 
             return await BuildOrderResponseAsync(order.Id);
         }
