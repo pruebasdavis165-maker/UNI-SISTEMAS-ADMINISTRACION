@@ -8,7 +8,7 @@ import {
   CheckCircle2, AlertOctagon, TrendingDown 
 } from 'lucide-react';
 import { 
-  Button, Input, Select, Card, CardHeader, CardTitle, CardContent, 
+  Button, Input, Select, CustomDropdown, Card, CardHeader, CardTitle, CardContent, 
   Badge, Modal, Alert, Toast 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
@@ -38,24 +38,26 @@ export default function InventarioPage() {
       const token = getToken();
       const headers = { 'Authorization': `Bearer ${token}` };
 
+      // Consulta robusta: intenta /api/inventario y en fallback /api/productos
       const [resProd, resMovs, resAlerts] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/inventario`, { headers }),
-        fetch(`${API_BASE_URL}/api/inventario/movimientos`, { headers }),
-        fetch(`${API_BASE_URL}/api/inventario/alertas`, { headers })
+        fetch(`${API_BASE_URL}/api/inventario`, { headers })
+          .then(async (r) => (r.ok ? r : fetch(`${API_BASE_URL}/api/productos`, { headers }))),
+        fetch(`${API_BASE_URL}/api/inventario/movimientos`, { headers }).catch(() => null),
+        fetch(`${API_BASE_URL}/api/inventario/alertas`, { headers }).catch(() => null)
       ]);
 
-      if (!resProd.ok) throw new Error('Error al cargar inventario general.');
+      if (!resProd || !resProd.ok) throw new Error('Error al consultar inventario general.');
       const dataProd = await resProd.json();
-      setProducts(dataProd);
+      setProducts(Array.isArray(dataProd) ? dataProd : []);
 
-      if (resMovs.ok) {
+      if (resMovs && resMovs.ok) {
         const dataMovs = await resMovs.json();
-        setMovements(dataMovs);
+        setMovements(Array.isArray(dataMovs) ? dataMovs : []);
       }
 
-      if (resAlerts.ok) {
+      if (resAlerts && resAlerts.ok) {
         const dataAlerts = await resAlerts.json();
-        setAlerts(dataAlerts);
+        setAlerts(Array.isArray(dataAlerts) ? dataAlerts : []);
       }
     } catch (err) {
       setError(err.message || 'Error de conexión con el servicio de inventario.');
@@ -434,15 +436,17 @@ export default function InventarioPage() {
               <div>Stock Mínimo de Alerta: <strong className="text-alert-amber">{selectedProduct?.stockMinimo} unidades</strong></div>
             </div>
 
-            <Select
+            <CustomDropdown
               label="Tipo de Movimiento"
               value={moveType}
-              onChange={(e) => setMoveType(e.target.value)}
-            >
-              <option value="ENTRADA">ENTRADA (Reabastecimiento o recepción desde Miami Hub)</option>
-              <option value="SALIDA">SALIDA (Merma, daño o ajuste negativo)</option>
-              <option value="AJUSTE">AJUSTE (Conteo físico directo)</option>
-            </Select>
+              onChange={(val) => setMoveType(val)}
+              options={[
+                { value: 'ENTRADA', label: 'ENTRADA', description: 'Reabastecimiento o recepción desde Miami Hub' },
+                { value: 'SALIDA', label: 'SALIDA', description: 'Merma, daño o ajuste negativo' },
+                { value: 'AJUSTE', label: 'AJUSTE', description: 'Conteo físico directo en bodega' }
+              ]}
+              required
+            />
 
             <Input
               label={moveType === 'AJUSTE' ? 'Nuevo Conteo Físico Total' : 'Cantidad a Mover'}

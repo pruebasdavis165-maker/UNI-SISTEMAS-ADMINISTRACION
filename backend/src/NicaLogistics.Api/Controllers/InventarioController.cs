@@ -8,14 +8,30 @@ namespace NicaLogistics.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Vendedor,Logística")]
+[Authorize(Roles = "Admin,Vendedor,Logística,Logistica")]
 public class InventarioController : ControllerBase
 {
     private readonly IInventoryService _inventoryService;
+    private readonly IProductService _productService;
 
-    public InventarioController(IInventoryService inventoryService)
+    public InventarioController(IInventoryService inventoryService, IProductService productService)
     {
         _inventoryService = inventoryService;
+        _productService = productService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetInventory([FromQuery] string? search, [FromQuery] Guid? categoriaId)
+    {
+        var products = await _productService.GetAllAsync(search, categoriaId, activeOnly: null);
+        return Ok(products);
+    }
+
+    [HttpGet("stock")]
+    public async Task<IActionResult> GetStock([FromQuery] string? search, [FromQuery] Guid? categoriaId)
+    {
+        var products = await _productService.GetAllAsync(search, categoriaId, activeOnly: null);
+        return Ok(products);
     }
 
     [HttpGet("movimientos")]

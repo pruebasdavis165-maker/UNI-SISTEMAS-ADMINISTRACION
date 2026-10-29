@@ -8,7 +8,7 @@ import {
   ArrowRight, RefreshCw, CheckCircle2, Clock, 
   TrendingUp, MapPin, AlertCircle, ShoppingCart 
 } from 'lucide-react';
-import { Button, Input, Select, Card, Badge, Alert } from '../../../components/ui';
+import { Button, Input, Select, CustomDropdown, Card, Badge, Alert } from '../../../components/ui';
 import { getToken, API_BASE_URL, getUser } from '../../../lib/auth';
 
 export default function PanelVendedorPage() {
@@ -181,16 +181,18 @@ export default function PanelVendedorPage() {
                 />
               </div>
 
-              <div className="w-full sm:w-48">
-                <Select
+              <div className="w-full sm:w-56">
+                <CustomDropdown
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">Todos los Estados</option>
-                  <option value="PAGADO">PAGADO</option>
-                  <option value="PENDIENTE">PENDIENTE</option>
-                  <option value="CANCELADO">CANCELADO</option>
-                </Select>
+                  onChange={(val) => setStatusFilter(val)}
+                  placeholder="Todos los Estados"
+                  options={[
+                    { value: '', label: 'Todos los Estados' },
+                    { value: 'PAGADO', label: 'PAGADO', description: 'Órdenes confirmadas y cobradas' },
+                    { value: 'PENDIENTE', label: 'PENDIENTE', description: 'En espera de pago o verificación' },
+                    { value: 'CANCELADO', label: 'CANCELADO', description: 'Transacción anulada' }
+                  ]}
+                />
               </div>
             </div>
           </div>

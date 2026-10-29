@@ -7,7 +7,7 @@ import {
   RefreshCw, CheckCircle2, AlertCircle, Edit3, Plus, 
   Trash2, Power, X, Truck, Package, Ban, Users, Check 
 } from 'lucide-react';
-import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast } from '../../../components/ui';
+import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast, CustomDropdown } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function SedesManagementPage() {
@@ -50,6 +50,19 @@ export default function SedesManagementPage() {
   const [editTelefono, setEditTelefono] = useState('');
   const [editHorario, setEditHorario] = useState('');
   const [editActivo, setEditActivo] = useState(true);
+
+  // Opciones estructuradas de País y Horarios
+  const countryOptions = [
+    { value: 'Nicaragua', label: 'Nicaragua', description: 'Operación nacional y ventanilla física Managua' },
+    { value: 'Estados Unidos', label: 'Estados Unidos', description: 'Hub internacional y ventanilla de carga Miami' }
+  ];
+
+  const scheduleOptions = [
+    { value: 'Lun - Sáb: 8:00 AM - 6:00 PM', label: 'Lun - Sáb: 8:00 AM - 6:00 PM', description: 'Horario comercial nacional completo' },
+    { value: 'Lun - Vie: 8:00 AM - 5:00 PM', label: 'Lun - Vie: 8:00 AM - 5:00 PM', description: 'Horario estándar Hub Miami' },
+    { value: 'Lun - Sáb: 8:30 AM - 5:30 PM', label: 'Lun - Sáb: 8:30 AM - 5:30 PM', description: 'Horario regular de oficina' },
+    { value: 'Lun - Dom: 8:00 AM - 7:00 PM', label: 'Lun - Dom: 8:00 AM - 7:00 PM', description: 'Horario extendido continuo' }
+  ];
 
   const defaultSedes = [
     {
@@ -516,16 +529,26 @@ export default function SedesManagementPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="País"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CustomDropdown
+                label="País de Operación"
                 value={newPais}
-                onChange={(e) => setNewPais(e.target.value)}
+                onChange={(val) => {
+                  setNewPais(val);
+                  if (val === 'Estados Unidos') {
+                    if (!newCiudad || newCiudad === 'Managua') setNewCiudad('Miami, Florida');
+                    if (!newTelefono || newTelefono.startsWith('+505')) setNewTelefono('+1 (305) 555-0199');
+                  } else {
+                    if (!newCiudad || newCiudad.includes('Miami')) setNewCiudad('Managua');
+                    if (!newTelefono || newTelefono.startsWith('+1')) setNewTelefono('+505 2249-0100');
+                  }
+                }}
+                options={countryOptions}
                 required
               />
               <Input
                 label="Ciudad"
-                placeholder="Ej. Estelí"
+                placeholder={newPais === 'Estados Unidos' ? 'Miami, Florida' : 'Managua'}
                 value={newCiudad}
                 onChange={(e) => setNewCiudad(e.target.value)}
                 required
@@ -540,17 +563,25 @@ export default function SedesManagementPage() {
               required
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Teléfono de Contacto"
-                placeholder="+505 2713-0000"
-                value={newTelefono}
-                onChange={(e) => setNewTelefono(e.target.value)}
-              />
-              <Input
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Input
+                  label="Teléfono de Contacto"
+                  placeholder={newPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
+                  value={newTelefono}
+                  onChange={(e) => setNewTelefono(e.target.value)}
+                />
+                <span className="text-[10px] text-slate-400 font-inter mt-0.5 block">
+                  Estándar: {newPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
+                </span>
+              </div>
+              <CustomDropdown
                 label="Horario de Atención"
                 value={newHorario}
-                onChange={(e) => setNewHorario(e.target.value)}
+                onChange={(val) => setNewHorario(val)}
+                options={scheduleOptions}
+                placeholder="Seleccionar Horario..."
+                required
               />
             </div>
 
@@ -580,11 +611,12 @@ export default function SedesManagementPage() {
               required
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="País"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CustomDropdown
+                label="País de Operación"
                 value={editPais}
-                onChange={(e) => setEditPais(e.target.value)}
+                onChange={(val) => setEditPais(val)}
+                options={countryOptions}
                 required
               />
               <Input
@@ -602,16 +634,25 @@ export default function SedesManagementPage() {
               required
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Teléfono de Contacto"
-                value={editTelefono}
-                onChange={(e) => setEditTelefono(e.target.value)}
-              />
-              <Input
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Input
+                  label="Teléfono de Contacto"
+                  placeholder={editPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
+                  value={editTelefono}
+                  onChange={(e) => setEditTelefono(e.target.value)}
+                />
+                <span className="text-[10px] text-slate-400 font-inter mt-0.5 block">
+                  Estándar: {editPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
+                </span>
+              </div>
+              <CustomDropdown
                 label="Horario de Atención"
                 value={editHorario}
-                onChange={(e) => setEditHorario(e.target.value)}
+                onChange={(val) => setEditHorario(val)}
+                options={scheduleOptions}
+                placeholder="Seleccionar Horario..."
+                required
               />
             </div>
 

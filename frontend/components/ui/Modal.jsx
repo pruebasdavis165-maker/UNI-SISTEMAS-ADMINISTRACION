@@ -44,7 +44,7 @@ export default function Modal({
 
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div 
-          className={`relative transform ${overflow} rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full ${maxWidth} border border-slate-100`}
+          className={`relative ${overflow} rounded-2xl bg-white text-left shadow-2xl sm:my-8 w-full ${maxWidth} border border-slate-100`}
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">

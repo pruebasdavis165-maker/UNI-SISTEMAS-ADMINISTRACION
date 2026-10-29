@@ -8,7 +8,7 @@ import {
   AlertTriangle, ShieldCheck, UserCheck, Eye, 
   Send, CheckSquare
 } from 'lucide-react';
-import { Button, Input, Select, Card, Badge, Modal, Alert, Toast } from '../../../components/ui';
+import { Button, Input, Select, CustomDropdown, Card, Badge, Modal, Alert, Toast } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function PanelLogisticaPage() {
@@ -307,20 +307,22 @@ export default function PanelLogisticaPage() {
               />
             </div>
 
-            {/* Sede Filter */}
-            <div className="w-full md:w-72">
-              <Select
+            {/* Sede Filter con Custom Dropdown moderno */}
+            <div className="w-full md:w-80">
+              <CustomDropdown
                 icon={MapPin}
                 value={selectedSedeFilter}
-                onChange={(e) => setSelectedSedeFilter(e.target.value)}
-              >
-                <option value="">Todas las Sedes Oficiales</option>
-                {sedes.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.nombre} ({s.ciudad})
-                  </option>
-                ))}
-              </Select>
+                onChange={(val) => setSelectedSedeFilter(val)}
+                placeholder="Todas las Sedes Oficiales"
+                options={[
+                  { value: '', label: 'Todas las Sedes Oficiales' },
+                  ...sedes.map((s) => ({
+                    value: s.id,
+                    label: `${s.nombre} (${s.ciudad})`,
+                    description: s.direccionVentanilla
+                  }))
+                ]}
+              />
             </div>
           </div>
         </div>

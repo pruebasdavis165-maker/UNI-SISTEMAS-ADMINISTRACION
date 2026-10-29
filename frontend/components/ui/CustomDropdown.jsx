@@ -66,7 +66,7 @@ export default function CustomDropdown({
           <div 
             ref={listRef}
             onWheel={(e) => e.stopPropagation()}
-            className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-2xl z-[999] py-1.5 max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50 font-inter ${
+            className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] py-1.5 max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50 font-inter ${
               dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
             }`}
           >

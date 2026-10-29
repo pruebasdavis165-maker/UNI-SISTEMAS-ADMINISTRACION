@@ -29,6 +29,15 @@ public class ProductosController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("stock")]
+    public async Task<IActionResult> GetStock(
+        [FromQuery] string? search,
+        [FromQuery] Guid? categoriaId)
+    {
+        var products = await _productService.GetAllAsync(search, categoriaId, activeOnly: null);
+        return Ok(products);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {

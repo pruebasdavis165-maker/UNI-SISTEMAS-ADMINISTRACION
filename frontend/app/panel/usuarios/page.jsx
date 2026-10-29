@@ -484,6 +484,7 @@ export default function UserManagementPage() {
           onClose={() => setIsCreateOpen(false)}
           title="Crear Nueva Cuenta"
           description="Agrega un nuevo miembro de personal o cliente al sistema"
+          maxWidth="max-w-xl"
         >
           <form onSubmit={handleCreateUser} className="space-y-4">
             <Input
@@ -521,7 +522,7 @@ export default function UserManagementPage() {
               value={formRole}
               onChange={(val) => setFormRole(Number(val))}
               options={roleDropdownOptions}
-              dropUp={true}
+              required
             />
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
@@ -541,6 +542,7 @@ export default function UserManagementPage() {
           onClose={() => setIsEditOpen(false)}
           title="Editar Cuenta de Usuario"
           description={`Modificando datos para ${currentUser?.email}`}
+          maxWidth="max-w-xl"
         >
           <form onSubmit={handleEditUser} className="space-y-4">
             <Input
