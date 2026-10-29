@@ -1,11 +1,12 @@
 import React from 'react';
 
 export function Card({ children, className = '', hover = true, ...props }) {
+  const hasOverflowClass = /overflow-(hidden|visible|auto|scroll)/.test(className);
   return (
     <div 
       className={`bg-white rounded-2xl border border-slate-200/90 shadow-soft-sm 
         ${hover ? 'hover:shadow-soft-md hover:border-slate-300 transition-all duration-200' : ''} 
-        overflow-hidden ${className}`}
+        ${hasOverflowClass ? '' : 'overflow-hidden'} ${className}`}
       {...props}
     >
       {children}

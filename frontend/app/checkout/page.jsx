@@ -219,7 +219,7 @@ function CheckoutContent() {
           </div>
 
           {/* Focal Point: Tarjeta Gigante del Código de Rastreo con Degradado Corporativo */}
-          <div className="p-7 sm:p-10 bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white rounded-3xl shadow-2xl border border-slate-700/60 relative overflow-hidden text-center space-y-6">
+          <div className="p-7 sm:p-10 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 shadow-2xl text-white rounded-3xl relative overflow-hidden text-center space-y-6">
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent-magenta/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -233,11 +233,11 @@ function CheckoutContent() {
               </p>
             </div>
 
-            {/* Código Gigante y Llamativo */}
-            <div className="relative z-10 py-5 px-6 bg-slate-900/90 rounded-2xl border border-white/10 max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
-              <div className="text-center sm:text-left">
+            {/* Código Gigante y Llamativo en una sola línea horizontal */}
+            <div className="relative z-10 py-5 px-6 bg-black/40 rounded-2xl border border-white/10 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
+              <div className="text-center sm:text-left min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block font-inter">Tracking ID Oficial</span>
-                <span className="text-3xl sm:text-5xl font-mono font-extrabold text-[#D946EF] tracking-wider select-all block mt-0.5 drop-shadow-sm">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold text-[#D946EF] tracking-tight whitespace-nowrap select-all block mt-0.5 drop-shadow-sm">
                   {orderResult.codigoTracking || 'NL-2026-GENERADO'}
                 </span>
               </div>
@@ -245,7 +245,7 @@ function CheckoutContent() {
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold font-inter transition-all border border-white/20 active:scale-95 shadow-sm shrink-0"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold font-inter transition-all active:scale-95 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
                 title="Copiar código al portapapeles"
               >
                 {copiedCode ? (
@@ -368,7 +368,7 @@ function CheckoutContent() {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Step 1: Branch Selection */}
-            <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-6 overflow-visible relative">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-50 text-primary-blue flex items-center justify-center font-montserrat font-bold text-sm">
@@ -392,7 +392,7 @@ function CheckoutContent() {
                   <span>Cargando red de sedes oficiales...</span>
                 </div>
               ) : (
-                <div className="space-y-5">
+                <div className="space-y-5 overflow-visible relative">
                   
                   {/* Sede Origen */}
                   <div className="space-y-1.5">

@@ -11,6 +11,15 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { getUser, normalizeRole, isInternalRole } from '../lib/auth';
 
+// Función para formatear el nombre del cliente (Primer Nombre y Primer Apellido, sin paréntesis)
+function formatDisplayName(fullName) {
+  if (!fullName) return 'Cliente';
+  const cleaned = fullName.split(' (')[0].trim();
+  const parts = cleaned.split(' ').filter(Boolean);
+  if (parts.length <= 2) return cleaned;
+  return parts.slice(0, 2).join(' ');
+}
+
 export default function Navbar() {
   const pathname = usePathname();
   const auth = useAuth();
@@ -296,10 +305,10 @@ export default function Navbar() {
 
             {/* Bloque de Sesión Activa */}
             {isAuthenticated && effectiveUser ? (
-              <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+              <div className="flex items-center gap-4 pl-4 border-l border-slate-200 shrink-0">
                 <div className="flex flex-col items-end">
-                  <span className="text-xs font-bold text-slate-900 font-montserrat tracking-tight max-w-[160px] truncate" title={effectiveUser.nombreCompleto}>
-                    {effectiveUser.nombreCompleto}
+                  <span className="text-sm font-bold text-slate-800 font-montserrat tracking-tight whitespace-nowrap" title={effectiveUser.nombreCompleto}>
+                    {formatDisplayName(effectiveUser.nombreCompleto)}
                   </span>
                   <div className="mt-0.5">
                     {renderRoleBadge()}
@@ -308,10 +317,10 @@ export default function Navbar() {
 
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-xl transition-all shadow-xs cursor-pointer"
+                  className="text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-2 cursor-pointer"
                   title="Cerrar Sesión Activa"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Cerrar Sesión</span>
                 </button>
               </div>
@@ -366,8 +375,8 @@ export default function Navbar() {
           {isAuthenticated && effectiveUser && (
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 mb-3 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-900 font-montserrat truncate max-w-[200px]">
-                  {effectiveUser.nombreCompleto}
+                <p className="text-sm font-bold text-slate-900 font-montserrat">
+                  {formatDisplayName(effectiveUser.nombreCompleto)}
                 </p>
                 <div className="mt-1">
                   {renderRoleBadge()}
@@ -375,7 +384,7 @@ export default function Navbar() {
               </div>
               <button
                 onClick={handleLogout}
-                className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold flex items-center gap-1 border border-rose-200"
+                className="text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 border border-slate-200 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Salir</span>
