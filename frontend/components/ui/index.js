@@ -8,3 +8,4 @@ export { default as ConfirmModal } from './ConfirmModal';
 export { default as Badge } from './Badge';
 export { default as Alert } from './Alert';
 export { default as Toast } from './Toast';
+export { default as PhoneInput, COUNTRIES } from './PhoneInput';

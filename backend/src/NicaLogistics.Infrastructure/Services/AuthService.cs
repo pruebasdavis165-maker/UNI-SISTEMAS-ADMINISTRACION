@@ -114,6 +114,16 @@ public class AuthService : IAuthService
             throw new InvalidOperationException(passwordError ?? PasswordPolicy.PolicyErrorMessage);
         }
 
+        // Validación y normalización de Teléfono según política institucional
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(request.Telefono))
+        {
+            if (!PhonePolicy.IsValid(request.Telefono, out var phoneError, out normalizedPhone))
+            {
+                throw new InvalidOperationException(phoneError ?? PhonePolicy.PolicyErrorMessage);
+            }
+        }
+
         var emailExists = await _context.Usuarios.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
         if (emailExists)
         {
@@ -138,7 +148,7 @@ public class AuthService : IAuthService
             NombreCompleto = request.NombreCompleto.Trim(),
             Email = normalizedEmail,
             PasswordHash = _hasher.HashPassword(request.Password),
-            Telefono = request.Telefono?.Trim(),
+            Telefono = normalizedPhone,
             RolId = role.Id,
             Rol = role,
             Activo = true,

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NicaLogistics.Application.Common;
 using NicaLogistics.Application.DTOs;
 using NicaLogistics.Application.Interfaces;
 using NicaLogistics.Domain.Entities;
@@ -63,6 +64,15 @@ public class SedeService : ISedeService
 
     public async Task<SedeDto> CreateAsync(CreateSedeDto dto)
     {
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(dto.TelefonoContacto))
+        {
+            if (!PhonePolicy.IsValid(dto.TelefonoContacto, out var phoneError, out normalizedPhone))
+            {
+                throw new InvalidOperationException(phoneError ?? PhonePolicy.PolicyErrorMessage);
+            }
+        }
+
         var sede = new Sede
         {
             Id = Guid.NewGuid(),
@@ -71,7 +81,7 @@ public class SedeService : ISedeService
             Pais = dto.Pais.Trim(),
             Ciudad = dto.Ciudad.Trim(),
             DireccionVentanilla = dto.DireccionVentanilla.Trim(),
-            TelefonoContacto = dto.TelefonoContacto?.Trim(),
+            TelefonoContacto = normalizedPhone,
             HorarioAtencion = dto.HorarioAtencion?.Trim(),
             Activo = true,
             CreadoEn = DateTime.UtcNow
@@ -92,11 +102,20 @@ public class SedeService : ISedeService
         if (sede == null)
             throw new KeyNotFoundException("Sede no encontrada.");
 
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(dto.TelefonoContacto))
+        {
+            if (!PhonePolicy.IsValid(dto.TelefonoContacto, out var phoneError, out normalizedPhone))
+            {
+                throw new InvalidOperationException(phoneError ?? PhonePolicy.PolicyErrorMessage);
+            }
+        }
+
         sede.Nombre = dto.Nombre.Trim();
         sede.Pais = dto.Pais.Trim();
         sede.Ciudad = dto.Ciudad.Trim();
         sede.DireccionVentanilla = dto.DireccionVentanilla.Trim();
-        sede.TelefonoContacto = dto.TelefonoContacto?.Trim();
+        sede.TelefonoContacto = normalizedPhone;
         sede.HorarioAtencion = dto.HorarioAtencion?.Trim();
         sede.Activo = dto.Activo;
 

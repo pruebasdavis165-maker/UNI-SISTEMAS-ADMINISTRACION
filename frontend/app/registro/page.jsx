@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, User, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
-import { Button, Input, Card, CardContent, Alert } from '../../components/ui';
+import { Button, Input, Card, CardContent, Alert, PhoneInput } from '../../components/ui';
 import { setSession, API_BASE_URL } from '../../lib/auth';
 
 export default function RegisterPage() {
@@ -37,6 +37,17 @@ export default function RegisterPage() {
     if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
       setError('La contraseña no cumple con la Política 2: debe tener al menos 8 caracteres, e incluir mayúsculas, minúsculas, números y al menos un carácter especial.');
       return;
+    }
+
+    if (telefono && telefono.trim()) {
+      const digitsOnly = telefono.replace(/\D/g, '');
+      const isUS = telefono.startsWith('+1');
+      const expected = isUS ? 10 : 8;
+      const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (telefono.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
+      if (actualDigits.length !== expected) {
+        setError(`El número de teléfono debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -114,13 +125,11 @@ export default function RegisterPage() {
                 required
               />
 
-              <Input
+              <PhoneInput
                 label="Teléfono / WhatsApp"
-                type="tel"
-                icon={Phone}
-                placeholder="+505 8888-9999"
                 value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
+                onChange={(val) => setTelefono(val)}
+                helperText="Selecciona Nicaragua (+505) o USA (+1) para avisos y notificaciones de llegada."
               />
 
               <div>

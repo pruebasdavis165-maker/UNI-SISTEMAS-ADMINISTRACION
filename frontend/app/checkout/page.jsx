@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '../../lib/stripe';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown } from '../../components/ui';
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown, PhoneInput } from '../../components/ui';
 import { getCart, clearCart } from '../../lib/cart';
 import { getToken, getUser, API_BASE_URL } from '../../lib/auth';
 
@@ -25,6 +25,7 @@ function CheckoutContent() {
   const [sedeDestinoId, setSedeDestinoId] = useState('');
   const [metodoPago, setMetodoPago] = useState('TARJETA');
   const [cardHolder, setCardHolder] = useState('');
+  const [contactoTelefono, setContactoTelefono] = useState('');
 
   const [isLoadingSedes, setIsLoadingSedes] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +45,7 @@ function CheckoutContent() {
     }
     setUser(currentUser);
     setCardHolder(currentUser.nombreCompleto || '');
+    setContactoTelefono(currentUser.telefono || '');
 
     const items = getCart();
     if (!items || items.length === 0) {
@@ -89,6 +91,20 @@ function CheckoutContent() {
 
     if (sedeOrigenId === sedeDestinoId) {
       setError('La Sede de Origen y la Sede de Destino no pueden ser iguales. La mercancía debe viajar entre dos sucursales oficiales.');
+      return;
+    }
+
+    if (!contactoTelefono || !contactoTelefono.trim()) {
+      setError('Debes ingresar un número telefónico de contacto para recibir las alertas y el código de retiro.');
+      return;
+    }
+
+    const digitsOnly = contactoTelefono.replace(/\D/g, '');
+    const isUS = contactoTelefono.startsWith('+1');
+    const expected = isUS ? 10 : 8;
+    const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (contactoTelefono.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
+    if (actualDigits.length !== expected) {
+      setError(`El número de teléfono de contacto debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
       return;
     }
 
@@ -453,12 +469,49 @@ function CheckoutContent() {
               )}
             </Card>
 
-            {/* Step 2: Payment Method */}
+            {/* Step 2: Contact Details for Pickup */}
+            <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-montserrat font-bold text-sm">
+                    2
+                  </div>
+                  <div>
+                    <h2 className="font-montserrat font-bold text-lg text-slate-900">
+                      Datos de Contacto para Retiro en Ventanilla
+                    </h2>
+                    <p className="text-xs text-slate-500 font-inter">
+                      Llegada de paquetería y notificaciones oficiales por WhatsApp o llamada.
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="emerald" size="sm">Validación Bilateral</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Nombre de Quien Retira"
+                  value={cardHolder}
+                  onChange={(e) => setCardHolder(e.target.value)}
+                  placeholder="Ej. Juan Pérez Morales"
+                  required
+                />
+                <PhoneInput
+                  label="Teléfono / WhatsApp de Notificación"
+                  value={contactoTelefono}
+                  onChange={(val) => setContactoTelefono(val)}
+                  required
+                  helperText="Nicaragua (+505, 8 dígitos) o Estados Unidos (+1, 10 dígitos)."
+                />
+              </div>
+            </Card>
+
+            {/* Step 3: Payment Method */}
             <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-fuchsia-50 text-accent-magenta flex items-center justify-center font-montserrat font-bold text-sm">
-                    2
+                    3
                   </div>
                   <div>
                     <h2 className="font-montserrat font-bold text-lg text-slate-900">

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
   Button, Input, Select, CustomDropdown, Card, CardHeader, CardTitle, CardContent, 
-  Badge, Modal, Alert, ConfirmModal, Toast 
+  Badge, Modal, Alert, ConfirmModal, Toast, PhoneInput 
 } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
@@ -97,6 +97,17 @@ export default function UserManagementPage() {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    if (formPhone && formPhone.trim()) {
+      const digitsOnly = formPhone.replace(/\D/g, '');
+      const isUS = formPhone.startsWith('+1');
+      const expected = isUS ? 10 : 8;
+      const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (formPhone.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
+      if (actualDigits.length !== expected) {
+        setError(`El teléfono debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setError('');
     try {
@@ -133,6 +144,17 @@ export default function UserManagementPage() {
   const handleEditUser = async (e) => {
     e.preventDefault();
     if (!currentUser) return;
+    if (formPhone && formPhone.trim()) {
+      const digitsOnly = formPhone.replace(/\D/g, '');
+      const isUS = formPhone.startsWith('+1');
+      const expected = isUS ? 10 : 8;
+      const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (formPhone.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
+      if (actualDigits.length !== expected) {
+        setError(`El teléfono debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setError('');
     try {
@@ -510,12 +532,11 @@ export default function UserManagementPage() {
               onChange={(e) => setFormPassword(e.target.value)}
               required
             />
-            <Input
+            <PhoneInput
               label="Teléfono / Celular"
-              type="tel"
-              placeholder="+505 8888-0000"
               value={formPhone}
-              onChange={(e) => setFormPhone(e.target.value)}
+              onChange={(val) => setFormPhone(val)}
+              helperText="Operación bilateral: Nicaragua (+505) o Estados Unidos (+1)."
             />
             <CustomDropdown
               label="Rol en el Sistema"
@@ -551,11 +572,11 @@ export default function UserManagementPage() {
               onChange={(e) => setFormName(e.target.value)}
               required
             />
-            <Input
+            <PhoneInput
               label="Teléfono / Celular"
-              type="tel"
               value={formPhone}
-              onChange={(e) => setFormPhone(e.target.value)}
+              onChange={(val) => setFormPhone(val)}
+              helperText="Operación bilateral: Nicaragua (+505) o Estados Unidos (+1)."
             />
             <CustomDropdown
               label="Rol Asignado"

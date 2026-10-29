@@ -7,7 +7,7 @@ import {
   RefreshCw, CheckCircle2, AlertCircle, Edit3, Plus, 
   Trash2, Power, X, Truck, Package, Ban, Users, Check 
 } from 'lucide-react';
-import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast, CustomDropdown } from '../../../components/ui';
+import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast, CustomDropdown, PhoneInput } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function SedesManagementPage() {
@@ -158,10 +158,23 @@ export default function SedesManagementPage() {
     setIsEditOpen(true);
   };
 
+  const validatePhone = (phone) => {
+    if (!phone || !phone.trim()) return true;
+    const digitsOnly = phone.replace(/\D/g, '');
+    const isUS = phone.startsWith('+1');
+    const expected = isUS ? 10 : 8;
+    const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (phone.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
+    return actualDigits.length === expected;
+  };
+
   // Guardar edición
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!selectedSede) return;
+    if (editTelefono && !validatePhone(editTelefono)) {
+      setError(`El teléfono de contacto debe tener exactamente ${editTelefono.startsWith('+1') ? '10 dígitos (USA +1)' : '8 dígitos (Nicaragua +505)'}.`);
+      return;
+    }
     setIsSubmitting(true);
     setError('');
     setSuccessMsg('');
@@ -203,6 +216,10 @@ export default function SedesManagementPage() {
   // Crear nueva sede
   const handleCreateSede = async (e) => {
     e.preventDefault();
+    if (newTelefono && !validatePhone(newTelefono)) {
+      setError(`El teléfono de contacto debe tener exactamente ${newTelefono.startsWith('+1') ? '10 dígitos (USA +1)' : '8 dígitos (Nicaragua +505)'}.`);
+      return;
+    }
     setIsSubmitting(true);
     setError('');
     setSuccessMsg('');
@@ -565,15 +582,12 @@ export default function SedesManagementPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Input
+                <PhoneInput
                   label="Teléfono de Contacto"
-                  placeholder={newPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
                   value={newTelefono}
-                  onChange={(e) => setNewTelefono(e.target.value)}
+                  onChange={(val) => setNewTelefono(val)}
+                  helperText={`Sede en ${newPais}: ${newPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
                 />
-                <span className="text-[10px] text-slate-400 font-inter mt-0.5 block">
-                  Estándar: {newPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
-                </span>
               </div>
               <CustomDropdown
                 label="Horario de Atención"
@@ -636,15 +650,12 @@ export default function SedesManagementPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Input
+                <PhoneInput
                   label="Teléfono de Contacto"
-                  placeholder={editPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
                   value={editTelefono}
-                  onChange={(e) => setEditTelefono(e.target.value)}
+                  onChange={(val) => setEditTelefono(val)}
+                  helperText={`Sede en ${editPais}: ${editPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
                 />
-                <span className="text-[10px] text-slate-400 font-inter mt-0.5 block">
-                  Estándar: {editPais === 'Estados Unidos' ? '+1 (305) 555-0199' : '+505 2249-0100'}
-                </span>
               </div>
               <CustomDropdown
                 label="Horario de Atención"

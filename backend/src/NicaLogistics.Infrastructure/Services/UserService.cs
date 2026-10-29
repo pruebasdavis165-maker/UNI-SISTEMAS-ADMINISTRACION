@@ -87,6 +87,16 @@ public class UserService : IUserService
             throw new InvalidOperationException(passwordError ?? PasswordPolicy.PolicyErrorMessage);
         }
 
+        // Validación y normalización de Teléfono
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(dto.Telefono))
+        {
+            if (!PhonePolicy.IsValid(dto.Telefono, out var phoneError, out normalizedPhone))
+            {
+                throw new InvalidOperationException(phoneError ?? PhonePolicy.PolicyErrorMessage);
+            }
+        }
+
         var role = await _context.Roles.FindAsync(dto.RolId)
             ?? throw new InvalidOperationException("El rol seleccionado no es válido.");
 
@@ -96,7 +106,7 @@ public class UserService : IUserService
             NombreCompleto = dto.NombreCompleto.Trim(),
             Email = normalizedEmail,
             PasswordHash = _hasher.HashPassword(dto.Password),
-            Telefono = dto.Telefono?.Trim(),
+            Telefono = normalizedPhone,
             RolId = role.Id,
             Rol = role,
             Activo = true,
@@ -130,8 +140,18 @@ public class UserService : IUserService
         var role = await _context.Roles.FindAsync(dto.RolId)
             ?? throw new InvalidOperationException("El rol seleccionado no es válido.");
 
+        // Validación y normalización de Teléfono
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(dto.Telefono))
+        {
+            if (!PhonePolicy.IsValid(dto.Telefono, out var phoneError, out normalizedPhone))
+            {
+                throw new InvalidOperationException(phoneError ?? PhonePolicy.PolicyErrorMessage);
+            }
+        }
+
         user.NombreCompleto = dto.NombreCompleto.Trim();
-        user.Telefono = dto.Telefono?.Trim();
+        user.Telefono = normalizedPhone;
         user.RolId = role.Id;
         user.Rol = role;
         user.ActualizadoEn = DateTime.UtcNow;
