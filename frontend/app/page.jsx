@@ -166,80 +166,107 @@ export default function HomePage() {
 
       {/* 2. CÓMO FUNCIONA EL MODELO SEDE A SEDE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          
-          <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-900 mt-2 mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-[#1A56DB] text-xs font-bold uppercase tracking-wider font-inter border border-blue-100 mb-3">
+            <span>Flujo Logístico 100% Controlado</span>
+          </div>
+          <h2 className="font-montserrat font-extrabold text-3xl sm:text-4xl text-slate-800 mt-1 mb-3">
             ¿Cómo Funciona el Envío Sede a Sede?
           </h2>
-          <p className="font-inter text-slate-600 text-sm sm:text-base">
+          <p className="font-inter text-slate-600 text-sm sm:text-base leading-relaxed">
             Diseñado para erradicar las direcciones confusas de Nicaragua y los repartidores extraviados. 
-            Tus encomiendas van directamente de nuestra sede en EE.UU. a la ventanilla de tu ciudad.
+            Tus encomiendas van directamente de nuestra sede en EE.UU. a la ventanilla oficial de tu ciudad.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Step 1 */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm relative group hover:border-primary-blue/50 transition-all">
-            <span className="text-4xl font-extrabold text-blue-100 font-montserrat absolute top-4 right-4 group-hover:text-primary-blue/20 transition-colors">
-              01
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-primary-blue flex items-center justify-center font-bold text-lg mb-4">
-              <Warehouse className="w-6 h-6" />
-            </div>
-            <h3 className="font-montserrat font-bold text-base text-slate-900 mb-2">
-              Recibimos en Miami
-            </h3>
-            <p className="font-inter text-xs text-slate-500 leading-relaxed">
-              Envías tus compras a nuestro almacén en Doral, FL con tu código de casillero NicaLogistics.
-            </p>
-          </div>
+        {/* Stepper Container con Línea de Progreso Conectora Unificada */}
+        <div className="relative">
+          {/* Línea horizontal continua en Desktop que pasa por detrás de los indicadores */}
+          <div className="hidden md:block absolute top-11 left-16 right-16 h-0.5 border-t-2 border-dashed border-slate-300 z-0 pointer-events-none" />
 
-          {/* Step 2 */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm relative group hover:border-primary-blue/50 transition-all">
-            <span className="text-4xl font-extrabold text-blue-100 font-montserrat absolute top-4 right-4 group-hover:text-primary-blue/20 transition-colors">
-              02
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-fuchsia-50 text-accent-magenta flex items-center justify-center font-bold text-lg mb-4">
-              <Plane className="w-6 h-6" />
-            </div>
-            <h3 className="font-montserrat font-bold text-base text-slate-900 mb-2">
-              Transporte y Aduana
-            </h3>
-            <p className="font-inter text-xs text-slate-500 leading-relaxed">
-              Despacho en vuelos regulares (Martes y Viernes) y gestión de aforo y trámites aduanales DGA.
-            </p>
-          </div>
+          {/* Línea vertical continua en Móvil a la izquierda */}
+          <div className="md:hidden absolute top-8 bottom-8 left-11 w-0.5 border-l-2 border-dashed border-slate-300 z-0 pointer-events-none" />
 
-          {/* Step 3 */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm relative group hover:border-primary-blue/50 transition-all">
-            <span className="text-4xl font-extrabold text-blue-100 font-montserrat absolute top-4 right-4 group-hover:text-primary-blue/20 transition-colors">
-              03
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-alert-amber flex items-center justify-center font-bold text-lg mb-4">
-              <Clock className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+            {/* Step 1: Miami Hub */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-blue-200 flex flex-col justify-between group">
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#1A56DB] flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform shadow-xs">
+                  <Warehouse className="w-6 h-6" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#1A56DB] text-white flex items-center justify-center font-montserrat font-extrabold text-sm shadow-md ring-4 ring-white shrink-0">
+                  01
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-montserrat font-bold text-base text-slate-800 group-hover:text-[#1A56DB] transition-colors">
+                  Recibimos en Miami
+                </h3>
+                <p className="font-inter text-sm text-slate-500 leading-relaxed">
+                  Envías tus compras a nuestro almacén en Doral, FL con tu código de casillero NicaLogistics.
+                </p>
+              </div>
             </div>
-            <h3 className="font-montserrat font-bold text-base text-slate-900 mb-2">
-              Distribución a Sede
-            </h3>
-            <p className="font-inter text-xs text-slate-500 leading-relaxed">
-              El paquete se transfiere de inmediato a la ventanilla oficial seleccionada (Sede Central Managua o Miami Hub).
-            </p>
-          </div>
 
-          {/* Step 4 */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-soft-sm relative group hover:border-primary-blue/50 transition-all">
-            <span className="text-4xl font-extrabold text-blue-100 font-montserrat absolute top-4 right-4 group-hover:text-primary-blue/20 transition-colors">
-              04
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-success-green flex items-center justify-center font-bold text-lg mb-4">
-              <CheckCircle2 className="w-6 h-6" />
+            {/* Step 2: Transporte y Aduana */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-fuchsia-200 flex flex-col justify-between group">
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-12 h-12 rounded-xl bg-fuchsia-50 text-[#D946EF] flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform shadow-xs">
+                  <Plane className="w-6 h-6" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#D946EF] text-white flex items-center justify-center font-montserrat font-extrabold text-sm shadow-md ring-4 ring-white shrink-0">
+                  02
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-montserrat font-bold text-base text-slate-800 group-hover:text-[#D946EF] transition-colors">
+                  Transporte y Aduana
+                </h3>
+                <p className="font-inter text-sm text-slate-500 leading-relaxed">
+                  Despacho en vuelos regulares (Martes y Viernes) y gestión de aforo y trámites aduanales DGA.
+                </p>
+              </div>
             </div>
-            <h3 className="font-montserrat font-bold text-base text-slate-900 mb-2">
-              Retiro en Ventanilla
-            </h3>
-            <p className="font-inter text-xs text-slate-500 leading-relaxed">
-              Presentas tu Cédula física o código de guía y retiras sin filas ni sorpresas de cobro.
-            </p>
+
+            {/* Step 3: Distribución a Sede */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-amber-200 flex flex-col justify-between group">
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-12 h-12 rounded-xl bg-amber-50 text-[#F59E0B] flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform shadow-xs">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#F59E0B] text-white flex items-center justify-center font-montserrat font-extrabold text-sm shadow-md ring-4 ring-white shrink-0">
+                  03
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-montserrat font-bold text-base text-slate-800 group-hover:text-[#F59E0B] transition-colors">
+                  Distribución a Sede
+                </h3>
+                <p className="font-inter text-sm text-slate-500 leading-relaxed">
+                  El paquete se transfiere de inmediato a la ventanilla oficial seleccionada en Managua o Miami Hub.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 4: Retiro en Ventanilla */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-emerald-200 flex flex-col justify-between group">
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-[#10B981] flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform shadow-xs">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-montserrat font-extrabold text-sm shadow-md ring-4 ring-white shrink-0">
+                  04
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-montserrat font-bold text-base text-slate-800 group-hover:text-[#10B981] transition-colors">
+                  Retiro en Ventanilla
+                </h3>
+                <p className="font-inter text-sm text-slate-500 leading-relaxed">
+                  Presentas tu Cédula física o código de guía y retiras sin filas ni sorpresas de cobro.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

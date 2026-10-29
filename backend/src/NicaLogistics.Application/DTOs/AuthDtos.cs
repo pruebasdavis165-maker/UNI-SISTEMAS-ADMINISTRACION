@@ -24,3 +24,7 @@ public record AuthResponseDto(
     string Token,
     UserDto User
 );
+
+public record ForgotPasswordRequestDto(string Email);
+
+public record ResetPasswordRequestDto(string Email, string Token, string NewPassword);

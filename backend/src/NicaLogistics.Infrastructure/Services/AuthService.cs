@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NicaLogistics.Application.Common;
 using NicaLogistics.Application.DTOs;
 using NicaLogistics.Application.Interfaces;
@@ -13,15 +14,27 @@ public class AuthService : IAuthService
     private readonly AppDbContext _context;
     private readonly IPasswordHasher _hasher;
     private readonly IJwtTokenGenerator _jwtGenerator;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
 
     // Almacenamiento concurrente en memoria para control de intentos fallidos y bloqueo temporal (Política 2)
     private static readonly ConcurrentDictionary<string, (int FailedAttempts, DateTime? LockoutUntil)> _loginAttempts = new();
 
-    public AuthService(AppDbContext context, IPasswordHasher hasher, IJwtTokenGenerator jwtGenerator)
+    // Almacenamiento en memoria para tokens de recuperación de contraseña con expiración (15 min)
+    private static readonly ConcurrentDictionary<string, (string Token, DateTime ExpiresAt)> _passwordResetTokens = new();
+
+    public AuthService(
+        AppDbContext context,
+        IPasswordHasher hasher,
+        IJwtTokenGenerator jwtGenerator,
+        IEmailService emailService,
+        ILogger<AuthService> logger)
     {
         _context = context;
         _hasher = hasher;
         _jwtGenerator = jwtGenerator;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
@@ -136,6 +149,20 @@ public class AuthService : IAuthService
         _context.Usuarios.Add(user);
         await _context.SaveChangesAsync();
 
+        // Caso 1: Envío automático de código de verificación (OTP) transaccional vía Resend
+        var otpCode = Random.Shared.Next(100000, 999999).ToString();
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _emailService.SendVerificationOtpEmailAsync(user.Email, user.NombreCompleto, otpCode);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al enviar código OTP a {Email}", user.Email);
+            }
+        });
+
         var token = _jwtGenerator.GenerateToken(user, role.Nombre);
 
         var userDto = new UserDto(
@@ -149,6 +176,65 @@ public class AuthService : IAuthService
         );
 
         return new AuthResponseDto(token, userDto);
+    }
+
+    public async Task<bool> RequestPasswordResetAsync(string email)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && u.Activo);
+
+        // Si el usuario no existe, devolvemos true genérico por seguridad (prevenir enumeración de cuentas)
+        if (user == null)
+        {
+            return true;
+        }
+
+        var resetToken = $"{Random.Shared.Next(100000, 999999)}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
+        _passwordResetTokens[normalizedEmail] = (resetToken, DateTime.UtcNow.AddMinutes(15));
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, user.NombreCompleto, resetToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al enviar correo de recuperación a {Email}", user.Email);
+            }
+        });
+
+        return true;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        if (!_passwordResetTokens.TryGetValue(normalizedEmail, out var record) || 
+            record.Token != token.Trim() || 
+            record.ExpiresAt < DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("El token de recuperación es inválido o ha expirado.");
+        }
+
+        if (!PasswordPolicy.IsValid(newPassword, out var passwordError))
+        {
+            throw new InvalidOperationException(passwordError ?? PasswordPolicy.PolicyErrorMessage);
+        }
+
+        var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && u.Activo);
+        if (user == null)
+        {
+            throw new KeyNotFoundException("Usuario no encontrado.");
+        }
+
+        user.PasswordHash = _hasher.HashPassword(newPassword);
+        user.ActualizadoEn = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        _passwordResetTokens.TryRemove(normalizedEmail, out _);
+        return true;
     }
 
     public async Task<UserDto> GetCurrentUserAsync(Guid userId)

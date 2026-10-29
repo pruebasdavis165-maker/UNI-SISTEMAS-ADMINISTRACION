@@ -6,13 +6,15 @@ namespace NicaLogistics.Infrastructure.Services;
 public class EmailNotificationService : INotificationService
 {
     private readonly ILogger<EmailNotificationService> _logger;
+    private readonly IEmailService _emailService;
 
-    public EmailNotificationService(ILogger<EmailNotificationService> logger)
+    public EmailNotificationService(ILogger<EmailNotificationService> logger, IEmailService emailService)
     {
         _logger = logger;
+        _emailService = emailService;
     }
 
-    public Task SendReadyForPickupNotificationAsync(
+    public async Task SendReadyForPickupNotificationAsync(
         string clientEmail,
         string clientName,
         string trackingCode,
@@ -20,34 +22,16 @@ public class EmailNotificationService : INotificationService
         string branchAddress,
         string? branchSchedule)
     {
-        var message = $"""
-        ================================================================================
-        [NICALOGISTICS - NOTIFICACIÓN OFICIAL DE DISPONIBILIDAD PARA RETIRO]
-        Destinatario: {clientName} <{clientEmail}>
-        Código de Rastreo: {trackingCode}
-        Estado Actual: LISTA PARA RETIRO EN VENTANILLA
-        --------------------------------------------------------------------------------
-        Estimado/a {clientName},
-        
-        Le informamos que su paquete con código {trackingCode} ha arribado exitosamente
-        a nuestra sucursal de ventanilla y ya se encuentra DISPONIBLE PARA SU RETIRO.
+        _logger.LogInformation("[EmailNotificationService] Disparando notificación por correo para {ClientEmail} con tracking {TrackingCode}", clientEmail, trackingCode);
 
-        DETALLES DE LA SUCURSAL DE ENTREGA:
-        • Sede: {branchName}
-        • Dirección: {branchAddress}
-        • Horario de Atención: {branchSchedule ?? "Lunes a Sábado de 8:00 AM a 5:00 PM"}
-        
-        REQUISITOS OBLIGATORIOS PARA EL RETIRO:
-        1. Presentar documento de identidad original (Cédula o Pasaporte).
-        2. Proporcionar su código de tracking al operador de ventanilla.
-
-        Nota: Recordamos que NicaLogistics opera bajo el modelo exclusivo Sede a Sede.
-        ================================================================================
-        """;
-
-        _logger.LogInformation("{NotificationMessage}", message);
-        Console.WriteLine(message);
-
-        return Task.CompletedTask;
+        // Envío transaccional vía Resend API
+        await _emailService.SendReadyForPickupEmailAsync(
+            to: clientEmail,
+            clientName: clientName,
+            trackingCode: trackingCode,
+            sedeDestinoNombre: branchName,
+            sedeDestinoDireccion: branchAddress,
+            horarioAtencion: branchSchedule
+        );
     }
 }

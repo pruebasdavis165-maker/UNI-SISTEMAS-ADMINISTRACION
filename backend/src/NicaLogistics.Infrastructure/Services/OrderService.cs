@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NicaLogistics.Application.DTOs;
 using NicaLogistics.Application.Interfaces;
 using NicaLogistics.Domain.Entities;
@@ -10,11 +11,19 @@ public class OrderService : IOrderService
 {
     private readonly AppDbContext _context;
     private readonly IPaymentGatewayService _paymentGateway;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<OrderService> _logger;
 
-    public OrderService(AppDbContext context, IPaymentGatewayService paymentGateway)
+    public OrderService(
+        AppDbContext context,
+        IPaymentGatewayService paymentGateway,
+        IEmailService emailService,
+        ILogger<OrderService> logger)
     {
         _context = context;
         _paymentGateway = paymentGateway;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<OrderResponseDto> CreateOrderAsync(Guid clienteId, CreateOrderDto dto)
@@ -63,6 +72,7 @@ public class OrderService : IOrderService
             decimal grandTotal = 0m;
             var orderItems = new List<OrderItem>();
             var movements = new List<InventoryMovement>();
+            var lowStockProducts = new List<Product>();
 
             foreach (var itemReq in dto.Items)
             {
@@ -94,6 +104,11 @@ public class OrderService : IOrderService
                 var stockAnterior = prod.StockActual;
                 prod.StockActual -= itemReq.Cantidad;
                 prod.ActualizadoEn = DateTime.UtcNow;
+
+                if (prod.StockActual <= prod.StockMinimo)
+                {
+                    lowStockProducts.Add(prod);
+                }
 
                 movements.Add(new InventoryMovement
                 {
@@ -167,6 +182,49 @@ public class OrderService : IOrderService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // Notificaciones Transaccionales (Resend API)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    // Caso 2: Recibo de compra con Código de Rastreo focal para el cliente
+                    if (!string.IsNullOrWhiteSpace(cliente.Email))
+                    {
+                        var emailItems = orderItems.Select(i => (
+                            ProductName: products.FirstOrDefault(p => p.Id == i.ProductoId)?.Nombre ?? "Producto",
+                            Quantity: i.Cantidad,
+                            Subtotal: i.Subtotal
+                        ));
+
+                        await _emailService.SendOrderReceiptEmailAsync(
+                            to: cliente.Email,
+                            clientName: cliente.NombreCompleto,
+                            orderNumber: orderNumber,
+                            trackingCode: trackingCode,
+                            total: grandTotal,
+                            sedeOrigen: sedeOrigen.Nombre,
+                            sedeDestino: sedeDestino.Nombre,
+                            items: emailItems
+                        );
+                    }
+
+                    // Caso 4: Alertas de Stock (0 o mínimo) para el Administrador
+                    foreach (var p in lowStockProducts)
+                    {
+                        await _emailService.SendLowStockAlertEmailAsync(
+                            productName: p.Nombre,
+                            sku: p.CodigoSku,
+                            currentStock: p.StockActual,
+                            minStock: p.StockMinimo
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al despachar correos transaccionales para orden {OrderNumber}", orderNumber);
+                }
+            });
 
             return await BuildOrderResponseAsync(order.Id);
         }

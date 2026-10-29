@@ -146,6 +146,29 @@ public class ShipmentService : IShipmentService
 
         await _context.SaveChangesAsync();
 
+        // Caso 3: Alerta Logística automática vía correo al cliente cuando pasa a LISTA_PARA_RETIRO
+        if (normalizedState == "LISTA_PARA_RETIRO" && shipment.Cliente != null && !string.IsNullOrWhiteSpace(shipment.Cliente.Email))
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _notificationService.SendReadyForPickupNotificationAsync(
+                        clientEmail: shipment.Cliente.Email,
+                        clientName: shipment.Cliente.NombreCompleto,
+                        trackingCode: shipment.CodigoTracking,
+                        branchName: shipment.SedeDestino?.Nombre ?? "Sucursal NicaLogistics",
+                        branchAddress: shipment.SedeDestino?.DireccionVentanilla ?? "Dirección de ventanilla oficial",
+                        branchSchedule: shipment.SedeDestino?.HorarioAtencion ?? "Lunes a Sábado de 8:00 AM a 5:00 PM"
+                    );
+                }
+                catch
+                {
+                    // Errores de envío de correo en segundo plano no detienen la transacción
+                }
+            });
+        }
+
         return await GetByIdAsync(shipmentId);
     }
 
