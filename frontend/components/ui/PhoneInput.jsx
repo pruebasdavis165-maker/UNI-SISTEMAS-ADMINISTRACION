@@ -160,7 +160,7 @@ export default function PhoneInput({
 
       {/* Unified Flex Container */}
       <div 
-        className={`relative flex items-stretch rounded-xl border bg-white transition-all shadow-soft-sm ${
+        className={`relative flex items-stretch rounded-xl border bg-white transition-all shadow-xs ${
           error || isIncomplete
             ? 'border-rose-400 ring-2 ring-rose-100'
             : isFocused
@@ -175,59 +175,76 @@ export default function PhoneInput({
           onClick={() => setIsOpen(!isOpen)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          className="flex items-center gap-1.5 px-3 py-2.5 bg-slate-50/80 hover:bg-slate-100/90 text-slate-700 rounded-l-xl border-r border-slate-200 transition-colors select-none shrink-0 focus:outline-none"
-          title={`País: ${selectedCountry.name}`}
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-blue-50/60 active:bg-blue-100/60 text-slate-700 rounded-l-xl border-r border-slate-200 transition-all select-none shrink-0 focus:outline-none focus:ring-1 focus:ring-primary-blue cursor-pointer group"
+          title={`País seleccionado: ${selectedCountry.name} (${selectedCountry.dialCode})`}
         >
-          <span className="text-lg leading-none" role="img" aria-label={selectedCountry.name}>
+          <span className="text-lg leading-none drop-shadow-xs" role="img" aria-label={selectedCountry.name}>
             {selectedCountry.flag}
           </span>
-          <span className="font-semibold text-xs text-slate-900 font-mono tracking-tight">
-            {selectedCountry.dialCode}
-          </span>
-          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <div className="flex items-baseline gap-1">
+            <span className="font-bold text-xs text-slate-800 font-mono tracking-tight">
+              {selectedCountry.code}
+            </span>
+            <span className="font-semibold text-xs text-slate-500 font-mono">
+              {selectedCountry.dialCode}
+            </span>
+          </div>
+          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-primary-blue transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary-blue' : ''}`} />
         </button>
 
         {/* Floating Country Dropdown */}
         {isOpen && (
           <div 
-            className="absolute left-0 top-full mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+            className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-[9999] ring-1 ring-slate-900/5 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100"
             role="listbox"
           >
-            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 font-inter">
-              Operación Bilateral Oficial
+            <div className="px-3.5 py-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter bg-slate-50/70">
+              <span>Operación Bilateral Oficial</span>
+              <span className="text-[9px] text-primary-blue font-mono font-semibold">2 Rutas</span>
             </div>
-            {COUNTRIES.map((country) => {
-              const isSelected = country.code === selectedCountry.code;
-              return (
-                <button
-                  key={country.code}
-                  type="button"
-                  onClick={() => handleCountrySelect(country)}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-left text-xs transition-colors ${
-                    isSelected 
-                      ? 'bg-blue-50/80 text-primary-blue font-semibold' 
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                  role="option"
-                  aria-selected={isSelected}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl leading-none" role="img" aria-label={country.name}>
-                      {country.flag}
-                    </span>
-                    <div>
-                      <p className="font-medium text-slate-900">{country.name}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">
-                        {country.dialCode} • {country.digits} dígitos
-                      </p>
+            <div className="p-1 space-y-0.5">
+              {COUNTRIES.map((country) => {
+                const isSelected = country.code === selectedCountry.code;
+                return (
+                  <button
+                    key={country.code}
+                    type="button"
+                    onClick={() => handleCountrySelect(country)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
+                      isSelected 
+                        ? 'bg-blue-50/90 text-primary-blue font-semibold ring-1 ring-primary-blue/15' 
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                    }`}
+                    role="option"
+                    aria-selected={isSelected}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xl shrink-0 shadow-xs border border-slate-200/70">
+                        {country.flag}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className={`font-semibold ${isSelected ? 'text-primary-blue' : 'text-slate-800'}`}>
+                            {country.name}
+                          </p>
+                          <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                            {country.code}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+                          {country.dialCode} • {country.digits} dígitos ({country.placeholder})
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  {isSelected && (
-                    <Check className="w-4 h-4 text-primary-blue shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+                    {isSelected && (
+                      <div className="w-5 h-5 rounded-full bg-primary-blue/10 flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5 text-primary-blue stroke-[2.5]" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 

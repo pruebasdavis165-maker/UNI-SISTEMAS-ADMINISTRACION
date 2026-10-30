@@ -286,23 +286,30 @@ export default function CartPage() {
                     <span>Subtotal de mercancía</span>
                     <span className="font-semibold text-slate-900">${subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-slate-600 items-center">
-                    <span className="flex items-center gap-1">
-                      Pickup Local (Misma Sede)
-                      <Badge variant="green" size="sm">GRATIS</Badge>
+                  <div className="flex justify-between text-slate-600 items-center py-1 border-t border-dashed border-slate-200">
+                    <div>
+                      <span className="font-medium text-slate-700 block">Flete Logístico</span>
+                      <span className="text-[10px] text-slate-400">Calculado según ruta y sedes</span>
+                    </div>
+                    <span className="text-xs font-semibold text-primary-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                      Por calcular en Checkout
                     </span>
-                    <span className="font-semibold text-emerald-600">$0.00</span>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-200 flex justify-between items-baseline">
-                  <div>
-                    <span className="font-montserrat font-bold text-base text-slate-900 block">Total a Pagar</span>
-                    <span className="text-[11px] text-slate-400 font-inter">Precios en dólares estadounidenses</span>
+                <div className="pt-4 border-t border-slate-200 space-y-2">
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <span className="font-montserrat font-bold text-base text-slate-900 block">Subtotal de Mercancía</span>
+                      <span className="text-[11px] text-slate-400 font-inter">+ Flete a liquidar en Checkout</span>
+                    </div>
+                    <span className="font-montserrat font-extrabold text-2xl text-primary-blue">
+                      ${subtotal.toFixed(2)}
+                    </span>
                   </div>
-                  <span className="font-montserrat font-extrabold text-2xl text-primary-blue">
-                    ${subtotal.toFixed(2)}
-                  </span>
+                  <p className="text-[11px] text-slate-500 font-inter bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed">
+                    💡 <strong>Transparencia de Tarifas:</strong> Si retiras en la misma sede de inventario el flete es <strong>$0.00 GRATIS</strong>. En traslados intersedes o internacionales se aplicará la fórmula transparente (Tarifa Base + Flete por Libra) en el siguiente paso.
+                  </p>
                 </div>
 
                 <Link href="/checkout" onClick={handleProceedToCheckout} className="block">
