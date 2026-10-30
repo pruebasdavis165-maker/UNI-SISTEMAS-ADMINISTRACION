@@ -30,6 +30,99 @@ export const COUNTRIES = [
       if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
       return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
     }
+  },
+  {
+    code: 'CR',
+    name: 'Costa Rica',
+    dialCode: '+506',
+    flag: '🇨🇷',
+    digits: 8,
+    placeholder: '8888-0000',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 4) return digits;
+      return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    }
+  },
+  {
+    code: 'HN',
+    name: 'Honduras',
+    dialCode: '+504',
+    flag: '🇭🇳',
+    digits: 8,
+    placeholder: '9999-0000',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 4) return digits;
+      return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    }
+  },
+  {
+    code: 'SV',
+    name: 'El Salvador',
+    dialCode: '+503',
+    flag: '🇸🇻',
+    digits: 8,
+    placeholder: '7777-0000',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 4) return digits;
+      return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    }
+  },
+  {
+    code: 'GT',
+    name: 'Guatemala',
+    dialCode: '+502',
+    flag: '🇬🇹',
+    digits: 8,
+    placeholder: '5555-0000',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 4) return digits;
+      return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    }
+  },
+  {
+    code: 'PA',
+    name: 'Panamá',
+    dialCode: '+507',
+    flag: '🇵🇦',
+    digits: 8,
+    placeholder: '6000-0000',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 4) return digits;
+      return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    }
+  },
+  {
+    code: 'MX',
+    name: 'México',
+    dialCode: '+52',
+    flag: '🇲🇽',
+    digits: 10,
+    placeholder: '(55) 1234-5678',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 2) return `(${digits}`;
+      if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+    }
+  },
+  {
+    code: 'ES',
+    name: 'España',
+    dialCode: '+34',
+    flag: '🇪🇸',
+    digits: 9,
+    placeholder: '600 123 456',
+    format: (digits) => {
+      if (!digits) return '';
+      if (digits.length <= 3) return digits;
+      if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+      return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)}`;
+    }
   }
 ];
 
@@ -38,29 +131,35 @@ export const COUNTRIES = [
  */
 function parsePhoneValue(value) {
   if (!value || typeof value !== 'string') {
-    return { country: COUNTRIES[0], digits: '' };
+    return { country: null, digits: '' };
   }
 
   const trimmed = value.trim();
   const digitsOnly = trimmed.replace(/\D/g, '');
 
-  if (trimmed.startsWith('+1') || (trimmed.startsWith('1') && digitsOnly.length === 11)) {
-    const local = digitsOnly.startsWith('1') ? digitsOnly.slice(1, 11) : digitsOnly.slice(0, 10);
-    return { country: COUNTRIES[1], digits: local };
-  }
-
-  if (trimmed.startsWith('+505') || trimmed.startsWith('505')) {
-    const local = digitsOnly.startsWith('505') ? digitsOnly.slice(3, 11) : digitsOnly.slice(0, 8);
-    return { country: COUNTRIES[0], digits: local };
+  // Buscar coincidencia por dialCode (orden descendente de longitud)
+  const sorted = [...COUNTRIES].sort((a, b) => b.dialCode.length - a.dialCode.length);
+  for (const c of sorted) {
+    if (trimmed.startsWith(c.dialCode)) {
+      const codeDigits = c.dialCode.replace(/\D/g, '');
+      const local = digitsOnly.startsWith(codeDigits)
+        ? digitsOnly.slice(codeDigits.length, codeDigits.length + c.digits)
+        : digitsOnly.slice(0, c.digits);
+      return { country: c, digits: local };
+    }
   }
 
   // Si no tiene prefijo pero tiene 10 dígitos, asumir USA
   if (digitsOnly.length === 10) {
-    return { country: COUNTRIES[1], digits: digitsOnly };
+    return { country: COUNTRIES.find((c) => c.code === 'US') || COUNTRIES[1], digits: digitsOnly };
   }
 
-  // Por defecto Nicaragua
-  return { country: COUNTRIES[0], digits: digitsOnly.slice(0, 8) };
+  // Si tiene 8 dígitos, asumir Nicaragua
+  if (digitsOnly.length === 8) {
+    return { country: COUNTRIES[0], digits: digitsOnly };
+  }
+
+  return { country: null, digits: digitsOnly.slice(0, 8) };
 }
 
 export default function PhoneInput({
@@ -76,7 +175,7 @@ export default function PhoneInput({
   className = ''
 }) {
   const initial = parsePhoneValue(value);
-  const [selectedCountry, setSelectedCountry] = useState(initial.country);
+  const [selectedCountry, setSelectedCountry] = useState(initial.country || COUNTRIES[0]);
   const [digits, setDigits] = useState(initial.digits);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -84,11 +183,18 @@ export default function PhoneInput({
 
   const containerRef = useRef(null);
   const inputRef = useRef(null);
+  const listRef = useRef(null);
 
-  // Sincronizar si cambia el `value` externo
+  // Sincronizar solo si cambia el valor externo no vacío o si se vacía externamente
   useEffect(() => {
+    if (!value || typeof value !== 'string' || value.trim() === '') {
+      setDigits('');
+      return;
+    }
     const parsed = parsePhoneValue(value);
-    setSelectedCountry(parsed.country);
+    if (parsed.country) {
+      setSelectedCountry(parsed.country);
+    }
     setDigits(parsed.digits);
   }, [value]);
 
@@ -114,14 +220,22 @@ export default function PhoneInput({
     onChange(standardized);
   };
 
-  const handleCountrySelect = (country) => {
+  const handleCountrySelect = (country, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setSelectedCountry(country);
     setIsOpen(false);
+
     // Ajustar dígitos a la longitud máxima del nuevo país
     const trimmedDigits = digits.slice(0, country.digits);
     setDigits(trimmedDigits);
     triggerChange(country, trimmedDigits);
-    if (inputRef.current) inputRef.current.focus();
+
+    setTimeout(() => {
+      if (inputRef.current) inputRef.current.focus();
+    }, 50);
   };
 
   const handleInputChange = (e) => {
@@ -163,22 +277,26 @@ export default function PhoneInput({
         className={`relative flex items-stretch rounded-xl border bg-white transition-all shadow-xs ${
           error || isIncomplete
             ? 'border-rose-400 ring-2 ring-rose-100'
-            : isFocused
+            : isFocused || isOpen
             ? 'border-primary-blue ring-2 ring-primary-blue/20'
-            : 'border-slate-300 hover:border-slate-400'
+            : 'border-slate-200 hover:border-slate-300'
         } ${disabled ? 'bg-slate-50 opacity-70 cursor-not-allowed' : ''}`}
       >
-        {/* Country Selector Dropdown Miniature */}
+        {/* Country Selector Dropdown Miniature Trigger */}
         <button
           type="button"
           disabled={disabled}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-blue-50/60 active:bg-blue-100/60 text-slate-700 rounded-l-xl border-r border-slate-200 transition-all select-none shrink-0 focus:outline-none focus:ring-1 focus:ring-primary-blue cursor-pointer group"
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 hover:bg-blue-50/60 active:bg-blue-100/60 text-slate-700 rounded-l-xl border-r border-slate-200 transition-all select-none shrink-0 focus:outline-none cursor-pointer group"
           title={`País seleccionado: ${selectedCountry.name} (${selectedCountry.dialCode})`}
         >
-          <span className="text-lg leading-none drop-shadow-xs" role="img" aria-label={selectedCountry.name}>
+          <span className="text-xl leading-none drop-shadow-xs" role="img" aria-label={selectedCountry.name}>
             {selectedCountry.flag}
           </span>
           <div className="flex items-baseline gap-1">
@@ -195,28 +313,31 @@ export default function PhoneInput({
         {/* Floating Country Dropdown */}
         {isOpen && (
           <div 
-            className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-[9999] ring-1 ring-slate-900/5 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100"
+            ref={listRef}
+            onWheel={(e) => e.stopPropagation()}
+            className="absolute left-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 py-1.5 z-[9999] ring-1 ring-slate-900/5 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 font-inter"
             role="listbox"
           >
-            <div className="px-3.5 py-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 font-inter bg-slate-50/70">
-              <span>Operación Bilateral Oficial</span>
-              <span className="text-[9px] text-primary-blue font-mono font-semibold">2 Rutas</span>
+            <div className="px-3.5 py-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/70">
+              <span>Selecciona Código de País</span>
+              <span className="text-[9px] text-primary-blue font-mono font-semibold">{COUNTRIES.length} Países</span>
             </div>
-            <div className="p-1 space-y-0.5">
+
+            <div className="p-1 space-y-0.5 max-h-60 overflow-y-auto overscroll-contain">
               {COUNTRIES.map((country) => {
                 const isSelected = country.code === selectedCountry.code;
                 return (
-                  <button
+                  <div
                     key={country.code}
-                    type="button"
-                    onClick={() => handleCountrySelect(country)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs transition-all cursor-pointer ${
-                      isSelected 
-                        ? 'bg-blue-50/90 text-primary-blue font-semibold ring-1 ring-primary-blue/15' 
-                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
-                    }`}
                     role="option"
                     aria-selected={isSelected}
+                    onClick={(e) => handleCountrySelect(country, e)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs transition-colors cursor-pointer select-none ${
+                      isSelected 
+                        ? 'bg-blue-50 text-primary-blue font-bold ring-1 ring-primary-blue/20' 
+                        : 'text-slate-700 hover:bg-blue-50 hover:text-primary-blue'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xl shrink-0 shadow-xs border border-slate-200/70">
@@ -224,7 +345,7 @@ export default function PhoneInput({
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <p className={`font-semibold ${isSelected ? 'text-primary-blue' : 'text-slate-800'}`}>
+                          <p className={`font-semibold ${isSelected ? 'text-primary-blue font-bold' : 'text-slate-800'}`}>
                             {country.name}
                           </p>
                           <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
@@ -241,7 +362,7 @@ export default function PhoneInput({
                         <Check className="w-3.5 h-3.5 text-primary-blue stroke-[2.5]" />
                       </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
