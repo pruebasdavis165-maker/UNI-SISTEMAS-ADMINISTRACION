@@ -144,11 +144,11 @@ function LoginForm() {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <button
             type="button"
-            onClick={() => setDemoCredentials('admin@nicalogistics.com', 'Admin123*!')}
+            onClick={() => setDemoCredentials('davismunoz165@gmail.com', 'Admin123*!')}
             className="p-2 text-left rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-colors"
           >
             <strong className="block text-primary-blue">Administrador</strong>
-            <span className="text-[10px] text-slate-500">admin@nicalogistics.com</span>
+            <span className="text-[10px] text-slate-500">davismunoz165@gmail.com</span>
           </button>
           <button
             type="button"

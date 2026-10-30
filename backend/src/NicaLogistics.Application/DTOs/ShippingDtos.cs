@@ -43,5 +43,7 @@ public record OpcionEnvioDto(
     decimal Costo,
     string TiempoEstimado,
     string TipoRuta,
-    string Descripcion
+    string Descripcion,
+    decimal TarifaBase = 0,
+    decimal TarifaPorLibra = 0
 );

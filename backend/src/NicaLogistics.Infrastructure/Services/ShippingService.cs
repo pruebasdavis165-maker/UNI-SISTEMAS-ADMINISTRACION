@@ -146,7 +146,9 @@ public class ShippingService : IShippingService
                 Costo: 0.00m,
                 TiempoEstimado: "Disponible inmediatamente",
                 TipoRuta: "LOCAL",
-                Descripcion: $"Retiro directo en la ventanilla oficial de {sedeDestino.Nombre} sin cargos de traslado logístico."
+                Descripcion: $"Retiro directo en la ventanilla oficial de {sedeDestino.Nombre} sin cargos de traslado logístico.",
+                TarifaBase: 0.00m,
+                TarifaPorLibra: 0.00m
             ));
             return opciones;
         }
@@ -170,7 +172,9 @@ public class ShippingService : IShippingService
                 Costo: costoTotal,
                 TiempoEstimado: terrestre?.TiempoEstimado ?? "24 - 48 horas hábiles",
                 TipoRuta: "NACIONAL",
-                Descripcion: terrestre?.Descripcion ?? $"Despacho terrestre intermunicipal seguro entre {sedeOrigen.Ciudad} y {sedeDestino.Ciudad} ({peso:F1} lbs)."
+                Descripcion: terrestre?.Descripcion ?? $"Despacho terrestre intermunicipal seguro entre {sedeOrigen.Ciudad} y {sedeDestino.Ciudad} ({peso:F1} lbs).",
+                TarifaBase: tarifaBase,
+                TarifaPorLibra: tarifaPorLibra
             ));
 
             return opciones;
@@ -194,7 +198,9 @@ public class ShippingService : IShippingService
                 Costo: costoMaritimo,
                 TiempoEstimado: "10 - 15 días hábiles",
                 TipoRuta: "INTERNACIONAL",
-                Descripcion: $"Carga marítima consolidada bilateral {sedeOrigen.Ciudad} ⇄ {sedeDestino.Ciudad} ({peso:F1} lbs)."
+                Descripcion: $"Carga marítima consolidada bilateral {sedeOrigen.Ciudad} ⇄ {sedeDestino.Ciudad} ({peso:F1} lbs).",
+                TarifaBase: 10.00m,
+                TarifaPorLibra: 1.85m
             ));
 
             opciones.Add(new OpcionEnvioDto(
@@ -203,7 +209,9 @@ public class ShippingService : IShippingService
                 Costo: costoAereo,
                 TiempoEstimado: "2 - 4 días hábiles",
                 TipoRuta: "INTERNACIONAL",
-                Descripcion: $"Vuelo exprés prioritario bilateral con trámite aduanal y entrega rápida en ventanilla ({peso:F1} lbs)."
+                Descripcion: $"Vuelo exprés prioritario bilateral con trámite aduanal y entrega rápida en ventanilla ({peso:F1} lbs).",
+                TarifaBase: 20.00m,
+                TarifaPorLibra: 4.50m
             ));
 
             return opciones;
@@ -218,7 +226,9 @@ public class ShippingService : IShippingService
                 Costo: costo,
                 TiempoEstimado: f.TiempoEstimado,
                 TipoRuta: "INTERNACIONAL",
-                Descripcion: f.Descripcion ?? $"Transporte {f.Nombre} bilateral ({peso:F1} lbs)."
+                Descripcion: f.Descripcion ?? $"Transporte {f.Nombre} bilateral ({peso:F1} lbs).",
+                TarifaBase: f.TarifaBase,
+                TarifaPorLibra: f.TarifaPorLibra
             ));
         }
 

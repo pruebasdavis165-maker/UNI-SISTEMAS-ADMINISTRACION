@@ -92,7 +92,7 @@ La base de datos se inicializa automáticamente con usuarios de prueba para cada
 
 | Rol | Correo Electrónico | Contraseña | Alcance Operativo |
 | :--- | :--- | :--- | :--- |
-| **Administrador** | `admin@nicalogistics.com` | `Admin123*` | Control total del sistema, gestión de usuarios, roles, suspensión de cuentas y bitácora de auditoría. |
+| **Administrador** | `davismunoz165@gmail.com` | `Admin123*` | Control total del sistema, gestión de usuarios, roles, suspensión de cuentas y bitácora de auditoría. |
 | **Vendedor** | `vendedor@nicalogistics.com` | `Vendedor123*` | Gestión del catálogo, precios, creación de productos/categorías y CRM 360 de clientes. |
 | **Logística** | `logistica@nicalogistics.com` | `Logistica123*` | Operador de ventanilla: Tablero Kanban, actualización de estados de encomienda y entrega física. |
 | **Cliente** | `cliente@gmail.com` | `Cliente123*` | Exploración de catálogo, carrito de compras, órdenes Sede a Sede y seguimiento de paquetes. |

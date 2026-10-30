@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { Plane, Ship, Truck, Building2, Scale, ArrowRight, Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { CustomDropdown } from './ui';
 import { API_BASE_URL } from '../lib/auth';
+import { calculateShippingCost, SHIPPING_RATES } from '../lib/shipping';
 
 export default function CalculadoraFlete() {
-  const [calcWeight, setCalcWeight] = useState(5);
-  const [calcService, setCalcService] = useState('AEREO_INT');
+  const [calcWeight, setCalcWeight] = useState(1);
+  const [calcService, setCalcService] = useState('MARITIMO_INT');
   const [calcSede, setCalcSede] = useState('MGA-01');
   const [sedes, setSedes] = useState([]);
   const [formas, setFormas] = useState([]);
@@ -43,27 +44,27 @@ export default function CalculadoraFlete() {
     fetchData();
   }, []);
 
-  // Opciones de servicio con fallbacks corporativos
+  // Opciones de servicio con desglose transparente de Tarifa Base + Tarifa/lb
   const serviceOptions = formas.length > 0
     ? formas.map(f => ({
         value: f.codigo,
-        label: `${f.nombre} ($${f.tarifaPorLibra.toFixed(2)}/lb • ${f.tiempoEstimado})`,
-        description: f.descripcion || `${f.tipoRuta} - Tarifa base $${f.tarifaBase.toFixed(2)} USD`
+        label: `${f.nombre} ($${f.tarifaBase.toFixed(2)} base + $${f.tarifaPorLibra.toFixed(2)}/lb • ${f.tiempoEstimado})`,
+        description: f.descripcion || `${f.tipoRuta} - Tarifa base $${f.tarifaBase.toFixed(2)} USD + $${f.tarifaPorLibra.toFixed(2)}/lb`
       }))
     : [
         { 
-          value: 'AEREO_INT', 
-          label: 'Aéreo Exprés ($4.50/lb • 2-4 días)', 
-          description: 'Vuelo exprés prioritario bilateral con despacho rápido y aforo aduanal' 
-        },
-        { 
           value: 'MARITIMO_INT', 
-          label: 'Marítimo Económico ($1.85/lb • 10-15 días)', 
+          label: 'Marítimo Económico ($10.00 base + $1.85/lb • 10-15 días)', 
           description: 'Carga marítima consolidada económica para bultos medianos y grandes' 
         },
         { 
+          value: 'AEREO_INT', 
+          label: 'Aéreo Exprés ($20.00 base + $4.50/lb • 2-4 días)', 
+          description: 'Vuelo exprés prioritario bilateral con despacho rápido y aforo aduanal' 
+        },
+        { 
           value: 'TERRESTRE_NAC', 
-          label: 'Terrestre Nacional ($0.75/lb • 24-48 hrs)', 
+          label: 'Terrestre Nacional ($3.00 base + $0.75/lb • 24-48 hrs)', 
           description: 'Transporte terrestre interdepartamental seguro entre sedes de Nicaragua' 
         }
       ];
@@ -88,32 +89,21 @@ export default function CalculadoraFlete() {
         }
       ];
 
-  // Buscar objeto de modalidad seleccionada
+  // Buscar objeto de modalidad seleccionada en el estado o en constantes
   const selectedForma = formas.find(f => f.codigo === calcService);
+  const selectedSede = sedes.find(s => s.codigo === calcSede);
 
-  const calculateEstimate = () => {
-    const weight = Math.max(1, Number(calcWeight) || 1);
+  // Verificación si la sede es pickup local (e.g. seleccionó origen = destino o Pickup Local)
+  const isLocal = calcService === 'PICKUP_LOCAL';
 
-    if (selectedForma) {
-      return (selectedForma.tarifaBase + (weight * selectedForma.tarifaPorLibra)).toFixed(2);
-    }
-
-    if (calcService === 'TERRESTRE_NAC') {
-      return (3.00 + (weight * 0.75)).toFixed(2);
-    }
-    if (calcService === 'MARITIMO_INT') {
-      return (10.00 + (weight * 1.85)).toFixed(2);
-    }
-    // AEREO_INT
-    return (20.00 + (weight * 4.50)).toFixed(2);
-  };
-
-  const getEstimatedTime = () => {
-    if (selectedForma) return selectedForma.tiempoEstimado;
-    if (calcService === 'TERRESTRE_NAC') return '24 a 48 horas hábiles';
-    if (calcService === 'MARITIMO_INT') return '10 a 15 días hábiles';
-    return '2 a 4 días hábiles (Prioritario)';
-  };
+  // Cálculo matemático centralizado e idéntico al Checkout
+  const calculation = calculateShippingCost({
+    pesoLibras: calcWeight,
+    modalidad: calcService,
+    isLocalPickup: isLocal,
+    tarifaBase: selectedForma?.tarifaBase,
+    tarifaPorLibra: selectedForma?.tarifaPorLibra
+  });
 
   const selectedSedeName = sedeOptions.find(s => s.value === calcSede)?.label.split('(')[0]?.trim() || 'Ventanilla Oficial';
 
@@ -131,7 +121,7 @@ export default function CalculadoraFlete() {
         <div className="lg:col-span-7 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-primary-blue text-xs font-semibold tracking-wide">
             <Plane className="w-3.5 h-3.5 text-accent-magenta" />
-            <span>Tarifario Oficial Dinámico Sin Cargos Ocultos</span>
+            <span>Fórmula Matemática Unificada & Tarifario Oficial</span>
           </div>
 
           <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
@@ -139,8 +129,8 @@ export default function CalculadoraFlete() {
           </h2>
           
           <p className="font-inter text-sm text-slate-600 leading-relaxed max-w-xl">
-            Cotiza en tiempo real el flete de tus encomiendas y compras. Incluye recepción, 
-            pesaje en báscula certificada, tránsito seguro y resguardo en ventanilla oficial.
+            Cotiza con la misma fórmula exacta del Checkout: <strong>Tarifa Base por paquete + Flete por Libra</strong>. 
+            El costo incluye recepción, pesaje digital, tránsito internacional seguro y resguardo en ventanilla oficial.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
@@ -189,6 +179,17 @@ export default function CalculadoraFlete() {
 
           </div>
 
+          {/* Breakdown helper explaining formula */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600 font-inter space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-800">Fórmula de Liquidación Oficial:</span>
+              <span className="font-mono text-primary-blue font-bold">{calculation.formula}</span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Esta misma tarifa base y precio por libra se aplica de forma idéntica en el Checkout sin recargos sorpresa.
+            </p>
+          </div>
+
           <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-500 font-inter">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -212,17 +213,17 @@ export default function CalculadoraFlete() {
 
             <div className="space-y-1">
               <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta tracking-tight">
-                ${calculateEstimate()} <span className="text-base text-slate-500 font-normal">USD</span>
+                ${calculation.totalFlete.toFixed(2)} <span className="text-base text-slate-500 font-normal">USD</span>
               </div>
-              <p className="text-[11px] text-slate-400 font-inter font-medium">
-                Tarifa total para {calcWeight} lb{calcWeight > 1 ? 's' : ''} de carga
+              <p className="text-[11px] text-slate-500 font-inter font-medium">
+                {calculation.desgloseTexto}
               </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-slate-600 space-y-1 text-left font-inter">
               <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
                 <Clock className="w-3.5 h-3.5 text-primary-blue shrink-0" />
-                <span>Tiempo de entrega: {getEstimatedTime()}</span>
+                <span>Tiempo de entrega: {calculation.tiempoEstimado}</span>
               </div>
               <p className="text-[11px] text-slate-500 pl-5">
                 Retiro presencial y seguro en ventanilla oficial autorizada.

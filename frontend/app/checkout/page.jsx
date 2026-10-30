@@ -12,6 +12,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { getStripe } from '../../lib/stripe';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Alert, Input, CustomDropdown, PhoneInput } from '../../components/ui';
 import { getCart, clearCart } from '../../lib/cart';
+import { calculateShippingCost } from '../../lib/shipping';
 import { getToken, getUser, API_BASE_URL, clearSession, isInternalRole } from '../../lib/auth';
 
 function CheckoutContent() {
@@ -605,6 +606,12 @@ function CheckoutContent() {
                                 <p className="text-[11px] text-slate-500 font-inter leading-relaxed line-clamp-2">
                                   {opt.descripcion}
                                 </p>
+                                {opt.costo > 0 && (
+                                  <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-inter">
+                                    <span>Fórmula: ${Number(opt.tarifaBase || (isAereo ? 20 : isMaritimo ? 10 : 3)).toFixed(2)} base + ${Number(opt.tarifaPorLibra || (isAereo ? 4.5 : isMaritimo ? 1.85 : 0.75)).toFixed(2)}/lb</span>
+                                    <span className="text-primary-blue font-bold">${opt.costo.toFixed(2)} USD</span>
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
@@ -830,6 +837,12 @@ function CheckoutContent() {
                   <span>Peso acumulado:</span>
                   <span className="font-medium text-slate-600">{totalWeight.toFixed(1)} lbs</span>
                 </div>
+                {shippingCost > 0 && selectedShippingOption && (
+                  <div className="text-[10px] text-slate-500 font-inter bg-slate-50 p-2 rounded-lg border border-slate-200">
+                    <span className="font-bold text-slate-700 block">Fórmula de Flete Oficial:</span>
+                    <span>${Number(selectedShippingOption.tarifaBase || (selectedShippingOption.codigo?.includes('AEREO') ? 20 : selectedShippingOption.codigo?.includes('MARITIMO') ? 10 : 3)).toFixed(2)} base + {totalWeight.toFixed(1)} lbs × ${Number(selectedShippingOption.tarifaPorLibra || (selectedShippingOption.codigo?.includes('AEREO') ? 4.5 : selectedShippingOption.codigo?.includes('MARITIMO') ? 1.85 : 0.75)).toFixed(2)}/lb = ${shippingCost.toFixed(2)} USD</span>
+                  </div>
+                )}
                 {sedeOrigenId === sedeDestinoId && (
                   <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-medium flex items-center gap-1.5 mt-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />

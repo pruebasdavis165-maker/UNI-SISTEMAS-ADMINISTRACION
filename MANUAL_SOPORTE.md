@@ -103,7 +103,7 @@ Todas las contraseñas han sido cifradas utilizando **BCrypt Work Factor 12** (P
 
 | Rol | Correo Electrónico | Contraseña Predeterminada | Alcance y Permisos |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@nicalogistics.com` | `Admin123*` | Control total, usuarios, roles, suspensión de cuentas, catálogo, inventario, auditoría. |
+| **Admin** | `davismunoz165@gmail.com` | `Admin123*` | Control total, usuarios, roles, suspensión de cuentas, catálogo, inventario, auditoría. |
 | **Vendedor** | `vendedor@nicalogistics.com` | `Vendedor123*` | CRM de clientes, creación y edición de productos, categorías, pedidos. |
 | **Logística** | `logistica@nicalogistics.com` | `Logistica123*` | Tablero Kanban de encomiendas, actualización de estados de tracking, entrega en ventanilla. |
 | **Cliente** | `cliente@gmail.com` | `Cliente123*` | Catálogo público, carrito, checkout sede a sede, mis pedidos, portal de rastreo. |

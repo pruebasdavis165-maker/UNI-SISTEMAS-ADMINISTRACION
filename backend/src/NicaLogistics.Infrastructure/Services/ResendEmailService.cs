@@ -35,7 +35,7 @@ public class ResendEmailService : IEmailService
 
         _adminEmail = _configuration["Resend:AdminEmail"] 
             ?? Environment.GetEnvironmentVariable("RESEND_ADMIN_EMAIL") 
-            ?? "admin@nicalogistics.com";
+            ?? "davismunoz165@gmail.com";
     }
 
     public async Task<bool> SendEmailAsync(string to, string subject, string htmlContent)

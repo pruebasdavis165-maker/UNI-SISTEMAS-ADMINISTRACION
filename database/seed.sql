@@ -35,7 +35,7 @@ DELETE FROM sedes WHERE codigo NOT IN ('MIA-01', 'MGA-01');
 -- Logística: Logistica123*!
 -- Cliente: Cliente123*!
 INSERT INTO usuarios (id, nombre_completo, email, password_hash, telefono, rol_id, activo) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Administrador General NicaLogistics', 'admin@nicalogistics.com', crypt('Admin123*!', gen_salt('bf', 10)), '+505 8888-0001', 1, TRUE),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Administrador General NicaLogistics', 'davismunoz165@gmail.com', crypt('Admin123*!', gen_salt('bf', 10)), '+505 8888-0001', 1, TRUE),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Carlos Mendoza - Vendedor Comercial', 'vendedor@nicalogistics.com', crypt('Vendedor123*!', gen_salt('bf', 10)), '+505 8888-0002', 2, TRUE),
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Roberto Silva - Operador Logístico', 'logistica@nicalogistics.com', crypt('Logistica123*!', gen_salt('bf', 10)), '+505 8888-0003', 3, TRUE),
 ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Alejandro Morales (Cliente Frecuente)', 'cliente@gmail.com', crypt('Cliente123*!', gen_salt('bf', 10)), '+505 8888-0004', 4, TRUE)
