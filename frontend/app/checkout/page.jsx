@@ -548,10 +548,6 @@ function CheckoutContent() {
                         <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter">
                           Modalidad de Envío y Flete Oficial
                         </label>
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                          <Scale className="w-3.5 h-3.5 text-primary-blue" />
-                          Peso de Orden: {totalWeight.toFixed(1)} lbs
-                        </span>
                       </div>
 
                       {isLoadingShipping ? (
@@ -640,10 +636,9 @@ function CheckoutContent() {
                     </p>
                   </div>
                 </div>
-                <Badge variant="emerald" size="sm">Validación Bilateral</Badge>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 <Input
                   label="Nombre de Quien Retira"
                   value={cardHolder}
@@ -652,11 +647,10 @@ function CheckoutContent() {
                   required
                 />
                 <PhoneInput
-                  label="Teléfono / WhatsApp de Notificación"
+                  label="Teléfono / WhatsApp"
                   value={contactoTelefono}
                   onChange={(val) => setContactoTelefono(val)}
                   required
-                  helperText="Nicaragua (+505, 8 dígitos) o Estados Unidos (+1, 10 dígitos)."
                 />
               </div>
             </Card>
@@ -676,10 +670,6 @@ function CheckoutContent() {
                       Pasarela desacoplada con cobro seguro SSL y registro atómico.
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-slate-400">
-                  <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Stripe 256-bit</span>
                 </div>
               </div>
 

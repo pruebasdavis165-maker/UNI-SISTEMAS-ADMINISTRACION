@@ -259,7 +259,7 @@ export default function PhoneInput({
   return (
     <div className={`w-full space-y-1.5 ${className}`} ref={containerRef}>
       {label && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between min-h-[20px]">
           <label 
             htmlFor={id} 
             className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter"
@@ -274,12 +274,12 @@ export default function PhoneInput({
 
       {/* Unified Flex Container */}
       <div 
-        className={`relative flex items-stretch rounded-xl border bg-white transition-all shadow-xs ${
+        className={`relative flex items-stretch h-12 rounded-xl border bg-white transition-all shadow-xs ${
           error || isIncomplete
             ? 'border-rose-400 ring-2 ring-rose-100'
             : isFocused || isOpen
             ? 'border-primary-blue ring-2 ring-primary-blue/20'
-            : 'border-slate-200 hover:border-slate-300'
+            : 'border-slate-300 hover:border-slate-400'
         } ${disabled ? 'bg-slate-50 opacity-70 cursor-not-allowed' : ''}`}
       >
         {/* Country Selector Dropdown Miniature Trigger */}
@@ -293,7 +293,7 @@ export default function PhoneInput({
           }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          className="flex items-center gap-1.5 px-3 py-2.5 bg-slate-50 hover:bg-blue-50/60 active:bg-blue-100/60 text-slate-700 rounded-l-xl border-r border-slate-200 transition-all select-none shrink-0 focus:outline-none cursor-pointer group"
+          className="flex items-center gap-1.5 px-3 h-full bg-slate-50 hover:bg-blue-50/60 active:bg-blue-100/60 text-slate-700 rounded-l-xl border-r border-slate-200 transition-all select-none shrink-0 focus:outline-none cursor-pointer group"
           title={`País seleccionado: ${selectedCountry.name} (${selectedCountry.dialCode})`}
         >
           <span className="text-sm font-bold font-mono text-slate-800" role="img" aria-label={selectedCountry.name}>
@@ -372,7 +372,7 @@ export default function PhoneInput({
             onChange={handleInputChange}
             onFocus={() => setIsFocused(true)}
             onBlur={handleBlur}
-            className="w-full bg-transparent px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 font-inter focus:outline-none rounded-r-xl tracking-wider font-mono sm:font-sans"
+            className="w-full h-full bg-transparent px-3.5 text-sm text-slate-900 placeholder:text-slate-400 font-inter focus:outline-none rounded-r-xl tracking-wider font-mono sm:font-sans"
           />
 
           {/* Validation Status Indicator */}
