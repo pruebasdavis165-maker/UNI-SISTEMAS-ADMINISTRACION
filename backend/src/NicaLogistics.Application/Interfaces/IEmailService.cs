@@ -28,7 +28,10 @@ public interface IEmailService
         decimal total,
         string sedeOrigen,
         string sedeDestino,
-        IEnumerable<(string ProductName, int Quantity, decimal Subtotal)> items
+        IEnumerable<(string ProductName, int Quantity, decimal Subtotal)> items,
+        decimal costoEnvio = 0,
+        string modalidadEnvio = "Terrestre",
+        decimal pesoTotalLibras = 0
     );
 
     /// <summary>

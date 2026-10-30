@@ -130,14 +130,41 @@ export default function CategoriasPage() {
   };
 
   const handleDelete = (cat) => {
-    setConfirmModal({
-      isOpen: true,
-      title: '¿Desactivar Categoría?',
-      message: `¿Estás seguro de que deseas desactivar la categoría "${cat.nombre}"? Los productos pertenecientes a esta clasificación no podrán ser asignados mientras permanezca inactiva.`,
-      confirmText: 'Sí, Desactivar',
-      variant: 'danger',
-      onConfirm: () => executeDelete(cat)
-    });
+    if (cat.activo) {
+      setConfirmModal({
+        isOpen: true,
+        title: '¿Desactivar Categoría?',
+        message: `¿Estás seguro de que deseas desactivar la categoría "${cat.nombre}"? Los productos pertenecientes a esta clasificación no podrán ser asignados mientras permanezca inactiva.`,
+        confirmText: 'Sí, Desactivar',
+        variant: 'danger',
+        onConfirm: () => executeDelete(cat)
+      });
+    } else {
+      executeReactivate(cat);
+    }
+  };
+
+  const executeReactivate = async (cat) => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE_URL}/api/categorias/${cat.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nombre: cat.nombre,
+          descripcion: cat.descripcion,
+          activo: true
+        })
+      });
+      if (!res.ok) throw new Error('Error al reactivar categoría.');
+      setSuccessMsg(`Categoría "${cat.nombre}" reactivada con éxito.`);
+      fetchCategories();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const executeDelete = async (cat) => {

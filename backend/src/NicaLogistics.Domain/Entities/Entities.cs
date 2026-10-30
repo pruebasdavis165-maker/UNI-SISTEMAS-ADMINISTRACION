@@ -54,6 +54,7 @@ public class Product
     public int StockActual { get; set; }
     public int StockMinimo { get; set; } = 5;
     public string? ImagenUrl { get; set; }
+    public decimal PesoLibras { get; set; } = 1.0m;
     public Guid CategoriaId { get; set; }
     public Category? Categoria { get; set; }
     public bool Activo { get; set; } = true;
@@ -89,6 +90,9 @@ public class Order
     public Guid SedeDestinoId { get; set; }
     public Sede? SedeDestino { get; set; }
     
+    public decimal CostoEnvio { get; set; } = 0.0m;
+    public string ModalidadEnvio { get; set; } = "Terrestre";
+    public decimal PesoTotalLibras { get; set; } = 0.0m;
     public decimal Total { get; set; }
     public string Estado { get; set; } = "PENDIENTE_PAGO"; // PENDIENTE_PAGO, PAGADO, CANCELADO, COMPLETADO
     public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
@@ -169,4 +173,20 @@ public class AuditLog
     public string? Detalles { get; set; }
     public string? IpAddress { get; set; }
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
+}
+
+
+public class FormaEnvio
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Nombre { get; set; } = string.Empty;
+    public string Codigo { get; set; } = string.Empty; // TERRESTRE_NAC, MARITIMO_INT, AEREO_INT
+    public string TipoRuta { get; set; } = "NACIONAL"; // NACIONAL, INTERNACIONAL
+    public decimal TarifaBase { get; set; } = 5.0m;
+    public decimal TarifaPorLibra { get; set; } = 1.5m;
+    public string TiempoEstimado { get; set; } = "2 - 3 días hábiles";
+    public string? Descripcion { get; set; }
+    public bool Activo { get; set; } = true;
+    public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
+    public DateTime ActualizadoEn { get; set; } = DateTime.UtcNow;
 }

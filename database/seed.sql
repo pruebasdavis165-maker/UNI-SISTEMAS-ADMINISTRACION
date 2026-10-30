@@ -99,3 +99,17 @@ INSERT INTO historial_tracking (encomienda_id, estado, ubicacion_sede_id, coment
 ('f1111111-1111-1111-1111-111111111111', 'REGISTRADA', '11111111-1111-1111-1111-111111111111', 'Paquete recibido en ventanilla de recepción Miami Hub', 'cccccccc-cccc-cccc-cccc-cccccccccccc'),
 ('f1111111-1111-1111-1111-111111111111', 'EN_TRANSITO', '11111111-1111-1111-1111-111111111111', 'Despachado en vuelo de carga consolidada con destino a Managua', 'cccccccc-cccc-cccc-cccc-cccccccccccc')
 ON CONFLICT DO NOTHING;
+
+
+-- 5. Formas de Envio Iniciales
+INSERT INTO formas_envio (id, nombre, codigo, tipo_ruta, tarifa_base, tarifa_por_libra, tiempo_estimado, descripcion, activo)
+VALUES 
+  ('f1111111-1111-1111-1111-111111111111', 'Terrestre Estandar', 'TERRESTRE_NAC', 'NACIONAL', 3.00, 0.75, '24 - 48 horas habiles', 'Transporte terrestre seguro entre sedes autorizadas de Nicaragua con resguardo oficial.', TRUE),
+  ('f2222222-2222-2222-2222-222222222222', 'Maritimo Economico', 'MARITIMO_INT', 'INTERNACIONAL', 10.00, 1.85, '10 - 15 dias habiles', 'Carga maritima consolidada bilateral Miami - Managua para paqueteria economica.', TRUE),
+  ('f3333333-3333-3333-3333-333333333333', 'Aereo Expres', 'AEREO_INT', 'INTERNACIONAL', 20.00, 4.50, '2 - 4 dias habiles', 'Vuelo expres prioritario bilateral con tramite aduanal y entrega rapida en ventanilla.', TRUE)
+ON CONFLICT (codigo) DO UPDATE SET
+  nombre = EXCLUDED.nombre,
+  tarifa_base = EXCLUDED.tarifa_base,
+  tarifa_por_libra = EXCLUDED.tarifa_por_libra,
+  tiempo_estimado = EXCLUDED.tiempo_estimado,
+  descripcion = EXCLUDED.descripcion;

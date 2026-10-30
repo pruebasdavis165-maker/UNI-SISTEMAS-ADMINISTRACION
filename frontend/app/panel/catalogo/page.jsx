@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Package, Search, Filter, ShoppingBag, 
   ArrowRight, RefreshCw, AlertTriangle, CheckCircle2, 
-  DollarSign, ChevronDown, Check 
+  DollarSign, ChevronDown, Check, Eye, X, Scale, ShieldCheck 
 } from 'lucide-react';
 import { Button, Input, Select, CustomDropdown, Badge, Card } from '../../../components/ui';
 import { API_BASE_URL, getToken } from '../../../lib/auth';
@@ -18,6 +18,7 @@ export default function PanelCatalogoPage() {
   const [sortBy, setSortBy] = useState('destacados');
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [error, setError] = useState('');
 
   const fetchCatalogData = async () => {
@@ -191,26 +192,34 @@ export default function PanelCatalogoPage() {
             return (
               <div 
                 key={p.id}
-                className="bg-white rounded-xl border border-slate-200 hover:border-primary-blue/50 shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden"
+                className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col justify-between overflow-hidden group"
               >
                 <div>
-                  <div className="h-44 bg-slate-50 p-4 flex items-center justify-center border-b border-slate-100 relative">
+                  <div 
+                    onClick={() => setQuickViewProduct(p)}
+                    className="h-44 bg-slate-50/70 p-4 flex items-center justify-center border-b border-slate-100 relative cursor-pointer overflow-hidden"
+                  >
                     <img
                       src={p.imagenUrl || '/placeholder.png'}
                       alt={p.nombre}
-                      className="max-h-full max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
                     />
                     <div className="absolute top-2.5 right-2.5">
                       {isLowStock ? (
-                        <span className="text-[10px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-white bg-amber-500 px-2.5 py-0.5 rounded-full shadow-2xs">
                           Stock Bajo
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200">
                           En Stock
                         </span>
                       )}
+                    </div>
+                    <div className="absolute inset-0 bg-primary-blue/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="bg-white/95 text-primary-blue text-xs font-bold px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5" /> Ficha Técnica
+                      </span>
                     </div>
                   </div>
 
@@ -219,7 +228,10 @@ export default function PanelCatalogoPage() {
                       <span>SKU: {p.codigoSku || p.sku || 'N/A'}</span>
                       <span className="font-sans font-semibold text-slate-500">{p.categoriaNombre || 'General'}</span>
                     </div>
-                    <h3 className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2">
+                    <h3 
+                      onClick={() => setQuickViewProduct(p)}
+                      className="font-montserrat font-bold text-sm text-slate-900 line-clamp-2 hover:text-primary-blue transition-colors cursor-pointer"
+                    >
                       {p.nombre}
                     </h3>
                     <p className="font-inter text-xs text-slate-500 line-clamp-2">
@@ -245,6 +257,94 @@ export default function PanelCatalogoPage() {
               </div>
             );
           })}
+        </div>
+      )}
+    
+      {/* Modal Quick View Ficha Técnica para Vendedores */}
+      {quickViewProduct && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setQuickViewProduct(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative overflow-hidden space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start gap-4 pb-4 border-b border-slate-100">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-primary-blue bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                  {quickViewProduct.categoriaNombre || 'Categoría Oficial'}
+                </span>
+                <h2 className="font-montserrat font-extrabold text-xl sm:text-2xl text-slate-900 mt-2">
+                  {quickViewProduct.nombre}
+                </h2>
+                <p className="text-xs font-mono text-slate-400 font-bold mt-1">
+                  SKU Oficial: {quickViewProduct.codigoSku || quickViewProduct.sku || 'N/A'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickViewProduct(null)}
+                className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+              <div className="sm:col-span-5 h-56 bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center justify-center overflow-hidden">
+                <img
+                  src={quickViewProduct.imagenUrl || '/placeholder.png'}
+                  alt={quickViewProduct.nombre}
+                  className="max-h-full max-w-full object-contain"
+                  onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
+                />
+              </div>
+
+              <div className="sm:col-span-7 space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-xs font-inter bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/60">
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Precio Oficial</span>
+                    <span className="font-montserrat font-extrabold text-lg text-primary-blue">
+                      ${Number(quickViewProduct.precio || 0).toFixed(2)} USD
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Existencias en Almacén</span>
+                    <span className="font-montserrat font-extrabold text-lg text-slate-800">
+                      {quickViewProduct.stockActual || 0} unid.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs font-inter">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-primary-blue font-semibold border border-blue-100">
+                    <Scale className="w-4 h-4" />
+                    <span>Peso: {quickViewProduct.pesoLibras ? quickViewProduct.pesoLibras.toFixed(1) : '1.0'} lbs</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Retiro en Ventanilla</span>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-montserrat mb-1">
+                    Descripción Técnica
+                  </h4>
+                  <p className="text-xs text-slate-600 font-inter leading-relaxed max-h-32 overflow-y-auto">
+                    {quickViewProduct.descripcion || 'Sin descripción detallada registrada para este artículo.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <Button variant="secondary" size="md" onClick={() => setQuickViewProduct(null)}>
+                Cerrar Ficha Técnica
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

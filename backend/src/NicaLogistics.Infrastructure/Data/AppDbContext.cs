@@ -21,6 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<Shipment> Encomiendas => Set<Shipment>();
     public DbSet<TrackingHistory> HistorialTracking => Set<TrackingHistory>();
     public DbSet<AuditLog> LogsAuditoria => Set<AuditLog>();
+    public DbSet<FormaEnvio> FormasEnvio => Set<FormaEnvio>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,6 +92,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.StockActual).HasColumnName("stock_actual");
             entity.Property(e => e.StockMinimo).HasColumnName("stock_minimo");
             entity.Property(e => e.ImagenUrl).HasColumnName("imagen_url").HasMaxLength(255);
+            entity.Property(e => e.PesoLibras).HasColumnName("peso_libras").HasPrecision(10, 2);
             entity.Property(e => e.CategoriaId).HasColumnName("categoria_id");
             entity.Property(e => e.Activo).HasColumnName("activo");
             entity.Property(e => e.CreadoEn).HasColumnName("creado_en");
@@ -126,6 +128,9 @@ public class AppDbContext : DbContext
             entity.Property(e => e.ClienteId).HasColumnName("cliente_id");
             entity.Property(e => e.SedeOrigenId).HasColumnName("sede_origen_id");
             entity.Property(e => e.SedeDestinoId).HasColumnName("sede_destino_id");
+            entity.Property(e => e.CostoEnvio).HasColumnName("costo_envio").HasPrecision(12, 2);
+            entity.Property(e => e.ModalidadEnvio).HasColumnName("modalidad_envio").HasMaxLength(50);
+            entity.Property(e => e.PesoTotalLibras).HasColumnName("peso_total_libras").HasPrecision(10, 2);
             entity.Property(e => e.Total).HasColumnName("total").HasPrecision(12, 2);
             entity.Property(e => e.Estado).HasColumnName("estado").HasMaxLength(50);
             entity.Property(e => e.CreadoEn).HasColumnName("creado_en");
@@ -218,6 +223,23 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Detalles).HasColumnName("detalles");
             entity.Property(e => e.IpAddress).HasColumnName("ip_address").HasMaxLength(50);
             entity.Property(e => e.Fecha).HasColumnName("fecha");
+        });
+
+        modelBuilder.Entity<FormaEnvio>(entity =>
+        {
+            entity.ToTable("formas_envio");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Codigo).HasColumnName("codigo").IsRequired().HasMaxLength(20);
+            entity.Property(e => e.TipoRuta).HasColumnName("tipo_ruta").IsRequired().HasMaxLength(20);
+            entity.Property(e => e.TarifaBase).HasColumnName("tarifa_base").HasPrecision(10, 2);
+            entity.Property(e => e.TarifaPorLibra).HasColumnName("tarifa_por_libra").HasPrecision(10, 2);
+            entity.Property(e => e.TiempoEstimado).HasColumnName("tiempo_estimado").HasMaxLength(50);
+            entity.Property(e => e.Descripcion).HasColumnName("descripcion");
+            entity.Property(e => e.Activo).HasColumnName("activo");
+            entity.Property(e => e.CreadoEn).HasColumnName("creado_en");
+            entity.Property(e => e.ActualizadoEn).HasColumnName("actualizado_en");
         });
     }
 }

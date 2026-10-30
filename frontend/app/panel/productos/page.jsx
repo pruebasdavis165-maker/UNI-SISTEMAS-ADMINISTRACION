@@ -35,6 +35,7 @@ export default function ProductosPage() {
   const [formPrice, setFormPrice] = useState('');
   const [formStock, setFormStock] = useState('10');
   const [formMinStock, setFormMinStock] = useState('5');
+  const [formWeight, setFormWeight] = useState('1.0');
   const [formCatId, setFormCatId] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
@@ -140,6 +141,8 @@ export default function ProductosPage() {
           precio: parseFloat(formPrice),
           stockActual: parseInt(formStock),
           stockMinimo: parseInt(formMinStock),
+          pesoLibras: parseFloat(formWeight) || 1.0,
+          pesoLibras: parseFloat(formWeight) || 1.0,
           categoriaId: formCatId,
           imagenUrl: formImageUrl || null
         })
@@ -248,6 +251,7 @@ export default function ProductosPage() {
     setFormPrice('');
     setFormStock('10');
     setFormMinStock('5');
+    setFormWeight('1.0');
     setFormImageUrl('');
     setSelectedFileName('');
     setFormActive(true);
@@ -377,6 +381,7 @@ export default function ProductosPage() {
                               <span className="text-[11px] font-mono font-bold text-primary-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-100/60 inline-block mt-0.5">
                                 {p.codigoSku}
                               </span>
+                              <span className="text-[11px] font-inter text-slate-400 block mt-0.5 font-medium">Peso: {p.pesoLibras || 1.0} lbs</span>
                             </div>
                           </div>
                         </td>

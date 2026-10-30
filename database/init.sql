@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS productos (
     stock_minimo INT NOT NULL DEFAULT 5 CHECK (stock_minimo >= 0),
     imagen_url VARCHAR(255),
     categoria_id UUID NOT NULL REFERENCES categorias(id),
+    peso_libras NUMERIC(10,2) DEFAULT 1.00 CHECK (peso_libras > 0),
     activo BOOLEAN DEFAULT TRUE,
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -87,6 +88,9 @@ CREATE TABLE IF NOT EXISTS pedidos (
     sede_origen_id UUID NOT NULL REFERENCES sedes(id),
     sede_destino_id UUID NOT NULL REFERENCES sedes(id),
     total NUMERIC(12,2) NOT NULL CHECK (total >= 0),
+    costo_envio NUMERIC(12,2) DEFAULT 0.00 CHECK (costo_envio >= 0),
+    modalidad_envio VARCHAR(50) DEFAULT 'Terrestre',
+    peso_total_libras NUMERIC(10,2) DEFAULT 0.00,
     estado VARCHAR(50) NOT NULL DEFAULT 'PENDIENTE_PAGO', -- 'PENDIENTE_PAGO', 'PAGADO', 'CANCELADO', 'COMPLETADO'
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -165,3 +169,19 @@ CREATE INDEX IF NOT EXISTS idx_encomiendas_estado ON encomiendas(estado);
 CREATE INDEX IF NOT EXISTS idx_historial_encomienda ON historial_tracking(encomienda_id);
 CREATE INDEX IF NOT EXISTS idx_auditoria_usuario ON logs_auditoria(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON logs_auditoria(fecha);
+
+
+-- 12. Tabla de Formas y Tarifas de Envio (Configuracion Administrador)
+CREATE TABLE IF NOT EXISTS formas_envio (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre VARCHAR(50) NOT NULL,
+    codigo VARCHAR(20) UNIQUE NOT NULL,
+    tipo_ruta VARCHAR(20) NOT NULL,
+    tarifa_base NUMERIC(10,2) NOT NULL DEFAULT 5.00,
+    tarifa_por_libra NUMERIC(10,2) NOT NULL DEFAULT 1.50,
+    tiempo_estimado VARCHAR(50) NOT NULL DEFAULT '2 - 3 dias habiles',
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

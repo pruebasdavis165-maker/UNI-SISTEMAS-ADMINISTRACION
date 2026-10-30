@@ -66,7 +66,7 @@ export default function CustomDropdown({
           <div 
             ref={listRef}
             onWheel={(e) => e.stopPropagation()}
-            className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] py-1.5 max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50 font-inter ${
+            className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl z-[9999] py-1.5 max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50 font-inter ring-1 ring-slate-900/5 ${
               dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
             }`}
           >
@@ -87,7 +87,7 @@ export default function CustomDropdown({
                     className={`px-3.5 py-2.5 cursor-pointer flex items-center justify-between transition-colors ${
                       isSelected
                         ? 'bg-blue-50 text-primary-blue font-bold'
-                        : 'hover:bg-blue-50/70 hover:text-primary-blue text-slate-700'
+                        : 'hover:bg-blue-50 hover:text-primary-blue text-slate-700'
                     }`}
                   >
                     <div className="min-w-0 pr-2">

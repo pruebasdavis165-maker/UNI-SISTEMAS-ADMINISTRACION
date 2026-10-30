@@ -53,7 +53,8 @@ public class ProductService : IProductService
                 p.CategoriaId,
                 p.Categoria != null ? p.Categoria.Nombre : "Sin Categoría",
                 p.Activo,
-                p.CreadoEn
+                p.CreadoEn,
+                p.PesoLibras
             ))
             .ToListAsync();
 
@@ -82,7 +83,8 @@ public class ProductService : IProductService
             p.CategoriaId,
             p.Categoria?.Nombre ?? "Sin Categoría",
             p.Activo,
-            p.CreadoEn
+            p.CreadoEn,
+            p.PesoLibras
         );
     }
 
@@ -106,6 +108,7 @@ public class ProductService : IProductService
             Precio = dto.Precio,
             StockActual = dto.StockActual,
             StockMinimo = dto.StockMinimo,
+            PesoLibras = dto.PesoLibras > 0 ? dto.PesoLibras : 1.0m,
             ImagenUrl = dto.ImagenUrl?.Trim(),
             CategoriaId = category.Id,
             Categoria = category,
@@ -147,7 +150,8 @@ public class ProductService : IProductService
             product.CategoriaId,
             category.Nombre,
             product.Activo,
-            product.CreadoEn
+            product.CreadoEn,
+            product.PesoLibras
         );
     }
 
@@ -167,6 +171,7 @@ public class ProductService : IProductService
         product.Descripcion = dto.Descripcion?.Trim();
         product.Precio = dto.Precio;
         product.StockMinimo = dto.StockMinimo;
+        if (dto.PesoLibras > 0) product.PesoLibras = dto.PesoLibras;
         product.ImagenUrl = dto.ImagenUrl?.Trim();
         product.CategoriaId = category.Id;
         product.Categoria = category;
@@ -187,7 +192,8 @@ public class ProductService : IProductService
             product.CategoriaId,
             category.Nombre,
             product.Activo,
-            product.CreadoEn
+            product.CreadoEn,
+            product.PesoLibras
         );
     }
 

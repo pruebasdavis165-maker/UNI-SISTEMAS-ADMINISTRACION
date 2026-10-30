@@ -12,7 +12,8 @@ public record ProductDto(
     Guid CategoriaId,
     string CategoriaNombre,
     bool Activo,
-    DateTime CreadoEn
+    DateTime CreadoEn,
+    decimal PesoLibras = 1.0m
 );
 
 public record CreateProductDto(
@@ -23,7 +24,8 @@ public record CreateProductDto(
     int StockActual,
     int StockMinimo,
     string? ImagenUrl,
-    Guid CategoriaId
+    Guid CategoriaId,
+    decimal PesoLibras = 1.0m
 );
 
 public record UpdateProductDto(
@@ -33,5 +35,6 @@ public record UpdateProductDto(
     int StockMinimo,
     string? ImagenUrl,
     Guid CategoriaId,
-    bool Activo
+    bool Activo,
+    decimal PesoLibras = 1.0m
 );

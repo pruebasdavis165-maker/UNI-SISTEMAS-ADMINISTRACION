@@ -25,8 +25,12 @@ export default function HomePage() {
   };
 
   const calculateEstimate = () => {
+    if (calcService === 'terrestre') {
+      return (3.00 + (calcWeight * 0.75)).toFixed(2);
+    }
+    const base = calcService === 'aereo' ? 20.00 : 10.00;
     const rate = calcService === 'aereo' ? 4.50 : 1.85;
-    return (calcWeight * rate).toFixed(2);
+    return (base + (calcWeight * rate)).toFixed(2);
   };
 
   return (
@@ -300,8 +304,9 @@ export default function HomePage() {
                     value={calcService}
                     onChange={(val) => setCalcService(val)}
                     options={[
-                      { value: 'aereo', label: 'Aéreo Exprés ($4.50/lb)' },
-                      { value: 'maritimo', label: 'Marítimo Carga ($1.85/lb)' }
+                      { value: 'aereo', label: 'Aéreo Exprés ($4.50/lb • 2-4 días)', description: 'Vuelo exprés prioritario bilateral con despacho rápido' },
+                      { value: 'maritimo', label: 'Marítimo Carga ($1.85/lb • 10-15 días)', description: 'Carga marítima consolidada económica' },
+                      { value: 'terrestre', label: 'Terrestre Nacional ($0.75/lb • 24-48 hrs)', description: 'Transporte terrestre interdepartamental seguro' }
                     ]}
                   />
                 </div>
@@ -345,7 +350,7 @@ export default function HomePage() {
                 </div>
                 <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-slate-600 space-y-1">
                   <p className="font-medium text-slate-800">
-                    {calcService === 'aereo' ? 'Tiempo estimado: 3 a 5 días hábiles' : 'Tiempo marítimo: 12 a 15 días'}
+                    {calcService === 'aereo' ? 'Tiempo estimado: 2 a 4 días hábiles (Prioritario)' : calcService === 'terrestre' ? 'Tiempo terrestre nacional: 24 a 48 horas hábiles' : 'Tiempo marítimo: 10 a 15 días hábiles'}
                   </p>
                   <p className="text-[11px] text-slate-500">Retiro exclusivo en ventanilla oficial con documento de identidad</p>
                 </div>

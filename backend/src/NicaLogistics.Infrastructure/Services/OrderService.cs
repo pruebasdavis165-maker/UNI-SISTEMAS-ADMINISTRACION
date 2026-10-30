@@ -83,6 +83,7 @@ public class OrderService : IOrderService
             };
 
             decimal grandTotal = 0m;
+            decimal totalWeight = 0m;
             var orderItems = new List<OrderItem>();
             var movements = new List<InventoryMovement>();
             var lowStockProducts = new List<Product>();
@@ -103,14 +104,17 @@ public class OrderService : IOrderService
                 var subtotal = prod.Precio * itemReq.Cantidad;
                 grandTotal += subtotal;
 
+                var itemWeight = (prod.PesoLibras > 0 ? prod.PesoLibras : 1.0m) * itemReq.Cantidad;
+                totalWeight += itemWeight;
+
                 var orderItem = new OrderItem
                 {
                     PedidoId = order.Id,
                     ProductoId = prod.Id,
                     Cantidad = itemReq.Cantidad,
                     PrecioUnitario = prod.Precio,
-                    Subtotal = subtotal
-                };
+                    Subtotal = subtotal,
+                                    };
                 orderItems.Add(orderItem);
 
                 // Descuento atómico de stock e inserción de Kardex (RF-07)
@@ -148,7 +152,58 @@ public class OrderService : IOrderService
                 }
             }
 
-            order.Total = grandTotal;
+            // Cálculo de Flete según regla logística multidireccional
+            decimal costoEnvio = 0m;
+            string modalidadEnvio = "Terrestre Estándar";
+
+            if (isLocalPickup)
+            {
+                costoEnvio = 0.00m;
+                modalidadEnvio = "Pickup en Ventanilla (Local)";
+            }
+            else
+            {
+                var paisOrigen = sedeOrigen.Pais.Trim().ToLowerInvariant();
+                var paisDestino = sedeDestino.Pais.Trim().ToLowerInvariant();
+
+                if (paisOrigen == "nicaragua" && paisDestino == "nicaragua")
+                {
+                    modalidadEnvio = "Terrestre Estándar";
+                    var terrestre = await _context.FormasEnvio
+                        .FirstOrDefaultAsync(f => f.Codigo == "TERRESTRE_NAC" && f.Activo);
+                    var tBase = terrestre?.TarifaBase ?? 3.00m;
+                    var tLibra = terrestre?.TarifaPorLibra ?? 0.75m;
+                    costoEnvio = Math.Round(tBase + (totalWeight * tLibra), 2);
+                }
+                else
+                {
+                    var reqMod = dto.ModalidadEnvio?.Trim().ToUpperInvariant() ?? "MARITIMO_INT";
+                    var forma = await _context.FormasEnvio
+                        .FirstOrDefaultAsync(f => (f.Codigo == reqMod || f.Nombre.ToUpper() == reqMod) && f.Activo);
+
+                    if (forma == null)
+                    {
+                        if (reqMod.Contains("AEREO") || reqMod.Contains("AÉREO"))
+                        {
+                            forma = await _context.FormasEnvio.FirstOrDefaultAsync(f => f.Codigo == "AEREO_INT" && f.Activo)
+                                ?? new FormaEnvio { Nombre = "Aéreo Exprés", TarifaBase = 20.00m, TarifaPorLibra = 4.50m };
+                        }
+                        else
+                        {
+                            forma = await _context.FormasEnvio.FirstOrDefaultAsync(f => f.Codigo == "MARITIMO_INT" && f.Activo)
+                                ?? new FormaEnvio { Nombre = "Marítimo Económico", TarifaBase = 10.00m, TarifaPorLibra = 1.85m };
+                        }
+                    }
+
+                    modalidadEnvio = forma.Nombre;
+                    costoEnvio = Math.Round(forma.TarifaBase + (totalWeight * forma.TarifaPorLibra), 2);
+                }
+            }
+
+            order.CostoEnvio = costoEnvio;
+            order.ModalidadEnvio = modalidadEnvio;
+            order.PesoTotalLibras = totalWeight;
+            order.Total = grandTotal + costoEnvio;
             order.Detalles = orderItems;
 
             await _context.Pedidos.AddAsync(order);
@@ -158,7 +213,7 @@ public class OrderService : IOrderService
             var payment = new Payment
             {
                 PedidoId = order.Id,
-                Monto = grandTotal,
+                Monto = order.Total,
                 MetodoPago = string.IsNullOrWhiteSpace(dto.MetodoPago) ? "TARJETA" : dto.MetodoPago.ToUpper(),
                 ReferenciaTransaccion = dto.ReferenciaTransaccion ?? $"TX-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100, 999)}",
                 Estado = "APROBADO",
@@ -220,10 +275,13 @@ public class OrderService : IOrderService
                         clientName: cliente.NombreCompleto,
                         orderNumber: orderNumber,
                         trackingCode: trackingCode,
-                        total: grandTotal,
+                        total: order.Total,
                         sedeOrigen: sedeOrigen.Nombre,
                         sedeDestino: sedeDestino.Nombre,
-                        items: emailItems
+                        items: emailItems,
+                        costoEnvio: order.CostoEnvio,
+                        modalidadEnvio: order.ModalidadEnvio,
+                        pesoTotalLibras: order.PesoTotalLibras
                     );
                 }
             }
@@ -463,7 +521,10 @@ public class OrderService : IOrderService
             shipment?.CodigoTracking,
             order.CreadoEn,
             itemDtos,
-            shipment?.Estado
+            shipment?.Estado,
+            order.CostoEnvio,
+            order.ModalidadEnvio,
+            order.PesoTotalLibras
         );
     }
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { 
   ShieldCheck, MapPin, CreditCard, Building2, 
   ArrowRight, CheckCircle2, AlertTriangle, Package, 
-  Clock, Phone, ArrowLeft, RefreshCw, Truck, Lock, Copy, Check
+  Clock, Phone, ArrowLeft, RefreshCw, Truck, Lock, Ship, Plane, Scale, Copy, Check
 } from 'lucide-react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '../../lib/stripe';
@@ -23,6 +23,9 @@ function CheckoutContent() {
   const [sedes, setSedes] = useState([]);
   const [sedeOrigenId, setSedeOrigenId] = useState('');
   const [sedeDestinoId, setSedeDestinoId] = useState('');
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedShippingOption, setSelectedShippingOption] = useState(null);
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [metodoPago, setMetodoPago] = useState('TARJETA');
   const [cardHolder, setCardHolder] = useState('');
   const [contactoTelefono, setContactoTelefono] = useState('');
@@ -89,7 +92,43 @@ function CheckoutContent() {
     fetchSedes();
   }, [router]);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
+  const totalWeight = cartItems.reduce((acc, item) => acc + ((item.pesoLibras || 1.0) * item.quantity), 0);
+
+  useEffect(() => {
+    if (!sedeOrigenId || !sedeDestinoId) return;
+
+    const fetchQuote = async () => {
+      setIsLoadingShipping(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/envios/cotizar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sedeOrigenId,
+            sedeDestinoId,
+            pesoTotalLibras: totalWeight
+          })
+        });
+        if (res.ok) {
+          const options = await res.json();
+          setShippingOptions(options);
+          if (options.length > 0) {
+            setSelectedShippingOption(options[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error al cotizar envío:', err);
+      } finally {
+        setIsLoadingShipping(false);
+      }
+    };
+
+    fetchQuote();
+  }, [sedeOrigenId, sedeDestinoId, totalWeight]);
+
+  const shippingCost = selectedShippingOption?.costo || 0;
+  const finalTotal = subtotal + shippingCost;
 
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
@@ -150,7 +189,7 @@ function CheckoutContent() {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            monto: subtotal,
+            monto: finalTotal,
             descripcion: `Orden de compra Sede a Sede - ${user?.nombreCompleto || 'Cliente'}`,
             items: cartItems.map(item => ({
               productoId: item.id,
@@ -192,6 +231,9 @@ function CheckoutContent() {
         sedeDestinoId,
         metodoPago,
         referenciaTransaccion: transactionReference,
+        modalidadEnvio: selectedShippingOption?.modalidad || 'Terrestre Estándar',
+        costoEnvio: shippingCost,
+        pesoTotalLibras: totalWeight,
         items: cartItems.map(item => ({
           productoId: item.id,
           cantidad: item.quantity
@@ -482,18 +524,76 @@ function CheckoutContent() {
                       </div>
                     )}
 
-                    {/* Local Pickup Alert */}
-                    {sedeOrigenId && sedeDestinoId && sedeOrigenId === sedeDestinoId && (
-                      <div className="p-3.5 bg-blue-50/90 rounded-xl border border-blue-200 text-xs text-blue-900 font-inter flex items-start gap-2.5">
-                        <CheckCircle2 className="w-4 h-4 text-primary-blue shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-bold text-blue-950">Modalidad Pickup Local (Misma Sede)</p>
-                          <p className="text-blue-800 text-[11px] mt-0.5 leading-relaxed">
-                            Al seleccionar la misma sede para origen y destino, la encomienda se generará directamente en estado <strong>&quot;Lista para retiro&quot;</strong>, lista para entrega en ventanilla sin trámites de transporte internacional.
-                          </p>
-                        </div>
+                    {/* Modalidades de Envío Dinámicas según Ruta y Peso */}
+                    <div className="pt-4 border-t border-slate-100 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 font-inter">
+                          Modalidad de Envío y Flete Oficial
+                        </label>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                          <Scale className="w-3.5 h-3.5 text-primary-blue" />
+                          Peso de Orden: {totalWeight.toFixed(1)} lbs
+                        </span>
                       </div>
-                    )}
+
+                      {isLoadingShipping ? (
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-400">
+                          <RefreshCw className="w-4 h-4 animate-spin mx-auto text-primary-blue mb-1" />
+                          <span>Calculando tarifas de flete según peso y circuito...</span>
+                        </div>
+                      ) : shippingOptions.length === 0 ? (
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 text-center">
+                          Selecciona la Sede de Origen y Sede de Destino para calcular el flete.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {shippingOptions.map((opt) => {
+                            const isSelected = selectedShippingOption?.codigo === opt.codigo;
+                            const isAereo = opt.codigo.includes('AEREO');
+                            const isMaritimo = opt.codigo.includes('MARITIMO');
+                            const isLocal = opt.codigo.includes('LOCAL');
+
+                            return (
+                              <div
+                                key={opt.codigo}
+                                onClick={() => setSelectedShippingOption(opt)}
+                                className={`p-4 rounded-xl border transition-all cursor-pointer relative ${
+                                  isSelected 
+                                    ? 'border-primary-blue bg-blue-50/50 shadow-md ring-2 ring-primary-blue/20' 
+                                    : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/60 shadow-2xs'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                      isAereo ? 'bg-sky-100 text-sky-600' : isMaritimo ? 'bg-blue-100 text-primary-blue' : isLocal ? 'bg-emerald-100 text-emerald-600' : 'bg-emerald-100 text-emerald-600'
+                                    }`}>
+                                      {isAereo ? <Plane className="w-4 h-4" /> : isMaritimo ? <Ship className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-montserrat font-bold text-xs text-slate-900 leading-tight">{opt.modalidad}</h4>
+                                      <span className="text-[10px] text-slate-400 font-inter flex items-center gap-1 mt-0.5">
+                                        <Clock className="w-3 h-3" />
+                                        {opt.tiempoEstimado}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span className={`font-montserrat font-extrabold text-sm ${opt.costo === 0 ? 'text-emerald-600' : 'text-primary-blue'}`}>
+                                      {opt.costo === 0 ? 'GRATIS' : `${opt.costo.toFixed(2)}`}
+                                    </span>
+                                    {opt.costo > 0 && <span className="text-[10px] text-slate-400 block">USD</span>}
+                                  </div>
+                                </div>
+                                <p className="text-[11px] text-slate-500 font-inter leading-relaxed line-clamp-2">
+                                  {opt.descripcion}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                 </div>

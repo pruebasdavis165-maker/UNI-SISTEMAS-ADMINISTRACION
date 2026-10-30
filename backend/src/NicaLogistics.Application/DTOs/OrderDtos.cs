@@ -10,7 +10,10 @@ public record CreateOrderDto(
     Guid SedeDestinoId,
     string MetodoPago, // TARJETA, TRANSFERENCIA, VENTANILLA
     string? ReferenciaTransaccion,
-    List<OrderItemRequestDto> Items
+    List<OrderItemRequestDto> Items,
+    string? ModalidadEnvio = null,
+    decimal CostoEnvio = 0,
+    decimal PesoTotalLibras = 0
 );
 
 public record OrderItemDetailDto(
@@ -21,7 +24,8 @@ public record OrderItemDetailDto(
     string? ImagenUrl,
     int Cantidad,
     decimal PrecioUnitario,
-    decimal Subtotal
+    decimal Subtotal,
+    decimal PesoLibras = 1.0m
 );
 
 public record OrderResponseDto(
@@ -42,7 +46,10 @@ public record OrderResponseDto(
     string? CodigoTracking,
     DateTime CreadoEn,
     IEnumerable<OrderItemDetailDto> Items,
-    string? EstadoEncomienda = null
+    string? EstadoEncomienda = null,
+    decimal CostoEnvio = 0,
+    string? ModalidadEnvio = null,
+    decimal PesoTotalLibras = 0
 );
 
 public record CancelOrderDto(

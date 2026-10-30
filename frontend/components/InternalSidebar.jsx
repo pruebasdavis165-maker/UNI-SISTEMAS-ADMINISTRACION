@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Package, 
   AlertTriangle, Truck, Search, TrendingUp, 
   ShoppingBag, LogOut, X, Menu, ShieldCheck, 
-  Layers, CheckCircle2 
+  Layers, CheckCircle2, DollarSign 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getUser, normalizeRole, isInternalRole } from '../lib/auth';
@@ -50,6 +50,7 @@ export default function InternalSidebar({ mobileOpen, setMobileOpen }) {
       { name: 'Sedes Oficiales', href: '/panel/sedes', icon: Building2 },
       { name: 'Gestión de Productos', href: '/panel/productos', icon: Package, exact: true },
       { name: 'Gestión de Categorías', href: '/panel/categorias', icon: Layers },
+      { name: 'Tarifas y Envíos', href: '/panel/envios', icon: DollarSign },
       { name: 'Inventario Kardex', href: '/panel/inventario', icon: AlertTriangle },
       { name: 'Supervisión Encomiendas', href: '/panel/logistica', icon: Truck },
       { name: 'Rastreo Global', href: '/panel/rastreo', icon: Search }
