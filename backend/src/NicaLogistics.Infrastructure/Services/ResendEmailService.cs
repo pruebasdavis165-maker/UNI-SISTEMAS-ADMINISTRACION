@@ -323,6 +323,10 @@ public class ResendEmailService : IEmailService
                   </tbody>
                   <tfoot>
                     <tr style="border-top: 1px solid #e2e8f0;">
+                      <td colspan="2" style="padding: 10px 14px; text-align: right; font-size: 13px; color: #64748b;">Subtotal de Mercancía:</td>
+                      <td style="padding: 10px 14px; text-align: right; font-size: 13px; font-weight: 600; color: #1e293b;">${(total - costoEnvio):F2} USD</td>
+                    </tr>
+                    <tr>
                       <td colspan="2" style="padding: 10px 14px; text-align: right; font-size: 13px; color: #64748b;">Flete Logístico ({modalidadEnvio}):</td>
                       <td style="padding: 10px 14px; text-align: right; font-size: 13px; color: #1e293b;">{fleteDisplay}</td>
                     </tr>

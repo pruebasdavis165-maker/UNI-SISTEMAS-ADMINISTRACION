@@ -77,6 +77,7 @@ export default function CartPage() {
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
   const totalItemsCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalWeight = cartItems.reduce((acc, item) => acc + ((item.pesoLibras || 1.0) * item.quantity), 0);
 
   const handleProceedToCheckout = (e) => {
     const currentUser = getUser();
@@ -199,6 +200,8 @@ export default function CartPage() {
                           <span>Retiro en Ventanilla Sede</span>
                           <span>•</span>
                           <span className="text-slate-600 font-medium">Stock: {item.stockActual} disp.</span>
+                          <span>•</span>
+                          <span className="text-primary-blue font-semibold bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Peso: {((item.pesoLibras || 1.0) * item.quantity).toFixed(1)} lbs ({(item.pesoLibras || 1.0).toFixed(1)} lb/u)</span>
                         </div>
                       </div>
 
@@ -276,12 +279,16 @@ export default function CartPage() {
                     <span className="font-semibold text-slate-900">{totalItemsCount} unid.</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
+                    <span>Peso total estimado</span>
+                    <span className="font-semibold text-primary-blue">{totalWeight.toFixed(1)} lbs</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
                     <span>Subtotal de mercancía</span>
                     <span className="font-semibold text-slate-900">${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 items-center">
                     <span className="flex items-center gap-1">
-                      Flete Pickup Ventanilla
+                      Pickup Local (Misma Sede)
                       <Badge variant="green" size="sm">GRATIS</Badge>
                     </span>
                     <span className="font-semibold text-emerald-600">$0.00</span>

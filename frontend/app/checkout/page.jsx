@@ -382,6 +382,23 @@ function CheckoutContent() {
               ))}
             </div>
 
+            <div className="space-y-2 pt-3 border-t border-slate-100 font-inter text-xs text-slate-600">
+              <div className="flex justify-between">
+                <span>Subtotal de Mercancía:</span>
+                <span className="font-semibold text-slate-800">
+                  ${(orderResult.total - (orderResult.costoEnvio || 0)).toFixed(2)} USD
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>
+                  Flete Logístico ({orderResult.modalidadEnvio || 'Terrestre'} • {orderResult.pesoTotalLibras || 0} lbs):
+                </span>
+                <span className={`font-semibold ${(orderResult.costoEnvio || 0) === 0 ? 'text-emerald-600' : 'text-primary-blue'}`}>
+                  {(orderResult.costoEnvio || 0) === 0 ? 'GRATIS ($0.00 USD)' : `+${(orderResult.costoEnvio || 0).toFixed(2)} USD`}
+                </span>
+              </div>
+            </div>
+
             <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
               <span className="font-montserrat font-bold text-base text-slate-900">Total Facturado</span>
               <span className="font-montserrat font-extrabold text-2xl text-primary-blue">
@@ -798,13 +815,27 @@ function CheckoutContent() {
 
               <div className="space-y-2 pt-4 border-t border-slate-100 font-inter text-xs text-slate-600">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>Subtotal de Mercancía</span>
                   <span className="font-semibold text-slate-800">${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-emerald-600 font-medium">
-                  <span>Flete Pickup Ventanilla</span>
-                  <span>GRATIS ($0.00)</span>
+                <div className="flex justify-between items-center">
+                  <span className="truncate pr-2">
+                    Flete ({selectedShippingOption?.modalidad || (sedeOrigenId === sedeDestinoId ? 'Pickup Local' : 'Calculando...')})
+                  </span>
+                  <span className={`font-semibold shrink-0 ${shippingCost === 0 ? 'text-emerald-600' : 'text-primary-blue'}`}>
+                    {shippingCost === 0 ? 'GRATIS ($0.00)' : `+${shippingCost.toFixed(2)}`}
+                  </span>
                 </div>
+                <div className="flex justify-between text-[11px] text-slate-400 pt-0.5">
+                  <span>Peso acumulado:</span>
+                  <span className="font-medium text-slate-600">{totalWeight.toFixed(1)} lbs</span>
+                </div>
+                {sedeOrigenId === sedeDestinoId && (
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-medium flex items-center gap-1.5 mt-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Misma Sede: Retiro sin costo de flete.</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t border-slate-200 flex justify-between items-baseline">
@@ -813,7 +844,7 @@ function CheckoutContent() {
                   <span className="text-[10px] text-slate-400 font-inter">Dólares Estadounidenses (USD)</span>
                 </div>
                 <span className="font-montserrat font-extrabold text-2xl text-primary-blue">
-                  ${subtotal.toFixed(2)}
+                  ${finalTotal.toFixed(2)}
                 </span>
               </div>
 

@@ -9,28 +9,17 @@ import {
   ChevronRight, Award, Warehouse, ArrowUpRight
 } from 'lucide-react';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, Badge, CustomDropdown } from '../components/ui';
+import CalculadoraFlete from '../components/CalculadoraFlete';
 
 export default function HomePage() {
   const router = useRouter();
   const [trackingCode, setTrackingCode] = useState('');
-  const [calcWeight, setCalcWeight] = useState(5);
-  const [calcService, setCalcService] = useState('aereo');
-  const [calcSede, setCalcSede] = useState('Managua');
 
   const handleTrack = (e) => {
     e.preventDefault();
     if (trackingCode.trim()) {
       router.push(`/rastreo?codigo=${encodeURIComponent(trackingCode.trim())}`);
     }
-  };
-
-  const calculateEstimate = () => {
-    if (calcService === 'terrestre') {
-      return (3.00 + (calcWeight * 0.75)).toFixed(2);
-    }
-    const base = calcService === 'aereo' ? 20.00 : 10.00;
-    const rate = calcService === 'aereo' ? 4.50 : 1.85;
-    return (base + (calcWeight * rate)).toFixed(2);
   };
 
   return (
@@ -275,99 +264,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. CALCULADORA DE FLETE INTERNACIONAL */}
+      {/* 3. CALCULADORA DE FLETE INTERNACIONAL OFICIAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 text-slate-800 shadow-xl border border-slate-200 relative overflow-hidden">
-          {/* Subtle Corporate Ambient Glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-blue/5 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-accent-magenta/5 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-            
-            <div className="lg:col-span-7 space-y-4">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-primary-blue text-xs font-semibold tracking-wide">
-                <Plane className="w-3.5 h-3.5 text-accent-magenta" />
-                Tarifas Oficiales Sin Cargos Ocultos
-              </span>
-              <h2 className="font-montserrat font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
-                Calculadora de Flete Miami ⇄ Managua
-              </h2>
-              <p className="font-inter text-sm text-slate-600 leading-relaxed max-w-xl">
-                Cotiza el transporte de tus paquetes entre Florida y Nicaragua. El costo incluye recepción, 
-                tránsito internacional seguro y resguardo en ventanilla oficial hasta por 15 días.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                <div>
-                  <CustomDropdown
-                    label="Modalidad de Envío"
-                    value={calcService}
-                    onChange={(val) => setCalcService(val)}
-                    options={[
-                      { value: 'aereo', label: 'Aéreo Exprés ($4.50/lb • 2-4 días)', description: 'Vuelo exprés prioritario bilateral con despacho rápido' },
-                      { value: 'maritimo', label: 'Marítimo Carga ($1.85/lb • 10-15 días)', description: 'Carga marítima consolidada económica' },
-                      { value: 'terrestre', label: 'Terrestre Nacional ($0.75/lb • 24-48 hrs)', description: 'Transporte terrestre interdepartamental seguro' }
-                    ]}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5 font-montserrat">
-                    Peso Estimado (Libras)
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="500"
-                    value={calcWeight}
-                    onChange={(e) => setCalcWeight(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl py-2.5 px-3.5 border border-slate-200 text-xs font-inter font-medium focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all"
-                  />
-                </div>
-
-                <div>
-                  <CustomDropdown
-                    label="Sede de Retiro"
-                    value={calcSede}
-                    onChange={(val) => setCalcSede(val)}
-                    options={[
-                      { value: 'Managua', label: 'Sede Central Managua (Nicaragua)' },
-                      { value: 'Miami', label: 'Sede Miami Hub (Estados Unidos)' }
-                    ]}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm bg-gradient-to-b from-blue-50/70 via-white to-slate-50 rounded-2xl p-6 border border-blue-100 text-center space-y-4 shadow-md">
-                <div className="inline-flex items-center gap-1.5 text-[11px] uppercase font-bold tracking-wider text-slate-600 font-inter">
-                  <Building2 className="w-3.5 h-3.5 text-primary-blue" />
-                  Costo de Retiro en {calcSede}
-                </div>
-                <div className="font-montserrat font-extrabold text-4xl sm:text-5xl text-accent-magenta tracking-tight">
-                  ${calculateEstimate()} <span className="text-base text-slate-500 font-normal">USD</span>
-                </div>
-                <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-slate-600 space-y-1">
-                  <p className="font-medium text-slate-800">
-                    {calcService === 'aereo' ? 'Tiempo estimado: 2 a 4 días hábiles (Prioritario)' : calcService === 'terrestre' ? 'Tiempo terrestre nacional: 24 a 48 horas hábiles' : 'Tiempo marítimo: 10 a 15 días hábiles'}
-                  </p>
-                  <p className="text-[11px] text-slate-500">Retiro exclusivo en ventanilla oficial con documento de identidad</p>
-                </div>
-                <Link href="/catalogo" className="block pt-1">
-                  <button 
-                    type="button" 
-                    className="w-full py-3 px-4 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-primary-blue to-blue-700 hover:from-primary-blue hover:to-accent-magenta shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                  >
-                    <span>Explorar Catálogo con Flete</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-          </div>
-        </div>
+        <CalculadoraFlete />
       </section>
 
       {/* 4. PREVIEW DE CATÁLOGO DISPONIBLE */}
@@ -543,54 +442,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. DIRECTORIO OFICIAL DE SEDES (SEDE A SEDE) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          
-          <h2 className="font-montserrat font-extrabold text-3xl text-slate-900 mt-2">
-            Red de Sedes Oficiales de Retiro
-          </h2>
-          <p className="font-inter text-slate-500 text-sm">
-            Todas nuestras ubicaciones cuentan con personal calificado, cámaras de seguridad y ventanillas climatizadas.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Miami */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-primary-blue/30 shadow-soft-sm hover:shadow-soft-md transition-all">
-            <span className="text-xs font-bold font-montserrat text-primary-blue uppercase tracking-wider block mb-1">
-              Sede Oficial EE.UU. (Ventanilla & Hub)
-            </span>
-            <h3 className="font-montserrat font-bold text-xl text-slate-900">Sede Miami Hub (Estados Unidos)</h3>
-            <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              8400 NW 25th St, Doral, FL 33198 (Ventanilla de Carga y Recepción)
-            </p>
-            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-              <p><strong>Tel:</strong> +1 (305) 555-0199</p>
-              <p><strong>Horario:</strong> Lun - Vie: 8:00 AM - 5:00 PM</p>
-              <p className="text-primary-blue font-semibold mt-1">Flujo: Recepción / Despacho USA ⇄ Nicaragua</p>
-            </div>
-          </div>
-
-          {/* Managua */}
-          <div className="bg-white rounded-2xl p-6 border-2 border-accent-magenta/30 shadow-soft-sm hover:shadow-soft-md transition-all">
-            <span className="text-xs font-bold font-montserrat text-accent-magenta uppercase tracking-wider block mb-1">
-              Sede Oficial Nicaragua (Ventanilla Principal)
-            </span>
-            <h3 className="font-montserrat font-bold text-xl text-slate-900">Sede Central Managua (Nicaragua)</h3>
-            <p className="text-xs text-slate-600 mt-2 font-inter leading-relaxed">
-              Km 4.5 Carretera Norte, Frente a Enabas (Ventanilla Principal)
-            </p>
-            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-              <p><strong>Tel:</strong> +505 2249-0100</p>
-              <p><strong>Horario:</strong> Lun - Sáb: 8:00 AM - 6:00 PM</p>
-              <p className="text-accent-magenta font-semibold mt-1">Flujo: Retiro en Ventanilla / Envíos a Miami</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. CALL TO ACTION FINAL */}
+      {/* 5. CALL TO ACTION FINAL */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white rounded-3xl p-8 sm:p-12 text-slate-900 text-center space-y-6 shadow-soft-xl border border-blue-100 relative overflow-hidden">
           <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary-blue/10 rounded-full blur-2xl pointer-events-none"></div>

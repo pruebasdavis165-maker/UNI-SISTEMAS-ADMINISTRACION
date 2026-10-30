@@ -28,6 +28,7 @@ export const addToCart = (product, quantity = 1) => {
 
   if (existingIndex > -1) {
     cart[existingIndex].quantity = newQty;
+    cart[existingIndex].pesoLibras = product.pesoLibras || cart[existingIndex].pesoLibras || 1.0;
     // ensure sku is updated if it was previously undefined
     if (!cart[existingIndex].sku || cart[existingIndex].sku === 'undefined') {
       cart[existingIndex].sku = skuVal;
@@ -43,6 +44,7 @@ export const addToCart = (product, quantity = 1) => {
       stockActual: product.stockActual,
       categoriaNombre: product.categoriaNombre,
       imagenUrl: product.imagenUrl,
+      pesoLibras: product.pesoLibras || 1.0,
       quantity: quantity
     });
   }

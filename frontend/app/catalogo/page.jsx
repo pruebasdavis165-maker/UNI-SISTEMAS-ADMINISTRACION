@@ -422,9 +422,14 @@ export default function PublicCatalogPage() {
                       </div>
 
                       {/* Dinamismo Sede a Sede Notice (Cero estático de Miami) */}
-                      <div className="pt-2 flex items-center gap-1.5 text-xs text-emerald-700 font-medium font-inter bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-100">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="truncate">Disponible para envío Sede a Sede</span>
+                      <div className="pt-2 flex items-center justify-between gap-1.5 text-xs text-emerald-700 font-medium font-inter bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span className="truncate">Envío Sede a Sede</span>
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-600 font-mono shrink-0 bg-white/70 px-1.5 py-0.5 rounded border border-emerald-200/50">
+                          {(product.pesoLibras || 1.0).toFixed(1)} lb
+                        </span>
                       </div>
 
                       {/* Price and Action Buttons (Bottom Anchored Block) */}
@@ -496,6 +501,12 @@ export default function PublicCatalogPage() {
                     <span className="text-slate-500 font-medium">Existencias Disponibles:</span>
                     <span className={`font-bold ${quickViewProduct.stockActual > 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                       {quickViewProduct.stockActual > 0 ? `${quickViewProduct.stockActual} unidades en bodega` : 'Agotado'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium">Peso Unitario Registrado:</span>
+                    <span className="font-bold text-primary-blue font-mono">
+                      {(quickViewProduct.pesoLibras || 1.0).toFixed(1)} lbs
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium pt-0.5">
