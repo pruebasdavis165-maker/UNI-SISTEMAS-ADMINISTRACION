@@ -172,7 +172,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <Card hover={false} className="p-2 sm:p-4">
+        <Card hover={false} className="p-2 sm:p-4 overflow-visible relative">
           <CardContent className="p-4 sm:p-6 space-y-4">
             {error && (
               <Alert type="error" title="No se pudo continuar">

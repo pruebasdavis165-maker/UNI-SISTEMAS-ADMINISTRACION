@@ -6,7 +6,7 @@ export function Card({ children, className = '', hover = true, ...props }) {
     <div 
       className={`bg-white rounded-2xl border border-slate-200/90 shadow-soft-sm 
         ${hover ? 'hover:shadow-soft-md hover:border-slate-300 transition-all duration-200' : ''} 
-        ${hasOverflowClass ? '' : 'overflow-hidden'} ${className}`}
+        ${hasOverflowClass ? '' : 'overflow-visible'} ${className}`}
       {...props}
     >
       {children}

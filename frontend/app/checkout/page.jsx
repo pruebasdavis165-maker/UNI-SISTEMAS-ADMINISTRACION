@@ -625,7 +625,7 @@ function CheckoutContent() {
             </Card>
 
             {/* Step 2: Contact Details for Pickup */}
-            <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <Card className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4 overflow-visible relative">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-montserrat font-bold text-sm">
