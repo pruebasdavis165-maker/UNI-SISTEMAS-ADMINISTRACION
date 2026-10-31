@@ -257,8 +257,9 @@ export default function RegisterPage() {
                     rightElement={
                       <button
                         type="button"
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => setShowPassword(!showPassword)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-150 focus:outline-none flex items-center justify-center opacity-0 group-focus-within:opacity-100 pointer-events-none group-focus-within:pointer-events-auto"
                         title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                         aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                       >
@@ -283,8 +284,9 @@ export default function RegisterPage() {
                   rightElement={
                     <button
                       type="button"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-150 focus:outline-none flex items-center justify-center opacity-0 group-focus-within:opacity-100 pointer-events-none group-focus-within:pointer-events-auto"
                       title={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
                       aria-label={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
                     >

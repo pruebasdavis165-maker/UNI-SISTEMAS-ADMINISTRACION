@@ -28,7 +28,7 @@ const Input = forwardRef(({
         </div>
       )}
 
-      <div className="relative rounded-xl shadow-soft-sm">
+      <div className="relative rounded-xl shadow-soft-sm group">
         {Icon && (
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <Icon className="w-4 h-4" />
