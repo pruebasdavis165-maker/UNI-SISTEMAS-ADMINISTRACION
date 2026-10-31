@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
 import ProtectedRoute from '../../../components/auth/ProtectedRoute';
 import { 
-  Package, Plus, Search, Filter, Edit3, Trash2, RefreshCw, 
+  Package, Plus, Search, Filter, Edit3, Trash2, RotateCcw, RefreshCw, 
   AlertTriangle, CheckCircle2, Image as ImageIcon, Upload, DollarSign, UploadCloud, X, Layers 
 } from 'lucide-react';
 import { 
@@ -202,14 +202,33 @@ export default function ProductosPage() {
   };
 
   const handleDelete = (prod) => {
-    setConfirmModal({
-      isOpen: true,
-      title: '¿Desactivar Producto?',
-      message: `¿Estás seguro de que deseas desactivar "${prod.nombre}" (${prod.codigoSku})? El artículo dejará de estar visible para compras en el catálogo de clientes.`,
-      confirmText: 'Sí, Desactivar',
-      variant: 'danger',
-      onConfirm: () => executeDelete(prod)
-    });
+    if (prod.activo) {
+      setConfirmModal({
+        isOpen: true,
+        title: '¿Desactivar Producto?',
+        message: `¿Estás seguro de que deseas desactivar "${prod.nombre}" (${prod.codigoSku})? El artículo dejará de estar visible para compras en el catálogo de clientes.`,
+        confirmText: 'Sí, Desactivar',
+        variant: 'danger',
+        onConfirm: () => executeDelete(prod)
+      });
+    } else {
+      executeReactivate(prod);
+    }
+  };
+
+  const executeReactivate = async (prod) => {
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE_URL}/api/productos/${prod.id}/toggle-status`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Error al reactivar producto.');
+      setSuccessMsg(`Producto "${prod.nombre}" reactivado en el catálogo con éxito.`);
+      fetchProducts();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const executeDelete = async (prod) => {
@@ -433,8 +452,13 @@ export default function ProductosPage() {
                                   : 'border-emerald-200 bg-emerald-50/50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
                               }`}
                               title={p.activo ? "Desactivar Producto" : "Reactivar Producto"}
+                              aria-label={p.activo ? "Desactivar Producto" : "Reactivar Producto"}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              {p.activo ? (
+                                <Trash2 className="w-4 h-4" />
+                              ) : (
+                                <RotateCcw className="w-4 h-4" />
+                              )}
                             </button>
                           </div>
                         </td>

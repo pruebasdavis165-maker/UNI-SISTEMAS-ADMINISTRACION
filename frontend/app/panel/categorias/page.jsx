@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import ProtectedRoute from '../../../components/auth/ProtectedRoute';
 import { 
-  FolderPlus, FolderTree, Filter, Search, Edit3, Trash2, RefreshCw, 
+  FolderPlus, FolderTree, Filter, Search, Edit3, Trash2, RotateCcw, RefreshCw, 
   Layers, Package, CheckCircle2, XCircle 
 } from 'lucide-react';
 import { 
@@ -365,8 +365,13 @@ export default function CategoriasPage() {
                                 : 'border-emerald-200 bg-emerald-50/50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
                             }`}
                             title={c.activo ? "Desactivar Categoría" : "Reactivar Categoría"}
+                            aria-label={c.activo ? "Desactivar Categoría" : "Reactivar Categoría"}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {c.activo ? (
+                              <Trash2 className="w-4 h-4" />
+                            ) : (
+                              <RotateCcw className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </td>
