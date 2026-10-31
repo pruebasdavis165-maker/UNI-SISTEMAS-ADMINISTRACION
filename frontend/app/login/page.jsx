@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, UserCheck, Eye, EyeOff } from 'lucide-react';
 import { Button, Input, Card, CardContent, Alert } from '../../components/ui';
 import { API_BASE_URL, normalizeRole } from '../../lib/auth';
 import { useAuth } from '../../context/AuthContext';
@@ -16,6 +16,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -102,11 +103,22 @@ function LoginForm() {
 
             <Input
               label="Contraseña"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               icon={Lock}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+                  title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-400" />}
+                </button>
+              }
               required
             />
 
@@ -133,46 +145,53 @@ function LoginForm() {
         </CardContent>
       </Card>
 
-      {/* Demo Roles Quick Picker for Testing Acceptance Criteria */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-soft-sm">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Demo Credentials Box */}
+      <div className="bg-slate-100/80 rounded-2xl p-4 border border-slate-200/60 shadow-soft-sm">
+        <div className="flex items-center gap-2 mb-2 text-slate-700">
           <UserCheck className="w-4 h-4 text-primary-blue" />
-          <h4 className="font-montserrat font-bold text-xs uppercase tracking-wider text-slate-700">
-            Credenciales Rápidas de Prueba
-          </h4>
+          <span className="font-montserrat font-bold text-xs uppercase tracking-wider">
+            Accesos Rápidos de Prueba (Demo)
+          </span>
         </div>
+        <p className="text-[11px] text-slate-500 mb-3 font-inter">
+          Haz clic en cualquier rol para autocompletar credenciales y probar la plataforma:
+        </p>
+
         <div className="grid grid-cols-2 gap-2 text-xs">
           <button
             type="button"
-            onClick={() => setDemoCredentials('davismunoz165@gmail.com', 'Admin123*!')}
-            className="p-2 text-left rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-colors"
+            onClick={() => setDemoCredentials('davismunoz165@gmail.com', 'Admin123*')}
+            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
           >
-            <strong className="block text-primary-blue">Administrador</strong>
-            <span className="text-[10px] text-slate-500">davismunoz165@gmail.com</span>
+            <span className="font-semibold text-slate-900 font-inter">Administrador</span>
+            <span className="text-[10px] text-slate-400 font-inter">Full Access</span>
           </button>
+
           <button
             type="button"
-            onClick={() => setDemoCredentials('vendedor@nicalogistics.com', 'Vendedor123*!')}
-            className="p-2 text-left rounded-lg bg-slate-50 hover:bg-fuchsia-50 border border-slate-200 hover:border-fuchsia-300 transition-colors"
+            onClick={() => setDemoCredentials('vendedor@nicalogistics.com', 'Vendedor123*')}
+            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
           >
-            <strong className="block text-accent-magenta">Vendedor</strong>
-            <span className="text-[10px] text-slate-500">vendedor@nicalogistics.com</span>
+            <span className="font-semibold text-slate-900 font-inter">Vendedor</span>
+            <span className="text-[10px] text-slate-400 font-inter">Catálogo & Stock</span>
           </button>
+
           <button
             type="button"
-            onClick={() => setDemoCredentials('logistica@nicalogistics.com', 'Logistica123*!')}
-            className="p-2 text-left rounded-lg bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 transition-colors"
+            onClick={() => setDemoCredentials('logistica@nicalogistics.com', 'Logistica123*')}
+            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
           >
-            <strong className="block text-alert-amber">Logística</strong>
-            <span className="text-[10px] text-slate-500">logistica@nicalogistics.com</span>
+            <span className="font-semibold text-slate-900 font-inter">Logística</span>
+            <span className="text-[10px] text-slate-400 font-inter">Envíos & Kanban</span>
           </button>
+
           <button
             type="button"
-            onClick={() => setDemoCredentials('cliente@gmail.com', 'Cliente123*!')}
-            className="p-2 text-left rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 transition-colors"
+            onClick={() => setDemoCredentials('cliente@ejemplo.com', 'Cliente123*')}
+            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
           >
-            <strong className="block text-success-green">Cliente</strong>
-            <span className="text-[10px] text-slate-500">cliente@gmail.com</span>
+            <span className="font-semibold text-slate-900 font-inter">Cliente</span>
+            <span className="text-[10px] text-slate-400 font-inter">Compras & Tracking</span>
           </button>
         </div>
       </div>
@@ -182,8 +201,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-slate-50">
-      <Suspense fallback={<div className="p-8 text-center text-slate-500 font-inter">Cargando formulario...</div>}>
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-slate-50">
+      <Suspense fallback={<div className="text-sm text-slate-500 font-inter">Cargando formulario...</div>}>
         <LoginForm />
       </Suspense>
     </div>

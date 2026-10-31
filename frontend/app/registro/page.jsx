@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle2, RefreshCw, KeyRound } from 'lucide-react';
+import { 
+  Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle2, 
+  RefreshCw, KeyRound, Eye, EyeOff 
+} from 'lucide-react';
 import { Button, Input, Card, CardContent, Alert, PhoneInput, Badge } from '../../components/ui';
 import { setSession, API_BASE_URL } from '../../lib/auth';
 
@@ -19,6 +22,8 @@ export default function RegisterPage() {
   const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,12 +34,36 @@ export default function RegisterPage() {
   const [isResending, setIsResending] = useState(false);
   const [otpSuccessMsg, setOtpSuccessMsg] = useState('');
 
+  // Reference for Auto-Scroll to Error
+  const errorRef = useRef(null);
+
+  const scrollToError = () => {
+    setTimeout(() => {
+      if (errorRef.current) {
+        errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 60);
+  };
+
+  useEffect(() => {
+    if (error) {
+      scrollToError();
+    }
+  }, [error]);
+
+  const triggerError = (msg) => {
+    setError(msg);
+    scrollToError();
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      triggerError('Las contraseñas no coinciden.');
       return;
     }
 
@@ -46,7 +75,7 @@ export default function RegisterPage() {
     const hasSpecial = /[^a-zA-Z0-9]/.test(password);
 
     if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-      setError('La contraseña no cumple con la Política 2: debe tener al menos 8 caracteres, e incluir mayúsculas, minúsculas, números y al menos un carácter especial.');
+      triggerError('La contraseña no cumple con la Política 2: debe tener al menos 8 caracteres, e incluir mayúsculas, minúsculas, números y al menos un carácter especial.');
       return;
     }
 
@@ -56,7 +85,7 @@ export default function RegisterPage() {
       const expected = isUS ? 10 : 8;
       const actualDigits = isUS && digitsOnly.startsWith('1') ? digitsOnly.slice(1) : (telefono.startsWith('+505') && digitsOnly.startsWith('505') ? digitsOnly.slice(3) : digitsOnly);
       if (actualDigits.length !== expected) {
-        setError(`El número de teléfono debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
+        triggerError(`El número de teléfono debe tener exactamente ${expected} dígitos para ${isUS ? 'Estados Unidos (+1)' : 'Nicaragua (+505)'}.`);
         return;
       }
     }
@@ -93,7 +122,7 @@ export default function RegisterPage() {
         router.push('/catalogo');
       }
     } catch (err) {
-      setError(err.message || 'Error de conexión con el servidor');
+      triggerError(err.message || 'Error de conexión con el servidor');
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +131,7 @@ export default function RegisterPage() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!otpCode || otpCode.trim().length !== 6) {
-      setError('Por favor ingresa el código numérico de 6 dígitos completo.');
+      triggerError('Por favor ingresa el código numérico de 6 dígitos completo.');
       return;
     }
 
@@ -129,7 +158,7 @@ export default function RegisterPage() {
       window.dispatchEvent(new Event('cartUpdated'));
       router.push('/catalogo');
     } catch (err) {
-      setError(err.message || 'Código inválido o expirado.');
+      triggerError(err.message || 'Código inválido o expirado.');
     } finally {
       setIsVerifying(false);
     }
@@ -149,7 +178,7 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error(data.message || 'Error al reenviar código.');
       setOtpSuccessMsg('¡Nuevo código enviado! Revisa tu bandeja de entrada.');
     } catch (err) {
-      setError(err.message);
+      triggerError(err.message);
     } finally {
       setIsResending(false);
     }
@@ -174,11 +203,13 @@ export default function RegisterPage() {
 
         <Card hover={false} className="p-2 sm:p-4 overflow-visible relative">
           <CardContent className="p-4 sm:p-6 space-y-4">
-            {error && (
-              <Alert type="error" title="No se pudo continuar">
-                {error}
-              </Alert>
-            )}
+            <div ref={errorRef} className="scroll-mt-6">
+              {error && (
+                <Alert type="error" title="No se pudo continuar">
+                  {error}
+                </Alert>
+              )}
+            </div>
 
             {otpSuccessMsg && (
               <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 font-inter flex items-start gap-2">
@@ -218,11 +249,22 @@ export default function RegisterPage() {
                 <div>
                   <Input
                     label="Contraseña"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     icon={Lock}
                     placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, @#*)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    rightElement={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+                        title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                        aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-400" />}
+                      </button>
+                    }
                     required
                   />
                   <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-inter">
@@ -233,11 +275,22 @@ export default function RegisterPage() {
 
                 <Input
                   label="Confirmar Contraseña"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   icon={Lock}
                   placeholder="Repite la contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+                      title={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                      aria-label={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-400" />}
+                    </button>
+                  }
                   required
                 />
 
