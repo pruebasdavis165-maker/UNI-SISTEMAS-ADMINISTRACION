@@ -113,11 +113,11 @@ public class SmtpEmailService : IEmailService
 
             if (string.IsNullOrWhiteSpace(_pass))
             {
-                _logger.LogWarning("[SmtpEmailService] ⚠️ No se ha configurado contraseña SMTP (SMTP_PASS). Verifique variables de entorno para {To}", cleanRecipient);
+                _logger.LogWarning("[SmtpEmailService] No se ha configurado contraseña SMTP (SMTP_PASS). Verifique variables de entorno para {To}", cleanRecipient);
                 return false;
             }
 
-            _logger.LogInformation("[SmtpEmailService] 🚀 Despachando correo vía Gmail SMTP a {To} | Asunto: '{Subject}' | De: {FromName} <{FromEmail}>", cleanRecipient, subject, _fromName, _fromEmail);
+            _logger.LogInformation("[SmtpEmailService] Despachando correo vía Gmail SMTP a {To} | Asunto: '{Subject}' | De: {FromName} <{FromEmail}>", cleanRecipient, subject, _fromName, _fromEmail);
 
             using var client = new SmtpClient(_host, _port)
             {
@@ -142,17 +142,17 @@ public class SmtpEmailService : IEmailService
 
             await client.SendMailAsync(message);
 
-            _logger.LogInformation("[SmtpEmailService] ✅ Correo entregado exitosamente vía Gmail SMTP al destinatario real {To}.", cleanRecipient);
+            _logger.LogInformation("[SmtpEmailService] Correo entregado exitosamente vía Gmail SMTP al destinatario real {To}.", cleanRecipient);
             return true;
         }
         catch (SmtpException smtpEx)
         {
-            _logger.LogError(smtpEx, "[SmtpEmailService] ❌ Error SMTP al despachar correo a {To}. Código de estado: {StatusCode}, Mensaje: {Message}", to, smtpEx.StatusCode, smtpEx.Message);
+            _logger.LogError(smtpEx, "[SmtpEmailService] Error SMTP al despachar correo a {To}. Código de estado: {StatusCode}, Mensaje: {Message}", to, smtpEx.StatusCode, smtpEx.Message);
             return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[SmtpEmailService] ❌ Error inesperado al enviar correo a {To}: {Message}", to, ex.Message);
+            _logger.LogError(ex, "[SmtpEmailService] Error inesperado al enviar correo a {To}: {Message}", to, ex.Message);
             return false;
         }
     }
@@ -160,7 +160,7 @@ public class SmtpEmailService : IEmailService
     public async Task<bool> SendVerificationOtpEmailAsync(string to, string clientName, string otpCode)
     {
         _logger.LogInformation("================================================================================");
-        _logger.LogInformation("🔑 [NICALOGISTICS OTP GMAIL SMTP] DESTINATARIO: {To} ({ClientName}) | CÓDIGO OTP: {OtpCode} | VIGENCIA: 15 MINUTOS", to, clientName, otpCode);
+        _logger.LogInformation("[NICALOGISTICS OTP GMAIL SMTP] DESTINATARIO: {To} ({ClientName}) | CÓDIGO OTP: {OtpCode} | VIGENCIA: 15 MINUTOS", to, clientName, otpCode);
         _logger.LogInformation("================================================================================");
 
         var subject = $"Tu código de verificación NicaLogistics: {otpCode}";
@@ -200,12 +200,12 @@ public class SmtpEmailService : IEmailService
                     {otpCode}
                   </div>
                   <p style="font-size: 12px; color: #64748b; margin: 12px 0 0 0;">
-                    ⏱️ Este código vence en <strong>15 minutos</strong>.
+                    Este código vence en <strong>15 minutos</strong>.
                   </p>
                 </div>
                 <div style="background-color: #f1f5f9; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px;">
                   <p style="font-size: 12px; color: #475569; line-height: 1.5; margin: 0;">
-                    🔒 <strong>Aviso de Seguridad:</strong> Ningún colaborador de NicaLogistics te solicitará este código. Si no realizaste esta solicitud, ignora este mensaje.
+                    <strong>Aviso de Seguridad:</strong> Ningún colaborador de NicaLogistics te solicitará este código. Si no realizaste esta solicitud, ignora este mensaje.
                   </p>
                 </div>
               </td>
@@ -277,7 +277,7 @@ public class SmtpEmailService : IEmailService
         decimal pesoTotalLibras = 0)
     {
         _logger.LogInformation("================================================================================");
-        _logger.LogInformation("📦 [NICALOGISTICS RECIBO GMAIL SMTP] DESTINATARIO: {To} ({ClientName}) | ORDEN: #{OrderNumber} | GUÍA: {TrackingCode} | TOTAL: ${Total:F2} USD", to, clientName, orderNumber, trackingCode, total);
+        _logger.LogInformation("[NICALOGISTICS RECIBO GMAIL SMTP] DESTINATARIO: {To} ({ClientName}) | ORDEN: #{OrderNumber} | GUÍA: {TrackingCode} | TOTAL: ${Total:F2} USD", to, clientName, orderNumber, trackingCode, total);
         _logger.LogInformation("================================================================================");
 
         var subject = $"Recibo de Compra #{orderNumber} - Tracking: {trackingCode}";
@@ -310,7 +310,7 @@ public class SmtpEmailService : IEmailService
             <tr>
               <td style="padding: 36px 36px 20px 36px; text-align: center;">
                 <div style="display: inline-block; padding: 6px 14px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; margin-bottom: 16px;">
-                  <span style="color: #059669; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">✓ Pago Aprobado • Encomienda Oficial</span>
+                  <span style="color: #059669; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pago Aprobado • Encomienda Oficial</span>
                 </div>
                 <h1 style="color: #1a56db; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">NICALOGISTICS</h1>
                 <p style="color: #64748b; font-size: 14px; margin: 6px 0 0 0;">Comprobante de Compra #{orderNumber}</p>
@@ -338,7 +338,7 @@ public class SmtpEmailService : IEmailService
                         <span style="font-size: 10px; font-weight: 700; color: #1a56db; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Sede de Origen</span>
                         <strong style="font-size: 13px; color: #1e293b; display: block; margin-top: 2px;">{sedeOrigen}</strong>
                       </td>
-                      <td width="4%" style="text-align: center; font-size: 16px; color: #94a3b8;">➔</td>
+                      <td width="4%" style="text-align: center; font-size: 16px; color: #94a3b8;">&rarr;</td>
                       <td width="48%" style="vertical-align: top; text-align: right;">
                         <span style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Ventanilla de Retiro</span>
                         <strong style="font-size: 13px; color: #064e3b; display: block; margin-top: 2px;">{sedeDestino}</strong>
@@ -374,7 +374,7 @@ public class SmtpEmailService : IEmailService
                 </table>
                 <div style="background-color: #f8fafc; border-left: 4px solid #1a56db; padding: 16px 18px; border-radius: 0 12px 12px 0;">
                   <h4 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px;">
-                    📋 Requisitos para Retiro en Ventanilla
+                    Requisitos para Retiro en Ventanilla
                   </h4>
                   <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #475569; line-height: 1.6;">
                     <li>Presentar <strong>Cédula de Identidad original física o Pasaporte Oficial vigente</strong>.</li>
@@ -416,7 +416,7 @@ public class SmtpEmailService : IEmailService
           <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div style="text-align: center; margin-bottom: 24px;">
               <span style="background: #ecfdf5; color: #059669; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-                📦 Lista para Retiro en Ventanilla
+                Lista para Retiro en Ventanilla
               </span>
               <h2 style="color: #1a56db; margin: 12px 0 4px; font-size: 24px; font-weight: 800;">NICALOGISTICS</h2>
               <p style="color: #64748b; font-size: 13px; margin: 0;">Aviso Oficial de Llegada a Sede</p>
@@ -475,7 +475,7 @@ public class SmtpEmailService : IEmailService
           <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div style="text-align: center; margin-bottom: 24px;">
               <span style="background: {(isZero ? "#fee2e2" : "#fef3c7")}; color: {(isZero ? "#dc2626" : "#d97706")}; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-                {(isZero ? "⚠️ Stock en Cero" : "⚠️ Nivel Mínimo Superado")}
+                {(isZero ? "Stock en Cero" : "Nivel Mínimo Superado")}
               </span>
               <h2 style="color: #1a56db; margin: 12px 0 4px; font-size: 24px; font-weight: 800;">NICALOGISTICS</h2>
               <p style="color: #64748b; font-size: 13px; margin: 0;">Supervisión de Inventario y Kardex</p>
