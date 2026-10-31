@@ -7,7 +7,7 @@ import {
   RefreshCw, CheckCircle2, AlertCircle, Edit3, Plus, 
   Trash2, Power, X, Truck, Package, Ban, Users, Check 
 } from 'lucide-react';
-import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast, CustomDropdown, PhoneInput } from '../../../components/ui';
+import { Button, Card, Badge, Alert, Input, Modal, ConfirmModal, Toast, CustomDropdown, PhoneInput, HorarioBuilder } from '../../../components/ui';
 import { getToken, API_BASE_URL } from '../../../lib/auth';
 
 export default function SedesManagementPage() {
@@ -40,7 +40,9 @@ export default function SedesManagementPage() {
   const [newCiudad, setNewCiudad] = useState('');
   const [newDireccion, setNewDireccion] = useState('');
   const [newTelefono, setNewTelefono] = useState('');
-  const [newHorario, setNewHorario] = useState('Lun - Sáb: 8:00 AM - 6:00 PM');
+  const [newHorario, setNewHorario] = useState('Lun - Vie: 8:00 AM - 5:00 PM');
+  const [isNewHorarioValid, setIsNewHorarioValid] = useState(true);
+  const [isEditHorarioValid, setIsEditHorarioValid] = useState(true);
 
   // Form fields for Edit
   const [editNombre, setEditNombre] = useState('');
@@ -171,6 +173,10 @@ export default function SedesManagementPage() {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!selectedSede) return;
+    if (!isEditHorarioValid) {
+      setError('Por favor corrige los conflictos o inconsistencias en los rangos de horario.');
+      return;
+    }
     if (editTelefono && !validatePhone(editTelefono)) {
       setError(`El teléfono de contacto debe tener exactamente ${editTelefono.startsWith('+1') ? '10 dígitos (USA +1)' : '8 dígitos (Nicaragua +505)'}.`);
       return;
@@ -216,6 +222,10 @@ export default function SedesManagementPage() {
   // Crear nueva sede
   const handleCreateSede = async (e) => {
     e.preventDefault();
+    if (!isNewHorarioValid) {
+      setError('Por favor corrige los conflictos o inconsistencias en los rangos de horario.');
+      return;
+    }
     if (newTelefono && !validatePhone(newTelefono)) {
       setError(`El teléfono de contacto debe tener exactamente ${newTelefono.startsWith('+1') ? '10 dígitos (USA +1)' : '8 dígitos (Nicaragua +505)'}.`);
       return;
@@ -527,6 +537,7 @@ export default function SedesManagementPage() {
           onClose={() => setIsCreateOpen(false)}
           title="Registrar Nueva Sede Oficial"
           description="Apertura de una nueva sucursal autorizada para entrega presencial Sede a Sede."
+          maxWidth="max-w-2xl"
         >
           <form onSubmit={handleCreateSede} className="space-y-4 font-inter text-xs">
             <div className="grid grid-cols-2 gap-3">
@@ -580,30 +591,30 @@ export default function SedesManagementPage() {
               required
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <PhoneInput
-                  label="Teléfono de Contacto"
-                  value={newTelefono}
-                  onChange={(val) => setNewTelefono(val)}
-                  helperText={`Sede en ${newPais}: ${newPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
-                />
-              </div>
-              <CustomDropdown
-                label="Horario de Atención"
-                value={newHorario}
-                onChange={(val) => setNewHorario(val)}
-                options={scheduleOptions}
-                placeholder="Seleccionar Horario..."
-                required
+            <div>
+              <PhoneInput
+                label="Teléfono de Contacto"
+                value={newTelefono}
+                onChange={(val) => setNewTelefono(val)}
+                helperText={`Sede en ${newPais}: ${newPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
               />
             </div>
+
+            {/* Generador Dinámico de Bloques de Horarios */}
+            <HorarioBuilder
+              label="Horario de Atención Oficial (Configuración Dinámica)"
+              value={newHorario}
+              onChange={(val, isValid) => {
+                setNewHorario(val);
+                setIsNewHorarioValid(isValid);
+              }}
+            />
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!isNewHorarioValid}>
                 Crear Sede
               </Button>
             </div>
@@ -616,6 +627,7 @@ export default function SedesManagementPage() {
           onClose={() => setIsEditOpen(false)}
           title={`Modificar Sede (${selectedSede?.codigo})`}
           description="Actualización de datos de ventanilla física oficial."
+          maxWidth="max-w-2xl"
         >
           <form onSubmit={handleSaveEdit} className="space-y-4 font-inter text-xs">
             <Input
@@ -648,30 +660,30 @@ export default function SedesManagementPage() {
               required
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <PhoneInput
-                  label="Teléfono de Contacto"
-                  value={editTelefono}
-                  onChange={(val) => setEditTelefono(val)}
-                  helperText={`Sede en ${editPais}: ${editPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
-                />
-              </div>
-              <CustomDropdown
-                label="Horario de Atención"
-                value={editHorario}
-                onChange={(val) => setEditHorario(val)}
-                options={scheduleOptions}
-                placeholder="Seleccionar Horario..."
-                required
+            <div>
+              <PhoneInput
+                label="Teléfono de Contacto"
+                value={editTelefono}
+                onChange={(val) => setEditTelefono(val)}
+                helperText={`Sede en ${editPais}: ${editPais === 'Estados Unidos' ? '10 dígitos' : '8 dígitos'}`}
               />
             </div>
+
+            {/* Generador Dinámico de Bloques de Horarios */}
+            <HorarioBuilder
+              label="Horario de Atención Oficial (Configuración Dinámica)"
+              value={editHorario}
+              onChange={(val, isValid) => {
+                setEditHorario(val);
+                setIsEditHorarioValid(isValid);
+              }}
+            />
 
             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
               <Button variant="outline" onClick={() => setIsEditOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" isLoading={isSubmitting}>
+              <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!isEditHorarioValid}>
                 Guardar Cambios
               </Button>
             </div>

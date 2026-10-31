@@ -59,7 +59,7 @@ services:
       - Stripe__SecretKey=${STRIPE_SECRET_KEY}
       - Resend__ApiKey=${RESEND_API_KEY}
       - Resend__FromEmail=${RESEND_FROM_EMAIL:-NicaLogistics <onboarding@resend.dev>}
-      - Resend__AdminEmail=${RESEND_ADMIN_EMAIL:-admin@nicalogistics.com}
+      - Resend__AdminEmail=${RESEND_ADMIN_EMAIL:-davismunoz165@gmail.com}
     expose:
       - "5000"
     networks:

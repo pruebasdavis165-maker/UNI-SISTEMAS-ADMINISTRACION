@@ -9,3 +9,4 @@ export { default as Badge } from './Badge';
 export { default as Alert } from './Alert';
 export { default as Toast } from './Toast';
 export { default as PhoneInput, COUNTRIES } from './PhoneInput';
+export { default as HorarioBuilder, parseHorarioString, formatTimeTo12h } from './HorarioBuilder';

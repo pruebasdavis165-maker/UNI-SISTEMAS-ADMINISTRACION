@@ -42,16 +42,24 @@ public class ResendEmailService : IEmailService
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(to))
+            {
+                _logger.LogWarning("[ResendEmailService] Intento de envío a destinatario vacío o nulo.");
+                return false;
+            }
+
+            var cleanRecipient = to.Trim();
+
             if (string.IsNullOrWhiteSpace(_apiKey))
             {
-                _logger.LogWarning("[ResendEmailService] No se ha configurado API Key para Resend. Simulando envío a {To}", to);
+                _logger.LogWarning("[ResendEmailService] No se ha configurado API Key para Resend. Simulando envío a {To}", cleanRecipient);
                 return true;
             }
 
             var payload = new
             {
                 from = _fromEmail,
-                to = new[] { to },
+                to = new[] { cleanRecipient },
                 subject = subject,
                 html = htmlContent
             };
@@ -68,57 +76,11 @@ public class ResendEmailService : IEmailService
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("[ResendEmailService] Correo enviado exitosamente a {To}. Respuesta: {Response}", to, responseBody);
+                _logger.LogInformation("[ResendEmailService] Correo enviado exitosamente al destinatario real {To}. Respuesta: {Response}", cleanRecipient, responseBody);
                 return true;
             }
 
-            _logger.LogWarning("[ResendEmailService] Resend API devolvió estado {StatusCode}: {ResponseBody}", response.StatusCode, responseBody);
-
-            // Manejo automático del Sandbox de Resend:
-            // En cuentas gratuitas/sandbox sin dominio corporativo verificado, Resend solo permite enviar al correo del propietario (davismunoz05@gmail.com).
-            // Si el destinatario no está verificado en Resend, redirigimos automáticamente a la bandeja verificada del usuario para que SIEMPRE reciba la prueba en su Gmail real.
-            if (responseBody.Contains("You can only send testing emails to your own email address") || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                var match = System.Text.RegularExpressions.Regex.Match(responseBody, @"\(([^)]+@[^)]+)\)");
-                var verifiedOwner = match.Success ? match.Groups[1].Value : "davismunoz05@gmail.com";
-
-                _logger.LogInformation("[Resend Sandbox Delivery] Redirigiendo a la bandeja verificada {Owner} para destinatario {To}", verifiedOwner, to);
-
-                var banner = $"""
-                <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
-                  <strong>⚡ Notificación de Modo Pruebas (Resend Sandbox):</strong> Este correo transaccional fue generado en el sistema para el cliente <strong>{to}</strong> y entregado a tu bandeja verificada (<strong>{verifiedOwner}</strong>) para validación en tiempo real.
-                </div>
-                """;
-
-                var retryPayload = new
-                {
-                    from = _fromEmail,
-                    to = new[] { verifiedOwner },
-                    subject = $"[Prueba NicaLogistics -> {to}] {subject}",
-                    html = banner + htmlContent
-                };
-
-                var retryJson = JsonSerializer.Serialize(retryPayload);
-                using var retryRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails")
-                {
-                    Content = new StringContent(retryJson, Encoding.UTF8, "application/json")
-                };
-                retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
-                var retryResponse = await _httpClient.SendAsync(retryRequest);
-                var retryBody = await retryResponse.Content.ReadAsStringAsync();
-
-                if (retryResponse.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("[ResendEmailService] Correo sandbox entregado exitosamente en bandeja real {Owner}. Respuesta: {Response}", verifiedOwner, retryBody);
-                    return true;
-                }
-                else
-                {
-                    _logger.LogWarning("[ResendEmailService] Error en reintento a bandeja verificada: {RetryBody}", retryBody);
-                }
-            }
-
+            _logger.LogWarning("[ResendEmailService] Resend API devolvió estado {StatusCode} para {To}: {ResponseBody}", response.StatusCode, cleanRecipient, responseBody);
             return false;
         }
         catch (Exception ex)
