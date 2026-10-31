@@ -22,7 +22,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<IEmailService, ResendEmailService>();
+        services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<IUserService, UserService>();

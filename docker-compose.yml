@@ -57,6 +57,13 @@ services:
       - Jwt__Issuer=NicaLogistics
       - Jwt__Audience=NicaLogisticsUsers
       - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - Smtp__Host=${SMTP_HOST:-smtp.gmail.com}
+      - Smtp__Port=${SMTP_PORT:-587}
+      - Smtp__User=${SMTP_USER:-pruebasdavis16@gmail.com}
+      - Smtp__Pass=${SMTP_PASS}
+      - Smtp__FromName=${SMTP_FROM_NAME:-NicaLogistics}
+      - Smtp__FromEmail=${SMTP_FROM_EMAIL:-pruebasdavis16@gmail.com}
+      - Smtp__AdminEmail=${SMTP_ADMIN_EMAIL:-davismunoz165@gmail.com}
       - Resend__ApiKey=${RESEND_API_KEY}
       - Resend__FromEmail=${RESEND_FROM_EMAIL:-NicaLogistics <onboarding@resend.dev>}
       - Resend__AdminEmail=${RESEND_ADMIN_EMAIL:-davismunoz165@gmail.com}
