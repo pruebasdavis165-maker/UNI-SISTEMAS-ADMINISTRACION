@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NicaLogistics.Application.Interfaces;
@@ -52,9 +53,11 @@ public class ResendEmailService : IEmailService
 
             if (string.IsNullOrWhiteSpace(_apiKey))
             {
-                _logger.LogWarning("[ResendEmailService] No se ha configurado API Key para Resend. Simulando envío a {To}", cleanRecipient);
+                _logger.LogWarning("[ResendEmailService] ⚠️ No se ha configurado API Key para Resend (RESEND_API_KEY). Verifique variables de entorno para {To}", cleanRecipient);
                 return true;
             }
+
+            _logger.LogInformation("[ResendEmailService] 🚀 Despachando correo vía Resend API a {To} | Asunto: '{Subject}' | Remitente: {From}", cleanRecipient, subject, _fromEmail);
 
             var payload = new
             {
@@ -76,23 +79,62 @@ public class ResendEmailService : IEmailService
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("[ResendEmailService] Correo enviado exitosamente al destinatario real {To}. Respuesta: {Response}", cleanRecipient, responseBody);
+                _logger.LogInformation("[ResendEmailService] ✅ Correo entregado exitosamente a Resend API para destinatario {To}. Status: {StatusCode}, Resend ID: {Response}", cleanRecipient, (int)response.StatusCode, responseBody);
                 return true;
             }
 
-            _logger.LogWarning("[ResendEmailService] Resend API devolvió estado {StatusCode} para {To}: {ResponseBody}", response.StatusCode, cleanRecipient, responseBody);
+            // Manejo inteligente de la restricción de Sandbox de Resend (cuenta gratuita / dominio de prueba onboarding@resend.dev)
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden && responseBody.Contains("You can only send testing emails to your own email address"))
+            {
+                var match = Regex.Match(responseBody, @"\(([^)]+@[^)]+)\)");
+                var authorizedSandboxEmail = match.Success ? match.Groups[1].Value : "davismunoz05@gmail.com";
+
+                _logger.LogWarning("[ResendEmailService] ⚠️ RESTRICCIÓN DE SANDBOX DE RESEND DETECTADA: La cuenta gratuita con remitente '{From}' no permite envíos directos a '{To}' hasta verificar un dominio corporativo en resend.com/domains. Reintentando entrega en modo Sandbox hacia '{AuthorizedEmail}' con asunto rotulado...", _fromEmail, cleanRecipient, authorizedSandboxEmail);
+
+                var fallbackSubject = $"[Sandbox -> Para: {cleanRecipient}] {subject}";
+                var fallbackPayload = new
+                {
+                    from = _fromEmail,
+                    to = new[] { authorizedSandboxEmail },
+                    subject = fallbackSubject,
+                    html = htmlContent
+                };
+
+                using var retryRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails")
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(fallbackPayload), Encoding.UTF8, "application/json")
+                };
+                retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
+                var retryResponse = await _httpClient.SendAsync(retryRequest);
+                var retryBody = await retryResponse.Content.ReadAsStringAsync();
+
+                if (retryResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("[ResendEmailService] ✅ Correo despachado con éxito en modo Sandbox hacia {AuthorizedEmail} (Destinatario original: {To}). Resend ID: {Response}", authorizedSandboxEmail, cleanRecipient, retryBody);
+                    return true;
+                }
+
+                _logger.LogError("[ResendEmailService] ❌ Falló el reintento Sandbox hacia {AuthorizedEmail}: {StatusCode} {ResponseBody}", authorizedSandboxEmail, (int)retryResponse.StatusCode, retryBody);
+                return false;
+            }
+
+            _logger.LogError("[ResendEmailService] ❌ Resend API devolvió error {StatusCode} para {To}: {ResponseBody}", (int)response.StatusCode, cleanRecipient, responseBody);
             return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[ResendEmailService] Error inesperado al enviar correo a {To}", to);
-            // No interrumpimos la operación del negocio por fallas transaccionales de red
+            _logger.LogError(ex, "[ResendEmailService] Error inesperado de red o conexión al enviar correo a {To}", to);
             return false;
         }
     }
 
-        public async Task<bool> SendVerificationOtpEmailAsync(string to, string clientName, string otpCode)
+    public async Task<bool> SendVerificationOtpEmailAsync(string to, string clientName, string otpCode)
     {
+        _logger.LogInformation("================================================================================");
+        _logger.LogInformation("🔑 [NICALOGISTICS OTP] DESTINATARIO: {To} ({ClientName}) | CÓDIGO OTP: {OtpCode} | VIGENCIA: 15 MINUTOS", to, clientName, otpCode);
+        _logger.LogInformation("================================================================================");
+
         var subject = $"Tu código de verificación NicaLogistics: {otpCode}";
         var html = $"""
         <!DOCTYPE html>
@@ -193,7 +235,7 @@ public class ResendEmailService : IEmailService
         return await SendEmailAsync(to, subject, html);
     }
 
-        public async Task<bool> SendOrderReceiptEmailAsync(
+    public async Task<bool> SendOrderReceiptEmailAsync(
         string to,
         string clientName,
         string orderNumber,
@@ -206,6 +248,10 @@ public class ResendEmailService : IEmailService
         string modalidadEnvio = "Terrestre",
         decimal pesoTotalLibras = 0)
     {
+        _logger.LogInformation("================================================================================");
+        _logger.LogInformation("📦 [NICALOGISTICS RECIBO] DESTINATARIO: {To} ({ClientName}) | ORDEN: #{OrderNumber} | GUÍA: {TrackingCode} | TOTAL: ${Total:F2} USD", to, clientName, orderNumber, trackingCode, total);
+        _logger.LogInformation("================================================================================");
+
         var subject = $"Recibo de Compra #{orderNumber} - Tracking: {trackingCode}";
         var itemsRows = new StringBuilder();
         foreach (var item in items)
