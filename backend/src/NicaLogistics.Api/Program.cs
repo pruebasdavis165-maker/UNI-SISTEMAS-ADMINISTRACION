@@ -155,4 +155,7 @@ app.MapGet("/", () => Results.Ok(new
     Timestamp = DateTime.UtcNow
 }));
 
+// Semillero automático de inicialización (Roles, Sedes Oficiales y Cuentas Demo)
+await NicaLogistics.Infrastructure.Data.DbInitializer.SeedAsync(app.Services);
+
 app.Run();

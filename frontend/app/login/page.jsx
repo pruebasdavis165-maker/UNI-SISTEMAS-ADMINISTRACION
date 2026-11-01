@@ -66,6 +66,7 @@ function LoginForm() {
   const setDemoCredentials = (demoEmail, demoPassword) => {
     setEmail(demoEmail);
     setPassword(demoPassword);
+    setError('');
   };
 
   return (
@@ -161,37 +162,37 @@ function LoginForm() {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <button
             type="button"
-            onClick={() => setDemoCredentials('davismunoz165@gmail.com', 'Admin123*')}
-            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
+            onClick={() => setDemoCredentials('davismunoz165@gmail.com', 'Admin123*!')}
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-all text-left flex flex-col cursor-pointer shadow-sm group"
           >
-            <span className="font-semibold text-slate-900 font-inter">Administrador</span>
+            <span className="font-semibold text-slate-900 group-hover:text-primary-blue font-inter">Administrador</span>
             <span className="text-[10px] text-slate-400 font-inter">Full Access</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('vendedor@nicalogistics.com', 'Vendedor123*')}
-            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
+            onClick={() => setDemoCredentials('vendedor@nicalogistics.com', 'Vendedor123*!')}
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-all text-left flex flex-col cursor-pointer shadow-sm group"
           >
-            <span className="font-semibold text-slate-900 font-inter">Vendedor</span>
+            <span className="font-semibold text-slate-900 group-hover:text-primary-blue font-inter">Vendedor</span>
             <span className="text-[10px] text-slate-400 font-inter">Catálogo & Stock</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('logistica@nicalogistics.com', 'Logistica123*')}
-            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
+            onClick={() => setDemoCredentials('logistica@nicalogistics.com', 'Logistica123*!')}
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-all text-left flex flex-col cursor-pointer shadow-sm group"
           >
-            <span className="font-semibold text-slate-900 font-inter">Logística</span>
+            <span className="font-semibold text-slate-900 group-hover:text-primary-blue font-inter">Logística</span>
             <span className="text-[10px] text-slate-400 font-inter">Envíos & Kanban</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setDemoCredentials('cliente@ejemplo.com', 'Cliente123*')}
-            className="p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-colors text-left flex flex-col cursor-pointer"
+            onClick={() => setDemoCredentials('cliente@gmail.com', 'Cliente123*!')}
+            className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary-blue hover:bg-blue-50/50 transition-all text-left flex flex-col cursor-pointer shadow-sm group"
           >
-            <span className="font-semibold text-slate-900 font-inter">Cliente</span>
+            <span className="font-semibold text-slate-900 group-hover:text-primary-blue font-inter">Cliente</span>
             <span className="text-[10px] text-slate-400 font-inter">Compras & Tracking</span>
           </button>
         </div>
